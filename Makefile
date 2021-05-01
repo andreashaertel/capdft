@@ -22,7 +22,7 @@ LIBDIRS = -L./ -L./bin
 # Libraries to be linked #######################################################
 LIBS = -lm -lpthread -lfftw3 -lgsl -lgslcblas
 # Compiler flags ###############################################################
-CXXFLAGS = -pedantic -std=c++11 -O2 -Wall -fopenmp $(INCDIRS)
+CXXFLAGS = -pedantic -std=c++2a -O2 -Wall -fopenmp $(INCDIRS)
 # Linker flags #################################################################
 LDFLAGS = -fopenmp $(LIBDIRS)
 # Directories for binaries, objects and sources ################################
