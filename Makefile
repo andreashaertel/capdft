@@ -45,11 +45,19 @@ SYSINFO = $(OOFF)systeminfo
 # TARGETS ######################################################################
 default: all
 
-all: compile bind
+all: checkstyle compile bind
 
 # Initialize
 init:
 	@echo " Check for existing directories ... "; mkdir -p obj; mkdir -p include; mkdir -p bin
+
+# Google C++ style checker:
+# Install cpplint with
+# $pip3 install cpplint
+# And add ~/.local/bin to PATH variable.
+# Checks all files in the src directory.
+checkstyle:
+	cpplint src/*
 
 # Compile all objects and write system information
 compile: info $(OBJECTS)
