@@ -11,27 +11,27 @@ int main(int argc, char** args) {
   cmdtool.add_usage(" This program calculates the pair-distribution function from ");
   cmdtool.add_usage(" given particle positions. ");
   //// register parameters of interest
-  //cmdtool.register_flag("-t", "--test", 2);
-  //cmdtool.add_flag_description("-t", "Hello kitty.");
+  // cmdtool.register_flag("-t", "--test", 2);
+  // cmdtool.add_flag_description("-t", "Hello kitty.");
   cmdtool.process_flag_help();
   cmdtool.process_parameters();
-  //double boxx = cmdtool.get_double("box_len_x");
-  //std::cout << "Boxx: " << boxx << std::endl;
-  //std::vector<std::string> ert = cmdtool.get_remaining_cmdline_arguments();
-  //for (auto it = ert.begin(); it != ert.end(); ++it) {
+  // double boxx = cmdtool.get_double("box_len_x");
+  // std::cout << "Boxx: " << boxx << std::endl;
+  // std::vector<std::string> ert = cmdtool.get_remaining_cmdline_arguments();
+  // for (auto it = ert.begin(); it != ert.end(); ++it) {
   //  std::cout << *it << std::endl;
-  //}
+  // }
   //
-  //int flag_pos = 0;
-  //while (cmdtool.find_flag("-t", flag_pos)) {
+  // int flag_pos = 0;
+  // while (cmdtool.find_flag("-t", flag_pos)) {
   //  std::cout << cmdtool.get_option(flag_pos, 1) << std::endl;
   //  std::cout << cmdtool.get_option(flag_pos, 2) << std::endl;
-  //}
-  //if (cmdtool.find_flag("-t")) {
+  // }
+  // if (cmdtool.find_flag("-t")) {
   //  std::cout << cmdtool.find_option("-t", 1) << std::endl;
-  //}
+  // }
   //
-  //return 0;
+  // return 0;
   // read in parameters
   double box_len_x = 0.0;
   double box_len_y = 0.0;
@@ -51,10 +51,8 @@ int main(int argc, char** args) {
   if (box_len_y < min_box_len) { min_box_len = box_len_y; }
   if (box_len_z < min_box_len) { min_box_len = box_len_z; }
   double g_len = cmdtool.get_double("rdf_length", 0.5*min_box_len);
-
   // check for errors
-  //cmdtool.check_errors(std::cout);
-
+  // cmdtool.check_errors(std::cout);
   if (argc < 3) {
     std::cout << " please specify an input file ... " << std::endl;
     return 0;
@@ -96,7 +94,7 @@ int main(int argc, char** args) {
       if (entry[4] == 4) { N2++; }
       // Add the name-value pair to the other pairs
 //      parameters.push_back(make_pair(param_match.str(1), param_match.str(2)));
-      //std::cout << entry[1] << " " << entry[2] << " " << entry[3] << std::endl;
+      // std::cout << entry[1] << " " << entry[2] << " " << entry[3] << std::endl;
     }
   }
   double g_d = g_len / ((double)g_bins);
@@ -156,10 +154,10 @@ int main(int argc, char** args) {
         }
       }
       if (t1 == 4) {
-        //if (t2 == 3) {
+        // if (t2 == 3) {
         //  g12[pos] = g12[pos] + 1;
         //  g12_N++;
-        //}
+        // }
         if (t2 == 4) {
           g22long[pos] = g22long[pos] + 1;
           g22_N++;
@@ -218,10 +216,5 @@ int main(int argc, char** args) {
   delete[] g11long;
   delete[] g12long;
   delete[] g22long;
-
-
   return 0;
 }
-
-
-
