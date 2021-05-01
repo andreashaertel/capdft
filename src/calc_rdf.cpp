@@ -138,7 +138,7 @@ int main(int argc, char** args) {
       while (distz >= 0.5*box_len_z) { distz = distz - box_len_z; }
       dist = sqrt(distx*distx + disty*disty + distz*distz);
       if (dist >= g_len) { continue; }
-      pos = static_cast<int>floor(dist / g_d);
+      pos = static_cast<int>(floor(dist / g_d));
       if (t1 == 3) {
         if (t2 == 3) {
           g11long[pos] = g11long[pos] + 1;
