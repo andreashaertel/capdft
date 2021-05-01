@@ -617,7 +617,7 @@ void ParameterHandler::export_parameters(void) {
 int ParameterHandler::find_parameter_position(const std::string parameter) {
   // Search for parameter in vector parameters:
   for (auto it = parameters.begin(); it != parameters.end(); ++it) {
-    if((it->first).compare(parameter) == 0) {
+    if ((it->first).compare(parameter) == 0) {
       // parameter found
       return (it - parameters.begin());
     }
@@ -706,14 +706,14 @@ bool ParameterHandler::get_bool(std::string parameter) {
   if (isset_parameter(parameter)) {
     // Parameter available:
     std::string str(get_value(parameter));
-    if(str.compare("false") == 0) { return false; }
-    if(str.compare("true") == 0) { return true; }
-    if(str.compare("False") == 0) { return false; }
-    if(str.compare("True") == 0) { return true; }
-    if(str.compare("FALSE") == 0) { return false; }
-    if(str.compare("TRUE") == 0) { return true; }
-    if(str.compare("0") == 0) { return false; }
-    if(str.compare("1") == 0) { return true; }
+    if (str.compare("false") == 0) { return false; }
+    if (str.compare("true") == 0) { return true; }
+    if (str.compare("False") == 0) { return false; }
+    if (str.compare("True") == 0) { return true; }
+    if (str.compare("FALSE") == 0) { return false; }
+    if (str.compare("TRUE") == 0) { return true; }
+    if (str.compare("0") == 0) { return false; }
+    if (str.compare("1") == 0) { return true; }
     // Could not detect a bool:
     // throw exception
     std::cout << " Parameter " << parameter << " has wrong type. " << std::endl;
