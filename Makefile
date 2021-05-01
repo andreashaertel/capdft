@@ -43,7 +43,7 @@ OBJECTS = $(patsubst $(SDIR)%.cpp,$(OOFF)%.o,$(SOURCES))
 # System information files #####################################################
 SYSINFO = $(OOFF)systeminfo
 # TARGETS ######################################################################
-default: all
+default: compile bind
 
 all: checkstyle compile bind
 
