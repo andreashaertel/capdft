@@ -4,12 +4,13 @@
 *         Andreas Haertel <andreas.haertel@anno1982.de>
 * Physics Department Albert-Ludwigs-Universitaet
 *******************************************************************************/
-#include <regex>
+#include <regex>  // NOLINT
 #include <iostream>
 #include <fstream>
 #include <ctime>
 #include <exception>
 #include <limits>
+#include <utility>
 #include "parameter_handler.hpp"
 // _____________________________________________________________________________
 ParameterHandler::ParameterHandler(int argc, char **args) {
@@ -127,13 +128,16 @@ bool ParameterHandler::is_flag(std::string argument) {
   return false;
 }
 // _____________________________________________________________________________
-bool ParameterHandler::find_flag(int& flag_pos) {
+bool ParameterHandler::find_flag(int* flag_pos) {
   bool found_flag = false;
   auto it = args.begin();
   // Skip the first flag_pos+1 entries of args. If the end of args is reached,
   // it will immediately return that the flag could not be found.
-  if (flag_pos + 1 < static_cast<int>(args.size())) { it += flag_pos + 1; }
-  else { return found_flag; }
+  if (*flag_pos + 1 < static_cast<int>(args.size())) {
+    it += *flag_pos + 1;
+  } else {
+    return found_flag;
+  }
   // Find a flag
   while (it != args.end() && !found_flag) {
     // Test, whether args[it] is a flag in flag_list
@@ -143,7 +147,7 @@ bool ParameterHandler::find_flag(int& flag_pos) {
           (it->compare(flag_it->long_name) == 0)) {
         found_flag = true;
         // update flag_pos
-        flag_pos = it - args.begin();
+        *flag_pos = it - args.begin();
         // test for requested number of options available (and not flags)
         auto it2 = it;
         for (int i = 0; (i < flag_it->no_options) && (it2 != args.end()); ++i) {
@@ -160,7 +164,7 @@ bool ParameterHandler::find_flag(int& flag_pos) {
   return found_flag;
 }
 // _____________________________________________________________________________
-bool ParameterHandler::find_flag(std::string flag_name, int& flag_pos) {
+bool ParameterHandler::find_flag(std::string flag_name, int* flag_pos) {
   // test flag_name specifying a flag, store both flags in strings:
   std::string flag_name_short(flag_name);
   std::string flag_name_long(flag_name);
@@ -182,10 +186,10 @@ bool ParameterHandler::find_flag(std::string flag_name, int& flag_pos) {
   }
   // search for any flag, then test for flag having flag_name
   int any_flag_pos = flag_pos;
-  while (find_flag(any_flag_pos)) {
+  while (find_flag(&any_flag_pos)) {
     // test for flag having flag_name
-    if ( (flag_name_short.compare( args.at(any_flag_pos) ) == 0) ||
-         (flag_name_long.compare( args.at(any_flag_pos) ) == 0) ) {
+    if ( (flag_name_short.compare(args.at(any_flag_pos)) == 0) ||
+         (flag_name_long.compare(args.at(any_flag_pos)) == 0) ) {
       // the flag has flag_name:
       flag_pos = any_flag_pos;
       return true;
@@ -196,9 +200,9 @@ bool ParameterHandler::find_flag(std::string flag_name, int& flag_pos) {
 }
 // _____________________________________________________________________________
 bool ParameterHandler::find_flag(std::string flag_name) {
-  // Pass arguments to the find_flag(string, &int) function
+  // Pass arguments to the find_flag(string, int*) function
   int tmp = 0;
-  return find_flag(flag_name, tmp);
+  return find_flag(flag_name, &tmp);
 }
 // _____________________________________________________________________________
 std::string ParameterHandler::find_option(const char *flag_name,
@@ -254,7 +258,7 @@ std::string ParameterHandler::find_option(std::string flag_name,
     return tmp;
   }
   // find flag:
-  if (!find_flag(flag_name, flag_pos)) {
+  if (!find_flag(flag_name, &flag_pos)) {
     throw &bad_param;
   }
   // return option:
@@ -305,7 +309,7 @@ std::string ParameterHandler::get_option(int flag_pos, int option_index) {
   }
   // search for flag with correct flag_pos:
   int search_pos = 0;
-  while (find_flag(flag_name, search_pos)) {
+  while (find_flag(flag_name, &search_pos)) {
     if (search_pos == flag_pos) {
       // flag found: get option:
       return args.at(flag_pos+option_index);
@@ -318,14 +322,13 @@ std::string ParameterHandler::get_option(int flag_pos, int option_index) {
   return tmp;
 }
 // _____________________________________________________________________________
-std::vector<std::string> ParameterHandler::get_remaining_cmdline_arguments(void)
-{
+std::vector<std::string> ParameterHandler::get_remaining_cmdline_arguments() {
   // new vector for remaining arguments
   std::vector<std::string> rem_args;
   int any_flag_pos = 0;
   int last_no_flag_pos = 0;
   // search next flag
-  while (find_flag(any_flag_pos)) {
+  while (find_flag(&any_flag_pos)) {
     // flag found
     // store remaining arguments in front of new flag
     for (; last_no_flag_pos < any_flag_pos; last_no_flag_pos++) {
@@ -482,7 +485,7 @@ void ParameterHandler::process_parameters(void) {
 void ParameterHandler::add_parameters_from_file(void) {
   // Check for a specified parameter file using the flags "-f" or "--file"
   int flag_pos = 0;
-  if (find_flag("-f", flag_pos)) {
+  if (find_flag("-f", &flag_pos)) {
     // find flag has checked already for the existence of a corresponding option
     // If the flag is set without an option specified, a bad_option exception
     // is thrown
@@ -523,8 +526,7 @@ void ParameterHandler::load_parameter_file(std::string filename) {
           }
         }
       }
-    }
-    else {
+    } else {
       // file cannot be opened: throw error
       throw &bad_file;
     }
@@ -544,7 +546,7 @@ void ParameterHandler::add_parameters_from_cmdline(void) {
   do {
     // find new parameter flag (and check for option available)
     try {
-      flag_found = find_flag("-p", flag_pos);
+      flag_found = find_flag("-p", &flag_pos);
       if (!flag_found) { continue; }
       // flag found and
       // option is available (otherwise an exception has been thrown)
@@ -589,7 +591,7 @@ void ParameterHandler::export_parameters(void) {
       parameterFile.open(outFileName, std::ios::out);
       // Print command, that the file was created with.
       time_t now = time(0);
-      parameterFile << "# File generated on UTC " << asctime(gmtime(&now));
+      parameterFile << "# File generated on UTC " << asctime_r(gmtime_r(&now));
       parameterFile << " by command: " << std::endl;
       parameterFile << "# ";
       for (auto it = args.begin(); it != args.end(); ++it) {
@@ -751,7 +753,7 @@ char* ParameterHandler::get_char(std::string parameter) {
       char *value;
       value = new char[str.size()];
       // Copy value into char*
-      strcpy(value, str.c_str());
+      strcpy(value, str.c_str());  // NOLINT
       return value;
     } catch (std::exception *e) {
       std::cout << " ERROR:ParameterHandler::get_char: " << e->what();
@@ -810,7 +812,7 @@ std::string ParameterHandler::get_string(std::string parameter, std::string
 // _____________________________________________________________________________
 int ParameterHandler::unsigned_to_signed_int(unsigned int input) {
   if (input < std::numeric_limits<int>::max()) {
-    return (int)input;
+    return static_cast<int>(input);
   }
   throw "ParameterHandler::unsigned_to_signed_int:: unsigned int too large.";
   return -1;

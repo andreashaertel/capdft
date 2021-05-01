@@ -1,12 +1,3 @@
-#ifndef _PARAMETER_HANDLER_H_
-#define _PARAMETER_HANDLER_H_
-/** \file parameter_handler.hpp
- *  \brief Header file for the ParameterHandler class.
- *
- *  The file contains the class definition of the ParameterHandler class.
- *  This contains the definition of class specific exceptions and the
- *  definition of a struct flag.
- */
 /*******************************************************************************
 * Copyright 2019 Moritz Bueltmann
 * Author: Moritz Bueltmann <moritz.bueltmann@gmx.de>
@@ -19,12 +10,20 @@
 * completely compatible to the rest of Andreas' code.
 * The version of Moritz has been improved further.
 *******************************************************************************/
+#ifndef SRC_PARAMETER_HANDLER_HPP_
+#define SRC_PARAMETER_HANDLER_HPP_
+/** \file parameter_handler.hpp
+ *  \brief Header file for the ParameterHandler class.
+ *
+ *  The file contains the class definition of the ParameterHandler class.
+ *  This contains the definition of class specific exceptions and the
+ *  definition of a struct flag.
+ */
 #include <iostream>
 #include <string>
 #include <vector>
 #include <exception>
-// _____________________________________________________________________________
-// _____________________________________________________________________________
+#include <utility>
 // _____________________________________________________________________________
 /** \brief ParameterHandler to manage flag and parameter handling.
  *
@@ -45,8 +44,7 @@
  *  Finally, the standard flag "-e" allows to export all available parameters
  *  into a file.
  */
-class ParameterHandler
-{
+class ParameterHandler {
  public:
 // _____________________________________________________________________________
   /** \brief Constructor
@@ -137,7 +135,7 @@ class ParameterHandler
    *  If the number of options registered for the found flag is not available,
    *  a bad_option exception is thrown.
    */
-  bool find_flag(int& flag_pos);
+  bool find_flag(int* flag_pos);
 // _____________________________________________________________________________
   /** \brief Search the specified registered flag in the arguments.
    *
@@ -151,7 +149,7 @@ class ParameterHandler
    *  If the number of options registered for the found flag is not available,
    *  a bad_option exception is thrown.
    */
-  bool find_flag(std::string flag_name, int& flag_pos);
+  bool find_flag(std::string flag_name, int* flag_pos);
 // _____________________________________________________________________________
   /** \brief Search the specified registered flag in the arguments.
    *
@@ -588,7 +586,7 @@ class ParameterHandler
   /** \brief std::exception BadParamException, derived for the ParameterHandler.
    */
   class BadParamException : public std::exception {
-    public:
+   public:
     /** \brief Overwrite the exception information function what().
      *
      *  \return the text "Some requested parameter is not defined.".
@@ -615,7 +613,7 @@ class ParameterHandler
    *  ParameterHandler.
    */
   class BadOptionException : public std::exception {
-    public:
+   public:
     /** \brief Overwrite the exception information function what().
      *
      *  \return the text "Some requested option is not defined.".
@@ -635,7 +633,7 @@ class ParameterHandler
   /** \brief std::exception BadFileException, derived for the ParameterHandler.
    */
   class BadFileException : public std::exception {
-    public:
+   public:
     /** \brief Overwrite the exception information function what().
      *
      *  \return the text "A parameter file could not be handled.".
@@ -651,9 +649,6 @@ class ParameterHandler
    *  not be handled.
    */
   bad_file;
-// _____________________________________________________________________________
-// _____________________________________________________________________________
-// _____________________________________________________________________________
 //##############################################################################
 // PRIVATE:
 //##############################################################################
@@ -789,4 +784,4 @@ class ParameterHandler
    */
   int unsigned_to_signed_int(unsigned int input);
 };
-#endif // _CMD_LINE_TOOL_H_
+#endif  // SRC_PARAMETER_HANDLER_HPP_
