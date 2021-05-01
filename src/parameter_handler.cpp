@@ -185,13 +185,13 @@ bool ParameterHandler::find_flag(std::string flag_name, int* flag_pos) {
     return false;
   }
   // search for any flag, then test for flag having flag_name
-  int any_flag_pos = flag_pos;
+  int any_flag_pos = *flag_pos;
   while (find_flag(&any_flag_pos)) {
     // test for flag having flag_name
     if ( (flag_name_short.compare(args.at(any_flag_pos)) == 0) ||
          (flag_name_long.compare(args.at(any_flag_pos)) == 0) ) {
       // the flag has flag_name:
-      flag_pos = any_flag_pos;
+      *flag_pos = any_flag_pos;
       return true;
     }
   }
@@ -582,7 +582,7 @@ void ParameterHandler::add_parameters_from_cmdline(void) {
 void ParameterHandler::export_parameters(void) {
   // Search for an "-e" or "--export" flag:
   int flag_pos = 0;
-  if (find_flag("-e", flag_pos)) {
+  if (find_flag("-e", &flag_pos)) {
     // flag found (and option does exist, otherwise an exception is thrown):
     std::string outFileName = args.at(flag_pos+1);  // set file name
     std::fstream parameterFile;  // define file stream object
@@ -591,7 +591,7 @@ void ParameterHandler::export_parameters(void) {
       parameterFile.open(outFileName, std::ios::out);
       // Print command, that the file was created with.
       time_t now = time(0);
-      parameterFile << "# File generated on UTC " << asctime_r(gmtime_r(&now));
+      parameterFile << "# File generated on UTC " << asctime(gmtime(&now));  // NOLINT
       parameterFile << " by command: " << std::endl;
       parameterFile << "# ";
       for (auto it = args.begin(); it != args.end(); ++it) {
