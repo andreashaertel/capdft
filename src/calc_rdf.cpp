@@ -1,35 +1,20 @@
-
-
 #include <vector>
 #include <regex>
 #include <fstream>
 #include <iostream>
 #include <limits>
-
-#include "math.h"
-
+#include <cmath>
 #include "parameter_handler.hpp"
-
-
-
-
-
-
-int main(int argc, char** args)
-{
-
+int main(int argc, char** args) {
   // Activate the command line tool
   ParameterHandler cmdtool(argc, args);
   cmdtool.add_usage(" This program calculates the pair-distribution function from ");
   cmdtool.add_usage(" given particle positions. ");
-
   //// register parameters of interest
   //cmdtool.register_flag("-t", "--test", 2);
   //cmdtool.add_flag_description("-t", "Hello kitty.");
-
   cmdtool.process_flag_help();
   cmdtool.process_parameters();
-
   //double boxx = cmdtool.get_double("box_len_x");
   //std::cout << "Boxx: " << boxx << std::endl;
   //std::vector<std::string> ert = cmdtool.get_remaining_cmdline_arguments();
@@ -47,7 +32,6 @@ int main(int argc, char** args)
   //}
   //
   //return 0;
-
   // read in parameters
   double box_len_x = 0.0;
   double box_len_y = 0.0;
@@ -75,11 +59,8 @@ int main(int argc, char** args)
     std::cout << " please specify an input file ... " << std::endl;
     return 0;
   }
-
-  // get first non-parameter argument: 
-  // CHANGE TO -P ... 
-
-
+  // get first non-parameter argument:
+  // CHANGE TO -P ...
   // Dummy string
   std::string line;
   // Regular expression to filter comments beforehand
@@ -96,18 +77,14 @@ int main(int argc, char** args)
     std::cout << " problem with file ... " << std::endl;
     return 0;
   }
-
   int N1 = 0;
   int N2 = 0;
-
   std::vector<double*> part;
   double *entry;
-  while (getline(parameterFile, line))  // read file line by line
-  {
+  while (getline(parameterFile, line)) {  // read file line by line
     std::regex_search(line, comment_match, comment_regex);  // filter comment
     line = comment_match.str(1);
-    if(std::regex_search(line, param_match, param_regex))  // filter parameter
-    {
+    if (std::regex_search(line, param_match, param_regex)) {  // filter parameter
       entry = new double[5];
       entry[0] = std::stod(param_match.str(1), NULL);
       entry[1] = std::stod(param_match.str(2), NULL);
@@ -122,10 +99,7 @@ int main(int argc, char** args)
       //std::cout << entry[1] << " " << entry[2] << " " << entry[3] << std::endl;
     }
   }
-
-
   double g_d = g_len / ((double)g_bins);
-
   double *gr = new double[g_bins];
   double *gvol = new double[g_bins];
   long long int *g11long = new long long int[g_bins];
@@ -150,20 +124,15 @@ int main(int argc, char** args)
   long long int g11_N = 0;
   long long int g12_N = 0;
   long long int g22_N = 0;
-
   double dist, distx, disty, distz;
   int pos;
   int t1, t2;
-  for (std::vector<double*>::iterator it1 = part.begin(); it1 != part.end(); ++it1) {
-    for (std::vector<double*>::iterator it2 = part.begin(); it2 != part.end(); ++it2) {
-      
+  for (auto it1 = part.begin(); it1 != part.end(); ++it1) {
+    for (auto it2 = part.begin(); it2 != part.end(); ++it2) {
       if (it1 == it2) { continue; }
-
       t1 = (int)((*it1)[4]);
       t2 = (int)((*it2)[4]);
-
       if ((t1 < 3) || (t2 < 3)) { continue; }
-
       distx = (*it1)[1] - (*it2)[1];
       while (distx < -0.5*box_len_x) { distx = distx + box_len_x; }
       while (distx >= 0.5*box_len_x) { distx = distx - box_len_x; }
@@ -174,10 +143,8 @@ int main(int argc, char** args)
       while (distz < -0.5*box_len_z) { distz = distz + box_len_z; }
       while (distz >= 0.5*box_len_z) { distz = distz - box_len_z; }
       dist = sqrt(distx*distx + disty*disty + distz*distz);
-
       if (dist >= g_len) { continue; }
       pos = (int)floor(dist / g_d);
-
       if (t1 == 3) {
         if (t2 == 3) {
           g11long[pos] = g11long[pos] + 1;
@@ -198,37 +165,31 @@ int main(int argc, char** args)
           g22_N++;
         }
       }
-
     }
-    //std::cout << (*it1)[1] << std::endl;
   }
-
-
   // normalize
   double vol_tot = box_len_x * box_len_y * box_len_z;
   long long int longN1 = (long long int)N1;
   long long int longN2 = (long long int)N2;
   for (int i = 0; i < g_bins; i++) {
-    // normalization: 
+    // normalization:
     // Tracked particle: partX1
     // no(partX1) * densX2 * vol = no(partX1) * no(partX2) * vol / vol_tot
     g11[i] = ((double)g11long[i]) * vol_tot / (((double)(longN1*longN1)) * gvol[i]);
     g12[i] = ((double)g12long[i]) * vol_tot / (((double)(longN1*longN2)) * gvol[i]);
     g22[i] = ((double)g22long[i]) * vol_tot / (((double)(longN2*longN2)) * gvol[i]);
   }
-
-  
   // Output data
   // First, set precision to maximum for double values
   typedef std::numeric_limits< double > dbl;
   std::cout.precision(dbl::max_digits10);
   // Write header
   std::cout << "# g(r) calculated from: " << args[1] << std::endl;
-  std::cout << "# Number of particles species 1 (previously 3): " << N1 
+  std::cout << "# Number of particles species 1 (previously 3): " << N1
       << std::endl;
-  std::cout << "# Number of particles species 2 (previously 4): " << N2 
+  std::cout << "# Number of particles species 2 (previously 4): " << N2
       << std::endl;
-  std::cout << "# Total volume of box: " << vol_tot << " = " << box_len_x 
+  std::cout << "# Total volume of box: " << vol_tot << " = " << box_len_x
       << " x " << box_len_y << " x " << box_len_z << std::endl;
   std::cout << "# Bins for g(r): " << g_bins << std::endl;
   std::cout << "# Length g is sampled on: " << g_len << std::endl;
@@ -245,11 +206,8 @@ int main(int argc, char** args)
     std::cout << g22[i] << std::endl;
   }
   std::cout << std::endl;
-
-
   // destroy
-  for (std::vector<double*>::iterator it = part.begin(); it != part.end(); 
-      ++it) {
+  for (auto it = part.begin(); it != part.end(); ++it) {
     delete[] (*it);
   }
   delete[] gr;
