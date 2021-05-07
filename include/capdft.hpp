@@ -785,3 +785,25 @@ class ParameterHandler {
   int unsigned_to_signed_int(unsigned int input);
 };
 #endif  // SRC_PARAMETER_HANDLER_HPP_
+// Copyright 2021 Moritz Bültmann
+#ifndef SRC_SPECIES_PROPERTIES_HPP_
+#define SRC_SPECIES_PROPERTIES_HPP_
+class SpeciesProperties {
+ public:
+  SpeciesProperties();
+  ~SpeciesProperties();
+ private:
+ protected:
+};
+#endif  // SRC_SPECIES_PROPERTIES_HPP_
+// Copyright 2021 Moritz Bültmann
+#ifndef SRC_FUNCTIONAL_FMT_SPHERICAL_HPP_
+#define SRC_FUNCTIONAL_FMT_SPHERICAL_HPP_
+class FunctionalFMTSpherical {
+ public:
+  FunctionalFMTSpherical();
+  ~FunctionalFMTSpherical();
+ private:
+ protected:
+};
+#endif  // SRC_FUNCTIONAL_FMT_SPHERICAL_HPP_
