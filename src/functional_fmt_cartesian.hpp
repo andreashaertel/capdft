@@ -3,11 +3,11 @@
 //  WB-Mark II functional for hard spheres in cartesian coordinates
 //  Copyright 2021 Philipp Pelagejcev
 
-#ifndef SRC_FUNCTIONAL_FMT_CARTESIAN_H_
-#define SRC_FUNCTIONAL_FMT_CARTESIAN_H_
+#ifndef SRC_FUNCTIONAL_FMT_CARTESIAN_HPP_
+#define SRC_FUNCTIONAL_FMT_CARTESIAN_HPP_
 
 class FunctionalFMTCartesian {
-public:
+ public:
   FunctionalFMTCartesian(void);
   ~FunctionalFMTCartesian(void);
   void calc_derivative(void);
@@ -16,4 +16,4 @@ public:
   double **get_fluid_derivative_pointer(void);
 };
 
-#endif // SRC_FUNCTIONAL_FMT_CARTESIAN_H_
+#endif  // SRC_FUNCTIONAL_FMT_CARTESIAN_HPP_
