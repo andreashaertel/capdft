@@ -2,28 +2,37 @@
 BNAME=main
 # Compiler #####################################################################
 CXX=g++
-# Include directory ############################################################
-INCDIR=
-# Library directory ############################################################
-LIBDIR=-I./
 # Libraries to be linked #######################################################
 LIBS=-lm
 # Compiler flags ###############################################################
-CXXFLAGS=-pedantic -std=c++2a -O2 -Wall $(INCDIR)
+CXXFLAGS=-pedantic -std=c++2a -O2 -Wall
 # Directories for binaries, objects and sources ################################
 BDIR = bin/
 ODIR = obj/
 SDIR = src/
+REPOSDIR = ../../src/
+REPOFILE = species_properties
 # Get host name ################################################################
 HOST = $(shell hostname)
 # Offsets for binaries and objects #############################################
 BOFF = $(BDIR)$(HOST).
 OOFF = $(ODIR)$(HOST).
-# Header files and object files ################################################
-HEADERS = $(wildcard $(SDIR)*.h)
+# Create empty file collection variables #######################################
+SOURCE =
+HEADERS =
+OBJECTS =
+REPOSOURCE =
+REPOHEADERS =
+REPOOBJECTS =
+# Header files and object files from main repo #################################
+REPOSOURCE += $(REPOSDIR)$(REPOFILE).cpp
+REPOHEADERS += $(REPOSDIR)$(REPOFILE).hpp
+REPOOBJECTS += $(patsubst $(REPOSDIR)%.cpp,$(OOFF)%.o,$(REPOSOURCE))
+# Standard header files and object files #######################################
+HEADERS += $(wildcard $(SDIR)*.h)
 HEADERS += $(wildcard $(SDIR)*.hpp)
-SOURCE = $(wildcard $(SDIR)*.cpp)
-OBJECTS = $(patsubst $(SDIR)%.cpp,$(OOFF)%.o,$(SOURCE))
+SOURCE += $(wildcard $(SDIR)*.cpp)
+OBJECTS += $(patsubst $(SDIR)%.cpp,$(OOFF)%.o,$(SOURCE))
 # Get host name ################################################################
 HOST = $(shell hostname)
 # Offsets for binaries and objects #############################################
@@ -40,7 +49,8 @@ all: checkstyle compile
 # And add ~/.local/bin to PATH variable.
 # Checks all files in the src directory.
 checkstyle:
-	cpplint src/*
+	cpplint $(SDIR)*
+	cpplint $(REPOSDIR)$(REPOFILE).*
 
 clean:
 	rm -f $(OOFF)*.o
@@ -53,8 +63,10 @@ compile: $(BOFF)$(BNAME)
 # $+  list of all dependencies
 # $^  list of all dependencies, no doubles
 
-$(BOFF)$(BNAME): $(OBJECTS)
-	$(CXX) -o $@ -L$(LIBDIR) $^ $(LIBS)
+$(BOFF)$(BNAME): $(OBJECTS) $(REPOOBJECTS)
+	$(CXX) -o $@ $^ $(LIBS)
 
-$(OOFF)%.o: $(SDIR)%.cpp $(HEADERS)
+$(OOFF)%.o: $(SDIR)%.cpp $(HEADERS) $(REPOHEADERS)
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+$(OOFF)species_properties.o: $(REPOSDIR)$(REPOFILE).cpp $(HEADERS) $(REPOHEADERS)
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
