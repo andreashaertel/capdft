@@ -2,12 +2,11 @@
 cd <PROJECTFOLDER>
 git init
 # Link the working directory to a remote repository. "origin" is the alias for this remote repository.
-git remote add origin https://github.com/moritz-bueltmann/capdft.git
+git remote add origin https://github.com/andreashaertel/capdft.git
 # Show the remote repositories linked to this working directory
 git remote -v
-# Tell git your credentials, they are independent from the github.com credentials, but why not use the same?
-git config --global user.email "<EMAIL>"
-git config --global user.name "<USERNAME>"
+# Tell git to remember your credentials
+git config --global credential.helper store
 # Tell git what your favourite editor is.
 git config --global core.editor vim
 git config --global diff.tool vimdiff
