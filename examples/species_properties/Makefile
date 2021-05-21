@@ -39,9 +39,13 @@ HOST = $(shell hostname)
 BOFF = $(BDIR)$(HOST).
 OOFF = $(ODIR)$(HOST).
 # TARGETS ######################################################################
-default: compile
+default: createdir compile
 
-all: checkstyle compile
+all: createdir checkstyle compile
+
+createdir:
+	mkdir -p bin
+	mkdir -p obj
 
 # Google C++ style checker:
 # Install cpplint with
