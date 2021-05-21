@@ -13,6 +13,28 @@
  *  The project contains the C++ library capdft. 
  *
  *  
+ *  \section eq_example How to use equations
+ * 
+ *  \f$x+2\f$
+ * 
+ *  \f[
+ *  m = e g a
+ *  \f]
+ * 
+ *  \f{eqnarray}{
+ *  m = e g a
+ *  \f}
+ * 
+ *  https://www.doxygen.nl/manual/formulas.html
+ * 
+ *  Doxygen allows you to put $\mbox{\LaTeX}$ formulas in the output (this works only for the HTML, $\mbox{\LaTeX}$ and RTF output. To be able to include formulas (as images) in the HTML and RTF documentation, you will also need to have the following tools installed
+
+    latex: the $\mbox{\LaTeX}$ compiler, needed to parse the formulas. To test I have used the teTeX 1.0 distribution.
+    dvips: a tool to convert DVI files to PostScript files I have used version 5.92b from Radical Eye software for testing.
+    gs: the GhostScript interpreter for converting PostScript files to bitmaps. I have used Aladdin GhostScript 8.0 for testing.
+
+ * 
+ * 
  *  \section use_sec Use of the library
  *
  *  To use the library, you have to install the library on your system. 
