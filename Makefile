@@ -22,7 +22,7 @@ LIBDIRS = -L./ -L./bin
 # Libraries to be linked #######################################################
 LIBS = -lm -lpthread -lfftw3 -lgsl -lgslcblas
 # Compiler flags ###############################################################
-CXXFLAGS = -pedantic -std=c++11 -O2 -Wall -fopenmp $(INCDIRS)
+CXXFLAGS = -pedantic -std=c++2a -O2 -Wall -fopenmp $(INCDIRS)
 # Linker flags #################################################################
 LDFLAGS = -fopenmp $(LIBDIRS)
 # Directories for binaries, objects and sources ################################
@@ -43,13 +43,21 @@ OBJECTS = $(patsubst $(SDIR)%.cpp,$(OOFF)%.o,$(SOURCES))
 # System information files #####################################################
 SYSINFO = $(OOFF)systeminfo
 # TARGETS ######################################################################
-default: all
+default: compile bind
 
-all: compile bind
+all: checkstyle compile bind
 
 # Initialize
 init:
 	@echo " Check for existing directories ... "; mkdir -p obj; mkdir -p include; mkdir -p bin
+
+# Google C++ style checker:
+# Install cpplint with
+# $pip3 install cpplint
+# And add ~/.local/bin to PATH variable.
+# Checks all files in the src directory.
+checkstyle:
+	cpplint src/*
 
 # Compile all objects and write system information
 compile: info $(OBJECTS)

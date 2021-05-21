@@ -1,0 +1,10 @@
+*.swp
+*.vim
+*.swa
+*.o
+*.systeminfo
+*.a
+calc_rdf
+bin
+obj
+include

@@ -1,0 +1,34 @@
+# Tell git that this is a git-repository folder
+cd <PROJECTFOLDER>
+git init
+# Link the working directory to a remote repository. "origin" is the alias for this remote repository.
+git remote add origin https://github.com/andreashaertel/capdft.git
+# Show the remote repositories linked to this working directory
+git remote -v
+# Tell git to remember your credentials
+git config --global credential.helper store
+# Tell git what your favourite editor is.
+git config --global core.editor vim
+git config --global diff.tool vimdiff
+# Get the latest version of the master branch from the remote repository
+git pull origin master
+# Add a file to the staging area (make it ready for commit)
+git add <FILENAME>
+# Revert changes instead of adding them to staging
+git checkout -- <FILENAME>
+# Commit changes in the staging area to your local working directory
+git commit -m "<MESSAGE>"
+# Push changes to a branch (e.g. master) of the remote repository
+git push origin master
+# Make a new branch locally
+git checkout -b <NEWBRANCHNAME>
+# Make a new branch copied from another branch locally
+git checkout -b <NEWBRANCHNAME> <EXISTINGBRANCHNAME>
+# Show all branches
+git branch
+# Merge onto main. First switch to main branch then ...
+git merge <branch>
+# Have a look at this cheat sheet
+https://rogerdudler.github.io/git-guide/
+# Use ssh to save time
+https://github.com/settings/keys
