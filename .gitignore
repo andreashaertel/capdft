@@ -8,3 +8,6 @@ calc_rdf
 bin
 obj
 include
+doc/html
+doc/latex
+doc/make.log
