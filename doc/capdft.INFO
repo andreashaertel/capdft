@@ -1,0 +1,29 @@
+
+capdft repository
+
+capdft is a C++ code library 
+of the Statistical Physics of Soft Matter and Complex Systems 
+research group at the Institute of Physics in Freiburg, Germany. 
+
+created on 21.05.2021
+by Andreas Haertel
+
+
+
+Call "make init" to create necessary directories.
+Call "make" to build the project.
+
+Call "make" in the doc/ directory to make the documentation.
+For more details, see doc/html/index.html
+
+Examples are given in the samples directory.
+
+
+
+Further details will be found on capdft.org soon.
+
+
+
+
+
+
