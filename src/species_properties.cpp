@@ -5,13 +5,11 @@
 *******************************************************************************/
 #include "species_properties.hpp"
 // _____________________________________________________________________________
-SpeciesProperties::SpeciesProperties()
-    : species_count(0) {
+SpeciesProperties::SpeciesProperties() {
   //
 }
 // _____________________________________________________________________________
-SpeciesProperties::SpeciesProperties(size_t species_count)
-    : species_count(species_count) {
+SpeciesProperties::SpeciesProperties(size_t species_count) {
   //
 }
 // _____________________________________________________________________________
@@ -20,65 +18,114 @@ SpeciesProperties::~SpeciesProperties() {
 }
 // _____________________________________________________________________________
 void SpeciesProperties::add_property(
-    std::string property_name, VectorVariant property_values
+    std::string property_name, Variant property_values
 ) {
-  size_t vector_count = get_vector_size(property_values);
-  // Check for special cases
-  if (species_count == 0) {  // species_count has not been determined yet
-    species_count = vector_count;
-  } else if (species_count != vector_count) {  // invalid # species
-    std::cerr << species_count << std::endl;
-    // TODO(Moritz): throw error
-    exit(1);
-  }
   // Add name-value pair
   species_properties[property_name] = property_values;
 }
 // _____________________________________________________________________________
-void SpeciesProperties::get_property(
-    const std::string& property_name, std::vector<int>* poperty_values
-) {
-  *poperty_values =
-      std::get<std::vector<int>>(species_properties[property_name]);
-}
-// _____________________________________________________________________________
-void SpeciesProperties::get_property(
-    const std::string& property_name, std::vector<double>* poperty_values
-) {
-  *poperty_values =
-      std::get<std::vector<double>>(species_properties[property_name]);
-}
-// _____________________________________________________________________________
-void SpeciesProperties::get_property(
-    const std::string& property_name, std::vector<bool>* poperty_values
-) {
-  *poperty_values =
-      std::get<std::vector<bool>>(species_properties[property_name]);
-}
-// _____________________________________________________________________________
-void SpeciesProperties::get_property(
-    const std::string& property_name, std::vector<std::string>* poperty_values
-) {
-  *poperty_values =
-      std::get<std::vector<std::string>>(species_properties[property_name]);
-}
-// _____________________________________________________________________________
-size_t SpeciesProperties::get_vector_size(const VectorVariant& v) {
-  try {
-    return std::get<std::vector<int>>(v).size();
-  } catch (...) {}
-  try {
-    return std::get<std::vector<double>>(v).size();
-  } catch (...) {}
-
-  try {
-    return std::get<std::vector<bool>>(v).size();
-  } catch (...) {}
-  try {
-    return std::get<std::vector<std::string>>(v).size();
-  } catch (...) {
-    // TODO(Moritz): throw
-    exit(1);
+bool SpeciesProperties::contains_property(const std::string& property_name) {
+  auto search = species_properties.find(property_name);
+  if (search != species_properties.end()) {
+    return true;
+  } else {
+    return false;
   }
+}
+// _____________________________________________________________________________
+bool SpeciesProperties::get_property(
+    const std::string& property_name, int* property_value
+) {
+  if (contains_property(property_name)) {
+    *property_value = std::get<int>(species_properties[property_name]);
+    return true;
+  } else {
+    return false;
+  }
+}
+// _____________________________________________________________________________
+bool SpeciesProperties::get_property(
+    const std::string& property_name, double* property_value
+) {
+  if (contains_property(property_name)) {
+    *property_value = std::get<double>(species_properties[property_name]);
+    return true;
+  } else {
+    return false;
+  }
+}
+// _____________________________________________________________________________
+bool SpeciesProperties::get_property(
+    const std::string& property_name, bool* property_value
+) {
+  if (contains_property(property_name)) {
+    *property_value = std::get<bool>(species_properties[property_name]);
+    return true;
+  } else {
+    return false;
+  }
+}
+// _____________________________________________________________________________
+bool SpeciesProperties::get_property(
+    const std::string& property_name, std::string* property_value
+) {
+  if (contains_property(property_name)) {
+    *property_value = std::get<std::string>(species_properties[property_name]);
+    return true;
+  } else {
+    return false;
+  }
+}
+// _____________________________________________________________________________
+bool SpeciesProperties::get_property(
+    const std::string& property_name, std::vector<int>* property_value
+) {
+  if (contains_property(property_name)) {
+    *property_value = std::get<std::vector<int>>(
+        species_properties[property_name]);
+    return true;
+  } else {
+    return false;
+  }
+}
+// _____________________________________________________________________________
+bool SpeciesProperties::get_property(
+    const std::string& property_name, std::vector<double>* property_value
+) {
+  if (contains_property(property_name)) {
+    *property_value = std::get<std::vector<double>>(
+        species_properties[property_name]);
+    return true;
+  } else {
+    return false;
+  }
+}
+// _____________________________________________________________________________
+bool SpeciesProperties::get_property(
+    const std::string& property_name, std::vector<bool>* property_value
+) {
+  if (contains_property(property_name)) {
+    *property_value = std::get<std::vector<bool>>(
+        species_properties[property_name]);
+    return true;
+  } else {
+    return false;
+  }
+}
+// _____________________________________________________________________________
+bool SpeciesProperties::get_property(
+    const std::string& property_name, std::vector<std::string>* property_value
+) {
+  if (contains_property(property_name)) {
+    *property_value = std::get<std::vector<std::string>>(
+        species_properties[property_name]);
+    return true;
+  } else {
+    return false;
+  }
+}
+// _____________________________________________________________________________
+void SpeciesProperties::clear() {
+  species_properties.clear();
 }
 // _____________________________________________________________________________

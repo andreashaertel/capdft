@@ -25,7 +25,14 @@
  *
  */
 class SpeciesProperties {
-  using VectorVariant = std::variant<  // replaces typedef
+  /** \brief This data type contains all standard types that can be used
+   *
+   */
+  using Variant = std::variant<  // replaces typedef
+      int,
+      double,
+      bool,
+      std::string,
       std::vector<int>,
       std::vector<double>,
       std::vector<bool>,
@@ -46,35 +53,41 @@ class SpeciesProperties {
    */
   void add_property(
       std::string property_name,
-      VectorVariant property_values);
+      Variant property_values);
   /** \brief Get specific porperty
    *
    */
-  void get_property(
-      const std::string& property_name, std::vector<int>* poperty_values);
-  void get_property(
-      const std::string& property_name, std::vector<double>* poperty_values);
-  void get_property(
-      const std::string& property_name, std::vector<bool>* poperty_values);
-  void get_property(
+  bool get_property(
+      const std::string& property_name, int* property_value);
+  bool get_property(
+      const std::string& property_name, double* property_value);
+  bool get_property(
+      const std::string& property_name, bool* property_value);
+  bool get_property(
+      const std::string& property_name, std::string* property_value);
+  bool get_property(
+      const std::string& property_name, std::vector<int>* property_value);
+  bool get_property(
+      const std::string& property_name, std::vector<double>* property_value);
+  bool get_property(
+      const std::string& property_name, std::vector<bool>* property_value);
+  bool get_property(
       const std::string& property_name,
-      std::vector<std::string>* poperty_values);
+      std::vector<std::string>* property_value);
+  /** \brief Clear all properties
+   *
+   */
+  void clear();
 
  private:
-  /** \brief Number of species
-   *
-   *  This variable keeps track of the species count, such that all properties
-   *  have the same number of entries.
-   */
-  size_t species_count;
-  /** \brief Stores the species properties in a dictionary
+  /** \brief The species properties stored in a dictionary
    *
    */
-  std::unordered_map<std::string, VectorVariant> species_properties;
-  /** \brief Calculates the species count by getting the vector size
+  std::unordered_map<std::string, Variant> species_properties;
+  /** \brief Returns whether the speciefied property exists
    *
    */
-  size_t get_vector_size(const VectorVariant& v);
+  bool contains_property(const std::string& property_name);
 
  protected:
 };
