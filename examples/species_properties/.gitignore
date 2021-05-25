@@ -4,4 +4,5 @@
 *.o
 *.systeminfo
 *.a
-calc_rdf
+bin
+obj
