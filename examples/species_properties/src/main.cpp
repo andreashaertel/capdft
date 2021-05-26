@@ -13,6 +13,7 @@
 // _____________________________________________________________________________
 // Includes
 #include <iostream>
+#include <vector>
 #include "../../../src/species_properties.hpp"
 // _____________________________________________________________________________
 // Main function
@@ -21,28 +22,28 @@ int main(int argc, char** args) {
   SpeciesProperties species_properties;
   std::vector<SpeciesProperties> species_properties_vector;
   // First species
-  species_properties.add_property("number", 1);
-  species_properties.add_property("size", 2.71);
-  species_properties.add_property("is bird", true);
-  species_properties.add_property("color", std::string("black"));
+  species_properties.add_property<int>("number", 1);
+  species_properties.add_property<double>("size", 2.71);
+  species_properties.add_property("is bird", true);  // without type (bool)
+  species_properties.add_property<std::string>("color", "black");
   species_properties_vector.push_back(species_properties);
   species_properties.clear();
   // Second species (does not have color).
-  species_properties.add_property("number", 2);
-  species_properties.add_property("size", 3.14);
-  species_properties.add_property("is bird", false);
+  species_properties.add_property<int>("number", 2);
+  species_properties.add_property<double>("size", 3.14);
+  species_properties.add_property<bool>("is bird", false);
   species_properties_vector.push_back(species_properties);
   species_properties.clear();
   // Third species (does not have color and no size).
-  species_properties.add_property("number", 3);
-  species_properties.add_property("is bird", true);
+  species_properties.add_property<int>("number", 3);
+  species_properties.add_property<bool>("is bird", true);
   species_properties_vector.push_back(species_properties);
   species_properties.~SpeciesProperties();
   // Check for number
-  int species_number;
+  int species_number{0};
   for (auto it = species_properties_vector.begin();
       it != species_properties_vector.end(); ++it) {
-    it->get_property("number", &species_number);
+    it->get_property<int>("number", &species_number);
     std::cout << "This species has the number " << species_number << ".";
     std::cout << std::endl;
   }
@@ -51,9 +52,9 @@ int main(int argc, char** args) {
   double species_size;
   for (auto it = species_properties_vector.begin();
       it != species_properties_vector.end(); ++it) {
-    it->get_property("number", &species_number);
+    it->get_property<int>("number", &species_number);
     std::cout << "Species " << species_number;
-    if (it->get_property("size", &species_size)) {
+    if (it->get_property<double>("size", &species_size)) {
       std::cout << " has size " << species_size;
     } else {
       std::cout << " has no size";
@@ -65,9 +66,9 @@ int main(int argc, char** args) {
   bool species_bird;
   for (auto it = species_properties_vector.begin();
       it != species_properties_vector.end(); ++it) {
-    it->get_property("number", &species_number);
+    it->get_property("number", &species_number);  // works without type (int)
     std::cout << "Species " << species_number;
-    if (it->get_property("is bird", &species_bird)) {
+    if (it->get_property<bool>("is bird", &species_bird)) {
       if (species_bird) {
         std::cout << " is a bird";
       } else {
@@ -83,9 +84,9 @@ int main(int argc, char** args) {
   std::string species_color;
   for (auto it = species_properties_vector.begin();
       it != species_properties_vector.end(); ++it) {
-    it->get_property("number", &species_number);
+    it->get_property<int>("number", &species_number);
     std::cout << "Species " << species_number;
-    if (it->get_property("color", &species_color)) {
+    if (it->get_property<std::string>("color", &species_color)) {
       std::cerr << " is " << species_color;
     } else {
       std::cerr << " has no color";

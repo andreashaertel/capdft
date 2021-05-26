@@ -10,8 +10,11 @@ CXXFLAGS=-pedantic -std=c++2a -O2 -Wall
 BDIR = bin/
 ODIR = obj/
 SDIR = src/
+# All files from the normal repository that are used in this example ###########
 REPOSDIR = ../../src/
 REPOFILE = species_properties
+REPOFILE += data
+REPOFILE += template_data
 # Get host name ################################################################
 HOST = $(shell hostname)
 # Offsets for binaries and objects #############################################
@@ -25,9 +28,9 @@ REPOSOURCE =
 REPOHEADERS =
 REPOOBJECTS =
 # Header files and object files from main repo #################################
-REPOSOURCE += $(REPOSDIR)$(REPOFILE).cpp
-REPOHEADERS += $(REPOSDIR)$(REPOFILE).hpp
-REPOOBJECTS += $(patsubst $(REPOSDIR)%.cpp,$(OOFF)%.o,$(REPOSOURCE))
+REPOSOURCE += $(addprefix $(REPOSDIR), $(addsuffix .cpp, $(REPOFILE)))
+REPOHEADERS += $(addprefix $(REPOSDIR), $(addsuffix .hpp, $(REPOFILE)))
+REPOOBJECTS += $(patsubst $(REPOSDIR)%.cpp,$(OOFF)%.o, $(REPOSOURCE))
 # Standard header files and object files #######################################
 HEADERS += $(wildcard $(SDIR)*.h)
 HEADERS += $(wildcard $(SDIR)*.hpp)
@@ -39,9 +42,13 @@ HOST = $(shell hostname)
 BOFF = $(BDIR)$(HOST).
 OOFF = $(ODIR)$(HOST).
 # TARGETS ######################################################################
-default: compile
+default: init compile
 
-all: checkstyle compile
+all: checkstyle init compile
+
+init:
+	@mkdir -p bin
+	@mkdir -p obj
 
 # Google C++ style checker:
 # Install cpplint with
@@ -68,5 +75,6 @@ $(BOFF)$(BNAME): $(OBJECTS) $(REPOOBJECTS)
 
 $(OOFF)%.o: $(SDIR)%.cpp $(HEADERS) $(REPOHEADERS)
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
-$(OOFF)species_properties.o: $(REPOSDIR)$(REPOFILE).cpp $(HEADERS) $(REPOHEADERS)
-	$(CXX) $(CXXFLAGS) -c -o $@ $<
+$(REPOOBJECTS): $(REPOSOURCE) $(HEADERS) $(REPOHEADERS)
+	$(CXX) $(CXXFLAGS) -c -o $@ $(REPOSDIR)$(subst .,,$(suffix $(basename $@))).cpp
+
