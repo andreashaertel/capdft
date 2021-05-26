@@ -1,14 +1,14 @@
+
+# SPDX-FileCopyrightText: 2021 Andreas Härtel <http://andreashaertel.anno1982.de/>
+
+# SPDX-License-Identifier: LGPL-3.0-or-later
+
 ################################################################################
 #
 # Makefile
-# for the C++ project capdft 
-# of the Statistical Physics of Soft Matter and Complex Systems 
-# research group at the Institute of Physics in Freiburg, Germany. 
+# for the project capdft 
 #
 # The project contains the C++ library capdft. 
-#
-# Author: Andreas Haertel
-# Date: 30.04.2021
 #
 ################################################################################
 ## binary name #################################################################

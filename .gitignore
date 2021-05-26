@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2021 Moritz Bültmann <moritz.bueltmann@physik.uni-freiburg.de>
+#
+# SPDX-License-Identifier: CC0-1.0
+
 *.swp
 *.vim
 *.swa
@@ -8,3 +12,4 @@ calc_rdf
 bin
 obj
 include
+
