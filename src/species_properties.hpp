@@ -13,82 +13,65 @@
  */
 // _____________________________________________________________________________
 // Includes
-#include <cstddef>
-#include <iostream>
-#include <string>
-#include <variant>
-#include <vector>
 #include <unordered_map>
+#include "data.hpp"
+#include "template_data.hpp"
 // Class forward declarations
 // _____________________________________________________________________________
 /** \brief SpeciesProperties class contains all species-dependent properties
  *
  */
 class SpeciesProperties {
-  /** \brief This data type contains all standard types that can be used
-   *
-   */
-  using Variant = std::variant<  // replaces typedef
-      int,
-      double,
-      bool,
-      std::string,
-      std::vector<int>,
-      std::vector<double>,
-      std::vector<bool>,
-      std::vector<std::string>>;
-
  public:
-  /** \brief Constructor
+  /** \brief Constructors
    *
    */
   SpeciesProperties();
-  explicit SpeciesProperties(size_t species_count);
   /** \brief Destructor
    *
    */
   ~SpeciesProperties();
-  /** \brief Add property
-   *
-   */
-  void add_property(
-      std::string property_name,
-      Variant property_values);
-  /** \brief Get specific porperty
-   *
-   */
-  bool get_property(
-      const std::string& property_name, int* property_value);
-  bool get_property(
-      const std::string& property_name, double* property_value);
-  bool get_property(
-      const std::string& property_name, bool* property_value);
-  bool get_property(
-      const std::string& property_name, std::string* property_value);
-  bool get_property(
-      const std::string& property_name, std::vector<int>* property_value);
-  bool get_property(
-      const std::string& property_name, std::vector<double>* property_value);
-  bool get_property(
-      const std::string& property_name, std::vector<bool>* property_value);
-  bool get_property(
-      const std::string& property_name,
-      std::vector<std::string>* property_value);
-  /** \brief Clear all properties
+  /** \brief Removes all properties
    *
    */
   void clear();
-
- private:
-  /** \brief The species properties stored in a dictionary
-   *
-   */
-  std::unordered_map<std::string, Variant> species_properties;
-  /** \brief Returns whether the speciefied property exists
+  /** \brief Returns true if property is contained
    *
    */
   bool contains_property(const std::string& property_name);
+  /** \brief Add a property with an arbitrary data type
+   *
+   */
+  template<typename T>
+  void add_property(
+      const std::string& property_name, T property_value) {
+    TemplateData<T>* new_property = new TemplateData<T>(property_value);
+    species_properties[property_name] = new_property;
+  }
+  /** \brief Returns a property with an arbitrary data type
+   *
+   */
+  template<typename T>
+  bool get_property(const std::string& property_name, T* property_value) {
+    if (contains_property(property_name)) {
+      if (typeid(T) != *(species_properties[property_name]->type)) {
+        exit(1);  // TODO: throw error
+      }
+      *property_value = (dynamic_cast<TemplateData<T>*>(
+          species_properties[property_name]))->value;
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+ private:
+  /** \brief Contains all species properties.
+   *
+   */
+  std::unordered_map<std::string, Data*> species_properties;
 
  protected:
 };
+#include "species_properties.hpp"
 #endif  // SRC_SPECIES_PROPERTIES_HPP_
