@@ -60,22 +60,28 @@ git push origin master
 ```
 
 Make a new branch locally
-    git checkout -b <NEWBRANCHNAME>
+```bash
+git checkout -b <NEWBRANCHNAME>
+```
 
 Make a new branch copied from another branch locally
-    git checkout -b <NEWBRANCHNAME> <EXISTINGBRANCHNAME>
+```bash
+git checkout -b <NEWBRANCHNAME> <EXISTINGBRANCHNAME>
+```
 
 Show all branches
-    git branch
+```bash
+git branch
+```
 
 Merge onto main. First switch to main branch then ...
 ```bash
 git merge <branch>
 ```
 
-Have a look at this cheat sheet
-    https://rogerdudler.github.io/git-guide/
+Have a look at this cheat sheet 
+[https://rogerdudler.github.io/git-guide/](https://rogerdudler.github.io/git-guide/ "Have a look ...")
 
-Use ssh to save time
-    https://github.com/settings/keys
+Use ssh to save time 
+[https://github.com/settings/keys](https://github.com/settings/keys)
 
