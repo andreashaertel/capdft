@@ -23,12 +23,14 @@ git clone git@github.com:andreashaertel/capdft.git
 cd capdft/
 make init
 make
+```
 
 To make the documentation, you need to run make in the doc/ subfolder: 
 ```bash
 cd doc/
 make
- 
+```
+
 See doc/html/index.html for further details. 
 
 
