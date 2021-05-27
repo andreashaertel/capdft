@@ -1,9 +1,5 @@
-/*******************************************************************************
-* Copyright 2019 Moritz Bueltmann
-* Author: Moritz Bueltmann <moritz.bueltmann@gmx.de>
-*         Andreas Haertel <andreas.haertel@anno1982.de>
-* Physics Department Albert-Ludwigs-Universitaet
-*******************************************************************************/
+// SPDX-FileCopyrightText: 2021 Andreas Haertel <andreas.haertel@anno1982.de>
+// SPDX-License-Identifier: LGPL-3.0-or-later
 /*******************************************************************************
 * This is the improved version of Andreas' command line tool. Instead of the
 * C-madness, I used some clean C++ classes and regular expressions. It should be

@@ -1,36 +1,35 @@
-/*******************************************************************************
-* Copyright 2021 Moritz Bueltmann
-* Authors: Moritz Bueltmann <moritz.bueltmann@gmx.de>
-* Physics Department Albert-Ludwigs-Universitaet
-*******************************************************************************/
-#ifndef SRC_SPECIES_PROPERTIES_HPP_
-#define SRC_SPECIES_PROPERTIES_HPP_
-/** \file species_properties.hpp
- *  \brief Header file for the SpeciesProperties class.
+// SPDX-FileCopyrightText: 2021 Moritz Bültmann <moritz.bueltmann@gmx.de>
+// SPDX-License-Identifier: LGPL-3.0-or-later
+#ifndef SRC_PROPERTIES_HPP_
+#define SRC_PROPERTIES_HPP_
+/** \file properties.hpp
+ *  \brief Header file for the Properties class.
  *
- *  The file contains the class declarations of the SpeciesProperties class.
+ *  The file contains the class declarations of the Properties class.
  *
  */
 // _____________________________________________________________________________
 // Includes
+#include <stdexcept>
+#include <string>
 #include <unordered_map>
 #include "data.hpp"
 #include "template_data.hpp"
 // Class forward declarations
 // _____________________________________________________________________________
-/** \brief SpeciesProperties class contains all species-dependent properties
+/** \brief Properties class is a container for species or system properties
  *
  */
-class SpeciesProperties {
+class Properties {
  public:
   /** \brief Constructors
    *
    */
-  SpeciesProperties();
+  Properties();
   /** \brief Destructor
    *
    */
-  ~SpeciesProperties();
+  ~Properties();
   /** \brief Removes all properties
    *
    */
@@ -46,7 +45,7 @@ class SpeciesProperties {
   void add_property(
       const std::string& property_name, T property_value) {
     TemplateData<T>* new_property = new TemplateData<T>(property_value);
-    species_properties[property_name] = new_property;
+    properties[property_name] = new_property;
   }
   /** \brief Returns a property with an arbitrary data type
    *
@@ -54,11 +53,12 @@ class SpeciesProperties {
   template<typename T>
   bool get_property(const std::string& property_name, T* property_value) {
     if (contains_property(property_name)) {
-      if (typeid(T) != *(species_properties[property_name]->type)) {
-        exit(1);  // TODO: throw error
+      if (typeid(T) != *(properties[property_name]->type)) {
+        throw std::invalid_argument(
+            "Requested type and property type not the same.");
       }
       *property_value = (dynamic_cast<TemplateData<T>*>(
-          species_properties[property_name]))->value;
+          properties[property_name]))->value;
       return true;
     } else {
       return false;
@@ -66,12 +66,11 @@ class SpeciesProperties {
   }
 
  private:
-  /** \brief Contains all species properties.
+  /** \brief Contains all properties.
    *
    */
-  std::unordered_map<std::string, Data*> species_properties;
+  std::unordered_map<std::string, Data*> properties;
 
  protected:
 };
-#include "species_properties.hpp"
-#endif  // SRC_SPECIES_PROPERTIES_HPP_
+#endif  // SRC_PROPERTIES_HPP_
