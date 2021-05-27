@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2021 Moritz Bültmann <moritz.bueltmann@physik.uni-freiburg.de>
+# SPDX-License-Identifier: LGPL-3.0-or-later
 # Binary name ##################################################################
 BNAME=main
 # Compiler #####################################################################
@@ -12,7 +14,7 @@ ODIR = obj/
 SDIR = src/
 # All files from the normal repository that are used in this example ###########
 REPOSDIR = ../../src/
-REPOFILE = species_properties
+REPOFILE = properties
 REPOFILE += data
 REPOFILE += template_data
 # Get host name ################################################################
@@ -44,11 +46,16 @@ OOFF = $(ODIR)$(HOST).
 # TARGETS ######################################################################
 default: init compile
 
-all: checkstyle init compile
+all: checkstyle init compile todo
 
 init:
 	@mkdir -p bin
 	@mkdir -p obj
+
+todo:
+	@echo "================================ TODO ================================"
+	@grep -n "TODO[(]*.*[)]*[:]*.*" $(SOURCE) $(HEADERS) $(REPOSOURCE) $(REPOHEADERS)
+
 
 # Google C++ style checker:
 # Install cpplint with
@@ -56,8 +63,8 @@ init:
 # And add ~/.local/bin to PATH variable.
 # Checks all files in the src directory.
 checkstyle:
-	cpplint $(SDIR)*
-	cpplint $(REPOSDIR)$(REPOFILE).*
+	@cpplint $(SOURCE) $(HEADERS)
+	@cpplint $(REPOSOURCE) $(REPOHEADERS)
 
 clean:
 	rm -f $(OOFF)*.o

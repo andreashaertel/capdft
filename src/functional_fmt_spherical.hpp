@@ -1,8 +1,5 @@
-/*******************************************************************************
-* Copyright 2021 Moritz Bueltmann
-* Authors: Moritz Bueltmann <moritz.bueltmann@gmx.de>
-* Physics Department Albert-Ludwigs-Universitaet
-*******************************************************************************/
+// SPDX-FileCopyrightText: 2021 Moritz Bültmann <moritz.bueltmann@gmx.de>
+// SPDX-License-Identifier: LGPL-3.0-or-later
 #ifndef SRC_FUNCTIONAL_FMT_SPHERICAL_HPP_
 #define SRC_FUNCTIONAL_FMT_SPHERICAL_HPP_
 /** \file functional_fmt_spherical.hpp

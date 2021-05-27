@@ -1,8 +1,0 @@
-*.swp
-*.vim
-*.swa
-*.o
-*.systeminfo
-*.a
-bin
-obj
