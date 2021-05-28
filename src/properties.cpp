@@ -14,7 +14,7 @@ void Properties::clear() {
   properties.clear();
 }
 // _____________________________________________________________________________
-bool Properties::contains_property(const std::string& property_name) {
+bool Properties::contains_property(const std::string& property_name) const {
   auto search = properties.find(property_name);
   if (search != properties.end()) {
     return true;
