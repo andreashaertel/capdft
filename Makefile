@@ -89,7 +89,7 @@ clean:
 # $@	name of the target
 
 # Make header and library and programs
-bind: $(IDIR)$(LIBNAME).hpp $(BDIR)lib$(HOST).$(LIBNAME).a progs
+bind: $(IDIR)$(LIBNAME).hpp $(BDIR)lib$(HOST).$(LIBNAME).a
 
 # Make header
 $(IDIR)$(LIBNAME).hpp: $(HEADERS)
@@ -98,12 +98,6 @@ $(IDIR)$(LIBNAME).hpp: $(HEADERS)
 # Make library
 $(BDIR)lib$(HOST).$(LIBNAME).a: $(OBJECTS)
 	@echo " Binding $@ ... "; ar -rc $@ $^
-
-# Make programs
-progs: $(BDIR)calc_rdf
-
-$(BDIR)calc_rdf: $(OOFF)calc_rdf.o $(BDIR)lib$(HOST).$(LIBNAME).a
-	@echo " Binding $@ ... "; $(CXX) -o $@ $(LDFLAGS) $^ $(LIBS)
 
 ################################################################################
 # Compiling
@@ -128,9 +122,6 @@ $(BDIR)calc_rdf: $(OOFF)calc_rdf.o $(BDIR)lib$(HOST).$(LIBNAME).a
 # Explicit rules: 
 
 $(OOFF)parameter_handler.o: $(SDIR)parameter_handler.cpp $(SDIR)parameter_handler.hpp
-	@echo " Compiling $< ... "; $(CXX) $(CXXFLAGS) -c -o $@ $<
-
-$(OOFF)calc_rdf.o: $(SDIR)calc_rdf.cpp $(IDIR)$(LIBNAME).hpp
 	@echo " Compiling $< ... "; $(CXX) $(CXXFLAGS) -c -o $@ $<
 
 #################
