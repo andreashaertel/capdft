@@ -11,6 +11,8 @@
  */
 // _____________________________________________________________________________
 // Includes
+#include <vector>
+#include "src/properties.hpp"
 // Class forward declarations
 // _____________________________________________________________________________
 /** \brief FunctionalFMTSpherical calculates the FMT functional in spherical geometry
@@ -24,12 +26,36 @@ class FunctionalFMTSpherical {
   /** \brief Constructor
    *
    */
-  FunctionalFMTSpherical();
+  FunctionalFMTSpherical(
+      const Properties& system_properties,
+      const std::vector<Properties>& species_properties);
   /** \brief Destructor
    *
    */
   ~FunctionalFMTSpherical();
+
  private:
+  /** \brief System length (radius of the sperical geometry)
+   *
+   */
+  double length;
+  /** \brief Number of grid points
+   *
+   */
+  size_t grid_count;
+  /** \brief Number of species
+   *
+   */
+  size_t species_count;
+  /** \brief Hard sphere diameters
+   *
+   */
+  std::vector<double> diameters;
+  /** \brief Bulk densities
+   *
+   */
+  std::vector<double> bulk_densities;
+
  protected:
 };
 #endif  // SRC_FUNCTIONAL_FMT_SPHERICAL_HPP_
