@@ -1,8 +1,5 @@
-
 # SPDX-FileCopyrightText: 2021 Andreas Härtel <http://andreashaertel.anno1982.de/>
-
 # SPDX-License-Identifier: LGPL-3.0-or-later
-
 ################################################################################
 #
 # Makefile
@@ -43,9 +40,12 @@ OBJECTS = $(patsubst $(SDIR)%.cpp,$(OOFF)%.o,$(SOURCES))
 # System information files #####################################################
 SYSINFO = $(OOFF)systeminfo
 # TARGETS ######################################################################
+
+.PHONY: default all init checkstyle compile info clean
+
 default: compile bind
 
-all: checkstyle compile bind
+all: checkstyle info compile bind
 
 # Initialize
 init:

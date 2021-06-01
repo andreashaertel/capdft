@@ -44,6 +44,9 @@ HOST = $(shell hostname)
 BOFF = $(BDIR)$(HOST).
 OOFF = $(ODIR)$(HOST).
 # TARGETS ######################################################################
+
+.PHONY: default all init todo checkstyle clean compile
+
 default: init compile
 
 all: checkstyle init compile todo
