@@ -12,16 +12,18 @@
 // _____________________________________________________________________________
 // Includes
 #include <vector>
-#include "src/properties.hpp"
+#include "properties.hpp"
+#include "functional.hpp"
 // Class forward declarations
 // _____________________________________________________________________________
-/** \brief FunctionalFMTSpherical calculates the FMT functional in spherical geometry
+/** \brief FunctionalFMTSpherical calculates the FMT functional in spherical
+ *  geometry
  *  
  *  This class contains the tools to calculate functional and functional
  *  derivative values.
  *
  */
-class FunctionalFMTSpherical {
+class FunctionalFMTSpherical : public Functional {
  public:
   /** \brief Constructor
    *
@@ -44,11 +46,11 @@ class FunctionalFMTSpherical {
    *  check_weighted_densities(),
    *  calc_partial_derivatives()
    */
-  void calc_derivative();
-  /** Calculate bulk derivatives
+  virtual void calc_derivative();
+  /** \brief Calculate bulk derivatives
    *
    */
-  void calc_bulk_derivative();
+  virtual void calc_bulk_derivative();
   /** \brief Calculate the energy value of this functional
    *
    *  Calculate the energy value of this functional, which approaches the excess
@@ -56,7 +58,7 @@ class FunctionalFMTSpherical {
    *
    *  \return Returns the functional energy value
    */
-  double calc_energy();
+  virtual double calc_energy();
   /** \brief Calculate the ideal energy (not part of this functional)
    *
    *  Calculates the ideal free energy of all species that interact via this
@@ -65,17 +67,17 @@ class FunctionalFMTSpherical {
    *
    *  \return Returns the ideal free energy value
    */
-  double calc_ideal_free_energy();
+  virtual double calc_ideal_free_energy();  // TODO(Moritz): id gas functional
   /** \brief Calculate the grand potential (not part of this functional)
    *
-   * Calculates the grand potential given a certain chemical potential and
-   * external potential.
+   *  Calculates the grand potential given a certain chemical potential and
+   *  external potential.
    *
-   * \param[in] chemical_potential The chemical potentials of the species.
-   * \param[in] external_potential The external potential of the system.
-   * \return Returns the grand potential energy
+   *  \param[in] chemical_potential The chemical potentials of the species.
+   *  \param[in] external_potential The external potential of the system.
+   *  \return Returns the grand potential energy
    */
-  double calc_grand_potential(
+  virtual double calc_grand_potential(  // TODO(Moritz): ideal gas functional
       std::vector<double> chemical_potential,
       std::vector<std::vector<double>> external_potential);
 
@@ -119,7 +121,7 @@ class FunctionalFMTSpherical {
   /** \brief Calculate the partial derivatives of the free energy densities
    *
    */
-   void calc_partial_derivatives();
+  void calc_partial_derivatives();
 
  protected:
 };
