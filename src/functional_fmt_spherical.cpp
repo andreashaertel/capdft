@@ -28,8 +28,8 @@ FunctionalFMTSpherical::FunctionalFMTSpherical(
   }
   // Count species that interact via the hard sphere potential
   species_count = diameters.size();
-  // TODO: Initialize the following objects
-  // TODO: functional_derivative
+  // TODO(Moritz): Initialize the following objects
+  // TODO(Moritz): functional_derivative
 }
 // _____________________________________________________________________________
 FunctionalFMTSpherical::~FunctionalFMTSpherical() {
