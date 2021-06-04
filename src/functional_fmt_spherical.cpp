@@ -4,8 +4,10 @@
 // _____________________________________________________________________________
 FunctionalFMTSpherical::FunctionalFMTSpherical(
     const Properties& system_properties,
-    const std::vector<Properties>& species_properties) {
-  // Clear all vectors
+    const std::vector<Properties>& species_properties,
+    double** density_profile)
+  : density_profile(density_profile) {
+  // Clear all std::vectors
   diameters.clear();
   bulk_densities.clear();
   // Get system properties
@@ -18,7 +20,7 @@ FunctionalFMTSpherical::FunctionalFMTSpherical(
       ++it) {
     if (it->get_property("diameter", &diameter)) {  // only species with diam.
       if (!it->get_property("bulk density", &bulk_density)) {
-        // TODO(Moritz): throw error
+        // TODO(Moritz): throw error, because species has diameter, but no dens
       }
       diameters.push_back(diameter);
       bulk_densities.push_back(bulk_density);
@@ -26,6 +28,8 @@ FunctionalFMTSpherical::FunctionalFMTSpherical(
   }
   // Count species that interact via the hard sphere potential
   species_count = diameters.size();
+  // TODO: Initialize the following objects
+  // TODO: functional_derivative
 }
 // _____________________________________________________________________________
 FunctionalFMTSpherical::~FunctionalFMTSpherical() {
