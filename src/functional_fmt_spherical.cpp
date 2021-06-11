@@ -2,6 +2,10 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "functional_fmt_spherical.hpp"
 // _____________________________________________________________________________
+FunctionalFMTSpherical::FunctionalFMTSpherical() {
+  //
+}
+// _____________________________________________________________________________
 FunctionalFMTSpherical::FunctionalFMTSpherical(
     const Properties& system_properties,
     const std::vector<Properties>& species_properties,
@@ -35,4 +39,18 @@ FunctionalFMTSpherical::FunctionalFMTSpherical(
 FunctionalFMTSpherical::~FunctionalFMTSpherical() {
   //
 }
+// _____________________________________________________________________________
+void FunctionalFMTSpherical::calc_derivative() {
+  //
+}
+// _____________________________________________________________________________
+void FunctionalFMTSpherical::calc_bulk_derivative() {
+  //
+}
+// _____________________________________________________________________________
+double FunctionalFMTSpherical::calc_energy() {
+  //
+  return 0.;
+}
+// _____________________________________________________________________________
 // _____________________________________________________________________________

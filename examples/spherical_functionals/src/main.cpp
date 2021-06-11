@@ -12,7 +12,9 @@
 #include <iostream>
 #include <vector>
 #include "../../../src/properties.hpp"
-#include "../../../src/properties.hpp"
+#include "../../../src/functional.hpp"
+#include "../../../src/functional_fmt_spherical.hpp"
+#include "../../../src/functional_es_mf_spherical.hpp"
 // _____________________________________________________________________________
 // Main function
 int main(int argc, char** args) {
@@ -20,11 +22,25 @@ int main(int argc, char** args) {
   Properties properties;
   Properties system_properties;
   std::vector<Properties> species_properties;
+  // Define system properties
+  system_properties.add_property<double>("length", 10.);
+  system_properties.add_property<double>("bjerrum length", 1.);
+  system_properties.add_property<int>("grid_count", 1001);
   // First species
-  properties.add_property<int>("number", 1);
-  properties.add_property<double>("size", 2.71);
-  properties.add_property("is bird", true);
-  properties.add_property<std::string>("color", "black");
+  properties.add_property<double>("diameter", 1.);
+  properties.add_property<double>("bulk density", .1);
+  properties.add_property<double>("valency", -1.);
+  species_properties.push_back(properties);
+  properties.clear();
+  // Second species
+  properties.add_property<double>("diameter", 1.);
+  properties.add_property<double>("bulk density", .1);
+  species_properties.push_back(properties);
+  properties.clear();
+  // Third species
+  properties.add_property<double>("diameter", 1.);
+  properties.add_property<double>("bulk density", .1);
+  properties.add_property<double>("valency", +1.);
   species_properties.push_back(properties);
   properties.clear();
   return 0;
