@@ -17,6 +17,7 @@ REPOSDIR = ../../src/
 REPOFILE = properties
 REPOFILE += data
 REPOFILE += template_data
+REPOFILE += functional
 REPOFILE += functional_fmt_spherical
 REPOFILE += functional_es_mf_spherical
 # Get host name ################################################################
