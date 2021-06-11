@@ -31,7 +31,7 @@ class FunctionalFMTSpherical : public Functional {
   FunctionalFMTSpherical(
       const Properties& system_properties,
       const std::vector<Properties>& species_properties,
-      double** density_porfile);
+      double** density_profile);
   /** \brief Destructor
    *
    */
