@@ -27,14 +27,50 @@
  * 
  *  https://www.doxygen.nl/manual/formulas.html
  * 
- *  Doxygen allows you to put $\mbox{\LaTeX}$ formulas in the output (this works only for the HTML, $\mbox{\LaTeX}$ and RTF output. To be able to include formulas (as images) in the HTML and RTF documentation, you will also need to have the following tools installed
+ *  Doxygen allows you to put \f$\mbox{\LaTeX}\f$ formulas in the output (this
+ *  works only for the HTML, \f$\mbox{\LaTeX}\f$ and RTF output. To be able to include formulas (as images) in the HTML and RTF documentation, you will also need to have the following tools installed
 
-    latex: the $\mbox{\LaTeX}$ compiler, needed to parse the formulas. To test I have used the teTeX 1.0 distribution.
+    latex: the \f$\mbox{\LaTeX}\f$ compiler, needed to parse the formulas. To test I have used the teTeX 1.0 distribution.
     dvips: a tool to convert DVI files to PostScript files I have used version 5.92b from Radical Eye software for testing.
     gs: the GhostScript interpreter for converting PostScript files to bitmaps. I have used Aladdin GhostScript 8.0 for testing.
 
- * 
- * 
+ * \section classes_overview capdft Project: Classes overview
+ *
+ * The capdft library contains tools for numerical cDFT calculations. It relies
+ * heavily on classes that are shortly described in the following.
+ *
+ * Currently, the library supports only two different types of
+ * geometries:
+ *  - Cartesian: Two planar hard walls at distance \f$L\f$, where the density is
+ *	evaluated only at the coordinate axis perpendicular to the walls.
+ *  - Spherical: Two spheres with the same center but different radii
+ *    \f$ r_{1} < r_{2} \f$, where the density is evaluated in the range 
+ *    \f$ r_{1} < r_{2} \f$ in radial direction.
+ *
+ * Since each geometry requires adapted numerical threatment we decided to
+ * split every functional in two versions: One which is written for cartesian
+ * geometry and one that is optimised for spherical geometry. The functional
+ * classes carry the corresponding geometry suffix in their name.
+ *
+ * Each functional is implemented as a class that that is derived from an
+ * abstract class Functional, which contains the minimum
+ * required functionalities each functional must own. (Change this sentence,
+ * please). The naming convention for a functional class
+ * Functional<specifier><geometric-suffix>:
+ *  - "Functional": Each functional class carries this prefix in its name
+ *  - <specifier>: Something that is unique for this functional, such that it is
+ *  recognisible in a vast list of names
+ *  - <geometric-suffix>: Cartesian/Spherical
+ *  
+ * Currently, there is only one type functional implemented for both geometries:
+ *  - FunctionalFMTCartesian
+ *  - FunctionalFMTSpherical
+ *
+ * Where FMT is an abbreviation for "Fundamental Measure Theory". We use FMT
+ * exclusively for hard spheres. (Should we add other solids in a FMT
+ * description our naming convention would not be unique anymore.)
+ *
+ *
  *  \section use_sec Use of the library
  *
  *  To use the library, you have to install the library on your system. 
@@ -44,7 +80,7 @@
  *
  *  To include the functionality of sophtlib into your C++ codes, add the line <BR>
  *  <CODE>
- *  \#include "sophtlib.hpp" <BR>
+ *  \#include "sophtlib.hpp" <BR>                                 
  *  </CODE>
  *  to your code. For compiling (not binding), you also have to tell the compiler where it 
  *  will find the header file include/sophtlib.hpp. For instance, to compile a program 
