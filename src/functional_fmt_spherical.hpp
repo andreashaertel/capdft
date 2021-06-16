@@ -86,10 +86,19 @@ class FunctionalFMTSpherical : public Functional {
    *
    */
   double** density_profile;
+  /** \brief Density profiles times the radial position
+   *
+   */
+  double** density_profile_times_r;  // TODO(Moritz): Density object
   /** \brief Functional derivatives
    *
    */
   double** functional_derivative;
+  /** \brief Weighted densities
+   *
+   */
+  double* weighted_densities_real;
+  double* weighted_densities_four;
   /** \brief Calculate the weighted densities
    *
    */

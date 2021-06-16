@@ -34,6 +34,9 @@ FunctionalFMTSpherical::FunctionalFMTSpherical(
   species_count = diameters.size();
   // TODO(Moritz): Initialize the following objects
   // TODO(Moritz): functional_derivative
+  // TODO(Moritz): weighted densities
+  // TODO(Moritz): density_profile_times_r
+  // TODO(Moritz): 
 }
 // _____________________________________________________________________________
 FunctionalFMTSpherical::~FunctionalFMTSpherical() {
@@ -51,6 +54,18 @@ void FunctionalFMTSpherical::calc_bulk_derivative() {
 double FunctionalFMTSpherical::calc_energy() {
   //
   return 0.;
+}
+// _____________________________________________________________________________
+void FunctionalFMTSpherical::calc_weighted_densities() {
+  //
+}
+// _____________________________________________________________________________
+void FunctionalFMTSpherical::check_weighted_densities() {
+  //
+}
+// _____________________________________________________________________________
+void FunctionalFMTSpherical::calc_partial_derivatives() {
+  //
 }
 // _____________________________________________________________________________
 // _____________________________________________________________________________
