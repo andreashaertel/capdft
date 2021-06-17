@@ -53,7 +53,7 @@ Examples are given in the examples directory.
 Any pull requests or suggestions are welcome at 
 <https://github.com/andreashaertel/capdft> or via e-mail to one of the maintainers. 
 
-Explain how to contribute ... 
+Explain how to contribute ... . 
 
 
 
