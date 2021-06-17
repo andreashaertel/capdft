@@ -1,5 +1,15 @@
 /** \mainpage Code library of the SophT group in Freiburg. 
  * 
+ *  \latexonly
+ *  %\title{capDFT}
+ *  %\author{me}
+ *  %\titlepic{\includegraphics[width=\textwidth]{logo_latex.eps}}
+ *  %\maketitle
+ *  % In Doxyfile: add titlepic to EXTRA_PACKAGES
+ *  \endlatexonly
+ *  \image html logo_html.png
+ *  \image latex logo_latex.eps
+ * 
  *  This documentation is generated automatically by doxygen. 
  *  For more information about Doxygen, please visit 
  *  [doxygen](http://www.doxygen.nl/index.html). 
