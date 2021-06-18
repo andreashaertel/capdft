@@ -36,7 +36,7 @@ FunctionalFMTSpherical::FunctionalFMTSpherical(
   // TODO(Moritz): functional_derivative
   // TODO(Moritz): weighted densities
   // TODO(Moritz): density_profile_times_r
-  // TODO(Moritz): 
+  // TODO(Moritz):
 }
 // _____________________________________________________________________________
 FunctionalFMTSpherical::~FunctionalFMTSpherical() {
