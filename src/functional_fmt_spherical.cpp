@@ -2,6 +2,10 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "functional_fmt_spherical.hpp"
 // _____________________________________________________________________________
+FunctionalFMTSpherical::FunctionalFMTSpherical() {
+  //
+}
+// _____________________________________________________________________________
 FunctionalFMTSpherical::FunctionalFMTSpherical(
     const Properties& system_properties,
     const std::vector<Properties>& species_properties,
@@ -30,9 +34,38 @@ FunctionalFMTSpherical::FunctionalFMTSpherical(
   species_count = diameters.size();
   // TODO(Moritz): Initialize the following objects
   // TODO(Moritz): functional_derivative
+  // TODO(Moritz): weighted densities
+  // TODO(Moritz): density_profile_times_r
+  // TODO(Moritz): 
 }
 // _____________________________________________________________________________
 FunctionalFMTSpherical::~FunctionalFMTSpherical() {
   //
 }
+// _____________________________________________________________________________
+void FunctionalFMTSpherical::calc_derivative() {
+  //
+}
+// _____________________________________________________________________________
+void FunctionalFMTSpherical::calc_bulk_derivative() {
+  //
+}
+// _____________________________________________________________________________
+double FunctionalFMTSpherical::calc_energy() {
+  //
+  return 0.;
+}
+// _____________________________________________________________________________
+void FunctionalFMTSpherical::calc_weighted_densities() {
+  //
+}
+// _____________________________________________________________________________
+void FunctionalFMTSpherical::check_weighted_densities() {
+  //
+}
+// _____________________________________________________________________________
+void FunctionalFMTSpherical::calc_partial_derivatives() {
+  //
+}
+// _____________________________________________________________________________
 // _____________________________________________________________________________

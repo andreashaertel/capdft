@@ -25,13 +25,14 @@
  */
 class FunctionalFMTSpherical : public Functional {
  public:
-  /** \brief Constructor
+  /** \brief Constructors
    *
    */
+  FunctionalFMTSpherical();
   FunctionalFMTSpherical(
       const Properties& system_properties,
       const std::vector<Properties>& species_properties,
-      double** density_porfile);
+      double** density_profile);
   /** \brief Destructor
    *
    */
@@ -59,27 +60,6 @@ class FunctionalFMTSpherical : public Functional {
    *  \return Returns the functional energy value
    */
   virtual double calc_energy();
-  /** \brief Calculate the ideal energy (not part of this functional)
-   *
-   *  Calculates the ideal free energy of all species that interact via this
-   *  functional. The ideal free energy ist not really part of this excess
-   *  functional.
-   *
-   *  \return Returns the ideal free energy value
-   */
-  virtual double calc_ideal_free_energy();  // TODO(Moritz): id gas functional
-  /** \brief Calculate the grand potential (not part of this functional)
-   *
-   *  Calculates the grand potential given a certain chemical potential and
-   *  external potential.
-   *
-   *  \param[in] chemical_potential The chemical potentials of the species.
-   *  \param[in] external_potential The external potential of the system.
-   *  \return Returns the grand potential energy
-   */
-  virtual double calc_grand_potential(  // TODO(Moritz): ideal gas functional
-      std::vector<double> chemical_potential,
-      std::vector<std::vector<double>> external_potential);
 
  private:
   /** \brief System length (radius of the sperical geometry)
@@ -106,10 +86,19 @@ class FunctionalFMTSpherical : public Functional {
    *
    */
   double** density_profile;
+  /** \brief Density profiles times the radial position
+   *
+   */
+  double** density_profile_times_r;  // TODO(Moritz): Density object
   /** \brief Functional derivatives
    *
    */
   double** functional_derivative;
+  /** \brief Weighted densities
+   *
+   */
+  double* weighted_densities_real;
+  double* weighted_densities_four;
   /** \brief Calculate the weighted densities
    *
    */
