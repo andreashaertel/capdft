@@ -32,11 +32,11 @@ class Functional {
    *  This function calculates the functional derivatives and updates the
    *  corresponding internal array.
    */
-  virtual void calc_derivative() =0;
+  virtual void calc_derivative() = 0;
   /** Calculate bulk derivatives
    *
    */
-  virtual void calc_bulk_derivative() =0;
+  virtual void calc_bulk_derivative() = 0;
   /** \brief Calculate the energy value of this functional
    *
    *  Calculate the energy value of this functional, which approaches the excess
@@ -44,31 +44,14 @@ class Functional {
    *
    *  \return Returns the functional energy value
    */
-  virtual double calc_energy() =0;
-  /** \brief Calculate the ideal energy (not part of this functional)
-   *
-   *  Calculates the ideal free energy of all species that interact via this
-   *  functional. The ideal free energy ist not really part of this excess
-   *  functional.
-   *
-   *  \return Returns the ideal free energy value
-   */
-  virtual double calc_ideal_free_energy();  // TODO(Moritz): id gas functional
-  /** \brief Calculate the grand potential (not part of this functional)
-   *
-   *  Calculates the grand potential given a certain chemical potential and
-   *  external potential.
-   *
-   *  \return Returns the grand potential energy
-   */
-  virtual double calc_grand_potential();  // TODO(Moritz): ideal gas functional
+  virtual double calc_energy() = 0;
 
  private:
-  // This section should stay empty, because this is the template
+  // This section should stay empty, because this is the template (abstract)
   // functional class.
 
  protected:
-  // This section should stay empty, because this is the template
+  // This section should stay empty, because this is the template (abstract)
   // functional class.
 };
 #endif  // SRC_FUNCTIONAL_HPP_
