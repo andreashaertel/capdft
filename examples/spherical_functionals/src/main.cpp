@@ -13,7 +13,7 @@
 #include <vector>
 #include "../../../src/data_field.hpp"
 #include "../../../src/properties.hpp"
-//#include "../../../src/system.hpp"
+#include "../../../src/system.hpp"
 #include "../../../src/functional.hpp"
 #include "../../../src/functional_fmt_spherical.hpp"
 #include "../../../src/functional_es_mf_spherical.hpp"
@@ -52,7 +52,7 @@ int main(int argc, char** args) {
   // Create a density profiles with DataField
   DataField density_profile;
   // All the supplied data is now brought together in the System class
-  //System my_system;
+  System my_system;
   // Create FMT Functional object
   //FunctionalFMTSpherical functional2(
   //  system_properties, species_properties, density_profiles);

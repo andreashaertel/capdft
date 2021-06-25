@@ -34,6 +34,7 @@ DataField::DataField(const DataField& other)
     array_size(other.get_array_size()),
     bin_width(other.get_bin_width()) {
   this->create(array_count, array_size);
+  // TODO(Moritz): *this = other
   for (size_t i = 0; i < array_count; ++i) {
     for (size_t j = 0; j < array_size; ++j) {
       this->at(i, j) = other.element(i, j);
@@ -479,5 +480,4 @@ DataField operator/(double current, DataField other) {  // friend
   }
   return result;
 }
-// _____________________________________________________________________________
 // _____________________________________________________________________________
