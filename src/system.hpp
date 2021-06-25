@@ -18,10 +18,22 @@ class System {
    *
    */
   System();
+  System(
+      Properties system_properties,
+      std::vector<Properties> species_properties,
+      DataField density_profile);
   /** \brief Destructor
    *
    */
   ~System();
+  /** \brief Access system properties (no modification)
+   *
+   */
+  const Properties& get_system_properties() const;
+  /** \brief Access species properties (no modification)
+   *
+   */
+  const std::vector<Properties>& get_species_properties() const;
 
  private:
   /** \brief Supplied system properties
