@@ -19,14 +19,6 @@
  */
 class Functional {
  public:
-  /** \brief Constructor
-   *
-   */
-  Functional();
-  /** \brief Destructor
-   *
-   */
-  virtual ~Functional();
   /** \brief Calculate the functional derivatives
    *
    *  This function calculates the functional derivatives and updates the

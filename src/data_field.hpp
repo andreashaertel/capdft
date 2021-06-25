@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #ifndef SRC_DATA_FIELD_HPP_
 #define SRC_DATA_FIELD_HPP_
-/** \file data_field.cpp
+/** \file data_field.hpp
  *  \brief This file contains the declarations of the DataField class
  *
  */
@@ -99,14 +99,20 @@ class DataField {
    *  1.) DataField = DataField
    *  2.) DataField += DataField
    *  3.) DataField -= DataField
-   *  4.) DataField *= <number>
-   *  5.) DataField /= <number>
-   *  6.) DataField + DataField
-   *  7.) DataField - DataField
-   *  8.) DataField + <number>
-   *  9.) DataField - <number>
-   *  10.) DataField * <number>
-   *  11.) DataField / <number>
+   *  4.) DataField *= DataField
+   *  5.) DataField /= DataField
+   *  6.) DataField += <number>
+   *  7.) DataField -= <number>
+   *  8.) DataField *= <number>
+   *  9.) DataField /= <number>
+   *  10.) DataField + DataField
+   *  11.) DataField - DataField
+   *  12.) DataField * DataField
+   *  13.) DataField / DataField
+   *  14.) DataField + <number>
+   *  15.) DataField - <number>
+   *  16.) DataField * <number>
+   *  17.) DataField / <number>
    *
    */
   DataField& operator=(DataField other);
@@ -122,6 +128,30 @@ class DataField {
    *
    */
   DataField& operator-=(DataField other);
+  /** \brief The *= operator
+   *
+   *  See list of all operator actions at operator=().
+   *
+   */
+  DataField& operator*=(DataField other);
+  /** \brief The /= operator
+   *
+   *  See list of all operator actions at operator=().
+   *
+   */
+  DataField& operator/=(DataField other);
+  /** \brief The += operator
+   *
+   *  See list of all operator actions at operator=().
+   *
+   */
+  DataField& operator+=(double other);
+  /** \brief The -= operator
+   *
+   *  See list of all operator actions at operator=().
+   *
+   */
+  DataField& operator-=(double other);
   /** \brief The *= operator
    *
    *  See list of all operator actions at operator=().
@@ -146,6 +176,18 @@ class DataField {
    *
    */
   DataField operator-(DataField other);
+  /** \brief The * operator multiplies two DataFields elementwise
+   *
+   *  See list of all operator actions at operator=().
+   *
+   */
+  DataField operator*(DataField other);
+  /** \brief The / operator divides a DataField by another DataField elementwise
+   *
+   *  See list of all operator actions at operator=().
+   *
+   */
+  DataField operator/(DataField other);
   /** \brief The + operator adds a constant value to every entry
    *
    *  See list of all operator actions at operator=().
