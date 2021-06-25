@@ -1,7 +1,6 @@
 // SPDX-FileCopyrightText: 2021 Moritz Bültmann <moritz.bueltmann@gmx.de>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "data_field.hpp"
-#include <fftw3.h>
 #include <cmath>
 #include <iostream>
 #include <iomanip>
@@ -48,7 +47,7 @@ DataField::~DataField() {
 // _____________________________________________________________________________
 void DataField::clear() {
   for (auto it = arrays.begin(); it != arrays.end(); ++it) {
-    fftw_free(*it);
+    delete [] *it;
   }
   arrays.clear();
   array_count = 0;
@@ -59,8 +58,7 @@ void DataField::create(size_t ac, size_t as) {
   this->array_count = ac;
   this->array_size = as;
   for (size_t i = 0; i < array_count; ++i) {
-    arrays.push_back(
-        (double*) fftw_malloc(sizeof(double) * array_size));  // NOLINT
+    arrays.push_back(new double[array_size]);
   }
 }
 // _____________________________________________________________________________
@@ -178,24 +176,6 @@ DataField& DataField::operator=(DataField other) {
   return *this;
 }
 // _____________________________________________________________________________
-DataField& DataField::operator*=(double other) {
-  for (size_t i = 0; i < this->array_count; ++i) {
-    for (size_t j = 0; j < this->array_size; ++j) {
-      this->at(i, j) *= other;
-    }
-  }
-  return *this;
-}
-// _____________________________________________________________________________
-DataField& DataField::operator/=(double other) {
-  for (size_t i = 0; i < this->array_count; ++i) {
-    for (size_t j = 0; j < this->array_size; ++j) {
-      this->at(i, j) /= other;
-    }
-  }
-  return *this;
-}
-// _____________________________________________________________________________
 DataField& DataField::operator+=(DataField other) {
   if (this->array_count == other.get_array_count() &&
       this->array_size == other.get_array_size()
@@ -242,6 +222,88 @@ DataField& DataField::operator-=(DataField other) {
   return *this;
 }
 // _____________________________________________________________________________
+DataField& DataField::operator*=(DataField other) {
+  if (this->array_count == other.get_array_count() &&
+      this->array_size == other.get_array_size()
+  ) {
+    for (size_t i = 0; i < this->array_count; ++i) {
+      for (size_t j = 0; j < this->array_size; ++j) {
+        this->at(i, j) *= other.element(i, j);
+      }
+    }
+  } else {
+    std::cerr << "DataField::operator*=():";
+    std::cerr << " \"ERROR: Dimensions do not match. Cannot subtract.\"";
+    std::cerr << std::endl;
+    exit(1);
+  }
+  if (fabs(this->bin_width - other.get_bin_width()) > 1e-12) {
+    std::cerr << "DataField::operator*=():";
+    std::cerr << "\"Warning: Matrices do not have the same bin width.\"";
+    std::cerr << std::endl;
+  }
+  return *this;
+}
+// _____________________________________________________________________________
+DataField& DataField::operator/=(DataField other) {
+  if (this->array_count == other.get_array_count() &&
+      this->array_size == other.get_array_size()
+  ) {
+    for (size_t i = 0; i < this->array_count; ++i) {
+      for (size_t j = 0; j < this->array_size; ++j) {
+        this->at(i, j) /= other.element(i, j);
+      }
+    }
+  } else {
+    std::cerr << "DataField::operator/=():";
+    std::cerr << " \"ERROR: Dimensions do not match. Cannot subtract.\"";
+    std::cerr << std::endl;
+    exit(1);
+  }
+  if (fabs(this->bin_width - other.get_bin_width()) > 1e-12) {
+    std::cerr << "DataField::operator/=():";
+    std::cerr << "\"Warning: Matrices do not have the same bin width.\"";
+    std::cerr << std::endl;
+  }
+  return *this;
+}
+// _____________________________________________________________________________
+DataField& DataField::operator+=(double other) {
+  for (size_t i = 0; i < this->array_count; ++i) {
+    for (size_t j = 0; j < this->array_size; ++j) {
+      this->at(i, j) += other;
+    }
+  }
+  return *this;
+}
+// _____________________________________________________________________________
+DataField& DataField::operator-=(double other) {
+  for (size_t i = 0; i < this->array_count; ++i) {
+    for (size_t j = 0; j < this->array_size; ++j) {
+      this->at(i, j) -= other;
+    }
+  }
+  return *this;
+}
+// _____________________________________________________________________________
+DataField& DataField::operator*=(double other) {
+  for (size_t i = 0; i < this->array_count; ++i) {
+    for (size_t j = 0; j < this->array_size; ++j) {
+      this->at(i, j) *= other;
+    }
+  }
+  return *this;
+}
+// _____________________________________________________________________________
+DataField& DataField::operator/=(double other) {
+  for (size_t i = 0; i < this->array_count; ++i) {
+    for (size_t j = 0; j < this->array_size; ++j) {
+      this->at(i, j) /= other;
+    }
+  }
+  return *this;
+}
+// _____________________________________________________________________________
 DataField DataField::operator+(DataField other) {
   DataField result(other.get_array_count(), other.get_array_size());
   if (this->array_count == other.get_array_count() &&
@@ -284,6 +346,54 @@ DataField DataField::operator-(DataField other) {
   }
   if (fabs(this->bin_width - other.get_bin_width()) > 1e-12) {
     std::cerr << "DataField::operator-():";
+    std::cerr << "\"Warning: Matrices do not have the same bin width.\"";
+    std::cerr << std::endl;
+  }
+  return result;
+}
+// _____________________________________________________________________________
+DataField DataField::operator*(DataField other) {
+  DataField result(other.get_array_count(), other.get_array_size());
+  if (this->array_count == other.get_array_count() &&
+      this->array_size == other.get_array_size()
+  ) {
+    for (size_t i = 0; i < this->array_count; ++i) {
+      for (size_t j = 0; j < this->array_size; ++j) {
+        result.at(i, j) = this->element(i, j) * other.element(i, j);
+      }
+    }
+  } else {
+    std::cerr << "DataField::operator*():";
+    std::cerr << " \"ERROR: Dimensions do not match. Cannot add.\"";
+    std::cerr << std::endl;
+    exit(1);
+  }
+  if (fabs(this->bin_width - other.get_bin_width()) > 1e-12) {
+    std::cerr << "DataField::operator*():";
+    std::cerr << "\"Warning: Matrices do not have the same bin width.\"";
+    std::cerr << std::endl;
+  }
+  return result;
+}
+// _____________________________________________________________________________
+DataField DataField::operator/(DataField other) {
+  DataField result(other.get_array_count(), other.get_array_size());
+  if (this->array_count == other.get_array_count() &&
+      this->array_size == other.get_array_size()
+  ) {
+    for (size_t i = 0; i < this->array_count; ++i) {
+      for (size_t j = 0; j < this->array_size; ++j) {
+        result.at(i, j) = this->element(i, j) / other.element(i, j);
+      }
+    }
+  } else {
+    std::cerr << "DataField::operator/():";
+    std::cerr << " \"ERROR: Dimensions do not match. Cannot subtract.\"";
+    std::cerr << std::endl;
+    exit(1);
+  }
+  if (fabs(this->bin_width - other.get_bin_width()) > 1e-12) {
+    std::cerr << "DataField::operator/():";
     std::cerr << "\"Warning: Matrices do not have the same bin width.\"";
     std::cerr << std::endl;
   }

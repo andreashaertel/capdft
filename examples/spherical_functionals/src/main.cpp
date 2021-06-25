@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2021 Moritz Bültmann <moritz.bueltmann@gmx.de>
 // SPDX-License-Identifier: LGPL-3.0-or-later
-/** \file examples/properties/src/main.cpp
+/** \file examples/spherical_functional/src/main.cpp
  *  \brief Main file of the example of the spherical functionals.
  *  
  *  This main file contains examples to show how the FunctionalESMFSpherical
@@ -11,7 +11,9 @@
 // Includes
 #include <iostream>
 #include <vector>
+#include "../../../src/data_field.hpp"
 #include "../../../src/properties.hpp"
+//#include "../../../src/system.hpp"
 #include "../../../src/functional.hpp"
 #include "../../../src/functional_fmt_spherical.hpp"
 #include "../../../src/functional_es_mf_spherical.hpp"
@@ -47,16 +49,15 @@ int main(int argc, char** args) {
   properties.add_property<double>("valency", +1.);
   species_properties.push_back(properties);
   properties.clear();
-  // Create a density array
-  double** density_profiles = new double*[species_properties.size()];
-  for (size_t spec_i = 0; spec_i < species_properties.size(); ++spec_i) {
-    density_profiles[spec_i] = new double[grid_count];
-  }
+  // Create a density profiles with DataField
+  DataField density_profile;
+  // All the supplied data is now brought together in the System class
+  //System my_system;
   // Create FMT Functional object
-  FunctionalFMTSpherical functional2(
-    system_properties, species_properties, density_profiles);
-  // Create mean-field electrostatic Functional object
-  FunctionalESMFSpherical functional3(
-    system_properties, species_properties, density_profiles);
+  //FunctionalFMTSpherical functional2(
+  //  system_properties, species_properties, density_profiles);
+  //// Create mean-field electrostatic Functional object
+  //FunctionalESMFSpherical functional3(
+  //  system_properties, species_properties, density_profiles);
   return 0;
 }
