@@ -6,6 +6,11 @@ Properties::Properties() {
   clear();
 }
 // _____________________________________________________________________________
+Properties::Properties(const Properties& other) {
+  clear();
+  properties = other.properties;
+}
+// _____________________________________________________________________________
 Properties::~Properties() {
   //
 }

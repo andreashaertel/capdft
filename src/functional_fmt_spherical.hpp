@@ -12,8 +12,9 @@
 // _____________________________________________________________________________
 // Includes
 #include <vector>
-#include "properties.hpp"
 #include "functional.hpp"
+#include "properties.hpp"
+#include "system.hpp"
 // Class forward declarations
 // _____________________________________________________________________________
 /** \brief FunctionalFMTSpherical calculates the FMT functional in spherical
@@ -29,10 +30,7 @@ class FunctionalFMTSpherical : public Functional {
    *
    */
   FunctionalFMTSpherical();
-  FunctionalFMTSpherical(
-      const Properties& system_properties,
-      const std::vector<Properties>& species_properties,
-      double** density_profile);
+  explicit FunctionalFMTSpherical(System* system);
   /** \brief Destructor
    *
    */
@@ -52,10 +50,11 @@ class FunctionalFMTSpherical : public Functional {
    *
    */
   virtual void calc_bulk_derivative();
-  /** \brief Calculate the energy value of this functional
+  /** \brief Calculate the (excess free) energy value of this functional
    *
-   *  Calculate the energy value of this functional, which approaches the excess
-   *  free energy contribution of the hard sphere interactions.
+   *  Calculate the energy value of this functional, which corresponds to the
+   *  excess free energy contribution of the hard sphere interactions in
+   *  equilibrium.
    *
    *  \return Returns the functional energy value
    */
@@ -85,20 +84,22 @@ class FunctionalFMTSpherical : public Functional {
   /** \brief Pointer to density profiles
    *
    */
-  double** density_profile;
+  DataField* density_profile;
   /** \brief Density profiles times the radial position
    *
    */
-  double** density_profile_times_r;  // TODO(Moritz): Density object
+  DataField density_profile_times_r;
   /** \brief Functional derivatives
    *
    */
-  double** functional_derivative;
+  double** functional_derivative;  // TODO(Moritz): DataField object
   /** \brief Weighted densities
    *
    */
-  double* weighted_densities_real;
-  double* weighted_densities_four;
+  double** scalar_weighted_dens_real;  // TODO(Moritz): DataField object
+  double*** vector_weighted_dens_real;  // TODO(Moritz): DataField object
+  double**** tensor_weighted_dens_real;  // TODO(Moritz): DataField object
+  double* weighted_densities_four;  // TODO(Moritz): DataField object
   /** \brief Calculate the weighted densities
    *
    */
@@ -111,6 +112,15 @@ class FunctionalFMTSpherical : public Functional {
    *
    */
   void calc_partial_derivatives();
+  /** \brief Calculate the energy density
+   *  
+   *  \param The index of the position of which the energy density value is
+   *  sought.
+   *
+   *  \return Returns the functional energy density at the specified position.
+   *
+   */
+   double calc_local_energy_density(size_t position);
 
  protected:
 };

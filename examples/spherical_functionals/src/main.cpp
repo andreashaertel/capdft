@@ -51,13 +51,14 @@ int main(int argc, char** args) {
   properties.clear();
   // Create a density profiles with DataField
   DataField density_profile;
-  // All the supplied data is now brought together in the System class
-  System my_system;
+  // All the supplied data is now brought together in the System class.
+  // The system class creates a density profile (DataField) from the given
+  // information and does noot allow modifictation of the properties.
+  System my_system(system_properties, species_properties);
   // Create FMT Functional object
-  //FunctionalFMTSpherical functional2(
-  //  system_properties, species_properties, density_profiles);
-  //// Create mean-field electrostatic Functional object
-  //FunctionalESMFSpherical functional3(
+  FunctionalFMTSpherical my_fmt_functional(&my_system);
+  // Create mean-field electrostatic Functional object
+  //FunctionalESMFSpherical my_es_functional(
   //  system_properties, species_properties, density_profiles);
   return 0;
 }

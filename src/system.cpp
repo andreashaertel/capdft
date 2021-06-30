@@ -8,8 +8,7 @@ System::System() {
 // _____________________________________________________________________________
 System::System(
     Properties system_properties,
-    std::vector<Properties> species_properties,
-    DataField density_profile)
+    std::vector<Properties> species_properties)
   : system_properties(system_properties),
     species_properties(species_properties) {
   // Get the number of grid points that were specified in system_properties
@@ -20,7 +19,7 @@ System::System(
 }
 // _____________________________________________________________________________
 System::~System() {
-  //
+  density_profile.~DataField();
 }
 // _____________________________________________________________________________
 const Properties& System::get_system_properties() const {
@@ -31,4 +30,7 @@ const std::vector<Properties>& System::get_species_properties() const {
   return species_properties;
 }
 // _____________________________________________________________________________
+DataField* System::get_density_profile_pointer() {
+  return &density_profile;
+}
 // _____________________________________________________________________________

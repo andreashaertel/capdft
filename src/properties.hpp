@@ -26,6 +26,7 @@ class Properties {
    *
    */
   Properties();
+  Properties(const Properties& other);
   /** \brief Destructor
    *
    */

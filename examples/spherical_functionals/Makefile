@@ -71,8 +71,7 @@ todo:
 # And add ~/.local/bin to PATH variable.
 # Checks all files in the src directory.
 checkstyle:
-	@cpplint $(SOURCE) $(HEADERS)
-	@cpplint $(REPOSOURCE) $(REPOHEADERS)
+	@cpplint $(SOURCE) $(HEADERS) $(REPOSOURCE) $(REPOHEADERS)
 
 clean:
 	rm -f $(OOFF)*.o
