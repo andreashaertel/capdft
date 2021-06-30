@@ -20,8 +20,7 @@ class System {
   System();
   System(
       Properties system_properties,
-      std::vector<Properties> species_properties,
-      DataField density_profile);
+      std::vector<Properties> species_properties);
   /** \brief Destructor
    *
    */
@@ -34,6 +33,10 @@ class System {
    *
    */
   const std::vector<Properties>& get_species_properties() const;
+  /** \brief Obtain pointer of the density_profile
+   *
+   */
+  DataField* get_density_profile_pointer();
 
  private:
   /** \brief Supplied system properties
@@ -44,7 +47,7 @@ class System {
    *
    */
   std::vector<Properties> species_properties;
-  /** \brief Data field that contains the density profile
+  /** \brief Data field pointer that contains the density profile if initialized
    *
    */
   DataField density_profile;
