@@ -39,7 +39,7 @@ class DataField {
    *
    */
   double& element(size_t i, size_t j) const;
-  /** \brief Access to one array i
+  /** \brief Pointer access to one array i
    *
    */
   double* array(size_t i);
@@ -238,9 +238,25 @@ class DataField {
   friend DataField operator/(double current, DataField other);
 
  private:
+  /** \brief Number of arrays in "arrays"
+   *
+   */
   size_t array_count;
+  /** \brief Size of the arrays in "arrays"
+   *
+   */
   size_t array_size;
+  /** \brief Bin width of the data in "arrays"
+   *
+   */
   double bin_width;
+  /** \brief Keeps track wether memory was allocated
+   *
+   */
+  bool allocated_memory;
+  /** \brief Stores pointers to the arrays containing the data
+   *
+   */
   std::vector<double*> arrays;
 
  protected:

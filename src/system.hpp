@@ -33,6 +33,10 @@ class System {
    *
    */
   const std::vector<Properties>& get_species_properties() const;
+  /** \brief Write bulk values to the density profile
+   *
+   */
+  void bulk();
   /** \brief Obtain pointer of the density_profile
    *
    */
@@ -50,7 +54,7 @@ class System {
   /** \brief Data field pointer that contains the density profile if initialized
    *
    */
-  DataField density_profile;
+  DataField* density_profile;
 
  protected:
 };

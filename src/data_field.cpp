@@ -10,13 +10,15 @@
 DataField::DataField()
   : array_count(0),
     array_size(0),
-    bin_width(1.) {
+    bin_width(1.),
+    allocated_memory(false) {
 }
 // _____________________________________________________________________________
 DataField::DataField(size_t array_count, size_t array_size)
   : array_count(array_count),
     array_size(array_size),
-    bin_width(1.) {
+    bin_width(1.),
+    allocated_memory(false){
   this->create(array_count, array_size);
   this->zeros();
 }
@@ -24,7 +26,8 @@ DataField::DataField(size_t array_count, size_t array_size)
 DataField::DataField(size_t array_count, size_t array_size, double bin_width)
   : array_count(array_count),
     array_size(array_size),
-    bin_width(bin_width) {
+    bin_width(bin_width),
+    allocated_memory(false){
   this->create(array_count, array_size);
   this->zeros();
 }
@@ -32,7 +35,8 @@ DataField::DataField(size_t array_count, size_t array_size, double bin_width)
 DataField::DataField(const DataField& other)
   : array_count(other.get_array_count()),
     array_size(other.get_array_size()),
-    bin_width(other.get_bin_width()) {
+    bin_width(other.get_bin_width()),
+    allocated_memory(false){
   this->create(array_count, array_size);
   // TODO(Moritz): *this = other
   for (size_t i = 0; i < array_count; ++i) {
@@ -43,7 +47,7 @@ DataField::DataField(const DataField& other)
 }
 // _____________________________________________________________________________
 DataField::~DataField() {
-  this->clear();
+  if (allocated_memory) { this->clear(); }
 }
 // _____________________________________________________________________________
 void DataField::clear() {
@@ -53,6 +57,7 @@ void DataField::clear() {
   arrays.clear();
   array_count = 0;
   array_size = 0;
+  allocated_memory = false;
 }
 // _____________________________________________________________________________
 void DataField::create(size_t ac, size_t as) {
@@ -61,6 +66,7 @@ void DataField::create(size_t ac, size_t as) {
   for (size_t i = 0; i < array_count; ++i) {
     arrays.push_back(new double[array_size]);
   }
+  allocated_memory = true;
 }
 // _____________________________________________________________________________
 void DataField::recreate(size_t ss, size_t as) {

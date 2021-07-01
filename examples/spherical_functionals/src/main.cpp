@@ -39,14 +39,13 @@ int main(int argc, char** args) {
   species_properties.push_back(properties);
   properties.clear();
   // Second species
-  properties.add_property<double>("diameter", 1.);
-  properties.add_property<double>("bulk density", .1);
+  properties.add_property<double>("bulk density", .2);
+  properties.add_property<double>("valency", +1.);
   species_properties.push_back(properties);
   properties.clear();
   // Third species
   properties.add_property<double>("diameter", 1.);
-  properties.add_property<double>("bulk density", .1);
-  properties.add_property<double>("valency", +1.);
+  properties.add_property<double>("bulk density", .3);
   species_properties.push_back(properties);
   properties.clear();
   // Create a density profiles with DataField
@@ -57,6 +56,7 @@ int main(int argc, char** args) {
   System my_system(system_properties, species_properties);
   // Create FMT Functional object
   FunctionalFMTSpherical my_fmt_functional(&my_system);
+  std::cout << my_fmt_functional.calc_energy() << std::endl;
   // Create mean-field electrostatic Functional object
   //FunctionalESMFSpherical my_es_functional(
   //  system_properties, species_properties, density_profiles);
