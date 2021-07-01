@@ -12,6 +12,7 @@
 // _____________________________________________________________________________
 // Includes
 #include <vector>
+#include <fftw3.h>
 #include "functional.hpp"
 #include "properties.hpp"
 #include "system.hpp"
@@ -69,10 +70,19 @@ class FunctionalFMTSpherical : public Functional {
    *
    */
   size_t grid_count;
+  /** \brief Bin sizes in real and Fourier space
+   *
+   */
+  double dr;  // TODO: think about renaming
+  double dkr;
   /** \brief Number of species
    *
    */
   size_t species_count;
+  /** \brief Vector that remembers the species, that are affected by this
+   *  functional
+   */
+  std::vector<size_t> affected_species;
   /** \brief Hard sphere diameters
    *
    */
@@ -84,22 +94,50 @@ class FunctionalFMTSpherical : public Functional {
   /** \brief Pointer to density profiles
    *
    */
-  DataField* density_profile;
+  DataField* density_profile_pointer;
   /** \brief Density profiles times the radial position
    *
+   *  The sine transform of fftw does not require the point r=0, because it is
+   *  zero anyways. The cosine transform, however has a non-zero value there.
+   *  For this reason the the array is of length grid_count+1 and a sine
+   *  transform starts at the second element.
+   *
    */
-  DataField density_profile_times_r;
+  DataField* density_profile_times_r;
+  /** \brief Fourier transformed density profile
+   *
+   *  Since it is the Sine transformed density_profile_times_r it also contains
+   *  arrays of length grid_count+1.
+   *
+   */
+  DataField* density_profile_four;
   /** \brief Functional derivatives
    *
    */
-  double** functional_derivative;  // TODO(Moritz): DataField object
+  DataField* functional_derivative;
   /** \brief Weighted densities
    *
+   * There are three weighted density types: scalar, vectorial, tensorial.
+   * There are four arrays containing the four scalar weighted densities.
+   * There are two arrays containing the z-components of the two vectorial
+   * weighted densities.
+   * There are two arrays containing the first (= second) and third element of
+   * the tensorial weighted density.
+   *
    */
-  double** scalar_weighted_dens_real;  // TODO(Moritz): DataField object
-  double*** vector_weighted_dens_real;  // TODO(Moritz): DataField object
-  double**** tensor_weighted_dens_real;  // TODO(Moritz): DataField object
-  double* weighted_densities_four;  // TODO(Moritz): DataField object
+  DataField* scalar_weighted_dens_real;
+  DataField* vector_weighted_dens_real;
+  DataField* tensor_weighted_dens_real;
+  DataField* scalar_weighted_dens_four;
+  DataField* vector_weighted_dens_four;
+  DataField* tensor_weighted_dens_four;
+  /** \brief Weight functions
+   *
+   *  In the radially symmetric case we only need a few weight functions.
+   *  Every vector element contains all weight function of another species.
+   *
+   */
+  std::vector<DataField> weights_four;
   /** \brief Calculate the weighted densities
    *
    */
@@ -123,5 +161,35 @@ class FunctionalFMTSpherical : public Functional {
    double calc_local_energy_density(size_t position);
 
  protected:
+  /** \brief From the system object extract the system properties
+   *
+   */
+  void extract_system_properties(System* sys);
+  /** \brief From the system object extract the species properties
+   *
+   */
+  void extract_species_properties(System* sys);
+  /** \brief The density profile is changed outside of this functional, thus
+   *  we need to update the internal arrays it before calculating something.
+   */
+  void update_density_times_r();
+  /** \brief Initialize the weight functions in Fourier space
+   *  For radially symmetric systems only a few weights are actually needed.
+   *  The different weighted densities are obtained by introducing the
+   *  prefactors in the convolution.
+   *
+   */
+  void initialize_weights();
+  /** \brief Radial integration  // TODO(Moritz): toolbox?
+   *
+   */
+  double radial_integration(double* data, int n, double delta);
+  /** \brief Flags for the sine and cosine transforms
+   *
+   *  The first one preserves the input, while the second one might destroy it.
+   *
+   */
+  static const unsigned int flags_keep = FFTW_MEASURE | FFTW_PRESERVE_INPUT;
+  static const unsigned int flags_destroy = FFTW_MEASURE; 
 };
 #endif  // SRC_FUNCTIONAL_FMT_SPHERICAL_HPP_

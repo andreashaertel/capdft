@@ -15,11 +15,12 @@ System::System(
   size_t grid_count{0};
   system_properties.get_property("grid count", &grid_count);
   // From the system properties create the density Profile
-  density_profile = DataField(species_properties.size(), grid_count);
+  density_profile = new DataField(species_properties.size(), grid_count);
+  bulk();
 }
 // _____________________________________________________________________________
 System::~System() {
-  density_profile.~DataField();
+  density_profile->~DataField();
 }
 // _____________________________________________________________________________
 const Properties& System::get_system_properties() const {
@@ -31,6 +32,19 @@ const std::vector<Properties>& System::get_species_properties() const {
 }
 // _____________________________________________________________________________
 DataField* System::get_density_profile_pointer() {
-  return &density_profile;
+  return density_profile;
+}
+// _____________________________________________________________________________
+void System::bulk() {
+  double bulk_density{0.};
+  size_t grid_count{0};
+  system_properties.get_property("grid count", &grid_count);
+  for (auto it = species_properties.begin(); it != species_properties.end();
+      ++it) {
+    it->get_property("bulk density", &bulk_density);
+    for (size_t i = 0; i != grid_count; ++i) {
+      density_profile->at(it - species_properties.begin(), i) = bulk_density;
+    }
+  }
 }
 // _____________________________________________________________________________

@@ -5,7 +5,7 @@ BNAME=main
 # Compiler #####################################################################
 CXX=g++
 # Libraries to be linked #######################################################
-LIBS=-lm
+LIBS=-lm -lfftw3
 # Compiler flags ###############################################################
 CXXFLAGS=-pedantic -std=c++2a -O2 -Wall
 # Directories for binaries, objects and sources ################################
