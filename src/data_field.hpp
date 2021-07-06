@@ -6,8 +6,8 @@
  *  \brief This file contains the declarations of the DataField class
  *
  */
-#include <cstddef>
 #include <fftw3.h>
+#include <cstddef>
 #include <vector>
 #include <string>
 /** \brief Container class for arrays (e.g. densities, functional derivatives)

@@ -1,9 +1,9 @@
 // SPDX-FileCopyrightText: 2021 Moritz Bültmann <moritz.bueltmann@gmx.de>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "functional_fmt_spherical.hpp"
+#include <fftw3.h>
 #include <cmath>
 #include <iostream>
-#include <fftw3.h>
 // _____________________________________________________________________________
 FunctionalFMTSpherical::FunctionalFMTSpherical() {
   //
@@ -97,7 +97,7 @@ void FunctionalFMTSpherical::update_density_times_r() {
 void FunctionalFMTSpherical::initialize_weights() {
   // Declare auxiliary variables. R means radius of the hard sphere.
   // kr is the radial position in Fourier space. Hence, RR is the square of R
-  // and so on. 
+  // and so on.
   double kr{0.}, krkr{0.}, krkrkr{0.};
   double R{0.}, RR{0.}, RRR{0.};
   double Rkr{0.};
@@ -129,7 +129,6 @@ void FunctionalFMTSpherical::initialize_weights() {
         weights_four.at(i).at(2, j) =
             weights_four.at(i).at(1, j) - 3. * weights_four.at(i).at(0, j) / R;
       }
-        
     }
   }
 }
@@ -216,7 +215,7 @@ void FunctionalFMTSpherical::calc_weighted_densities() {
           FFTW_RODFT00, flags_destroy));
   // Creating plans clears the input array hence we need to update it
   update_density_times_r();
-  // Sine transform of r*rho(r) 
+  // Sine transform of r*rho(r)
   for (auto it = forward_plans.begin(); it != forward_plans.end(); ++it) {
     fftw_execute(*it);
   }
@@ -292,9 +291,9 @@ void FunctionalFMTSpherical::calc_weighted_densities() {
     rrr = rr * r;
     scalar_weighted_dens_real->at(0, i) =
         scalar_weighted_dens_four->at(0, i+1) / r;
-    scalar_weighted_dens_real->at(1, i) = 
+    scalar_weighted_dens_real->at(1, i) =
         scalar_weighted_dens_four->at(1, i+1) / r;
-    scalar_weighted_dens_real->at(2, i) = 
+    scalar_weighted_dens_real->at(2, i) =
         scalar_weighted_dens_four->at(2, i+1) / r;
     scalar_weighted_dens_real->at(3, i) =
         scalar_weighted_dens_four->at(3, i+1) / r;
@@ -304,7 +303,7 @@ void FunctionalFMTSpherical::calc_weighted_densities() {
     vector_weighted_dens_real->at(1, i) =
         vector_weighted_dens_four->at(2, i+1) / rr -
         vector_weighted_dens_four->at(3, i+1) / r;
-    tensor_weighted_dens_real->at(0, i) = 
+    tensor_weighted_dens_real->at(0, i) =
         tensor_weighted_dens_four->at(0, i+1) / rrr -
         tensor_weighted_dens_four->at(1, i+1) / rr -
         tensor_weighted_dens_four->at(2, i+1) / (3. * r);
@@ -331,7 +330,7 @@ double FunctionalFMTSpherical::calc_local_energy_density(size_t position) {
   double Phi1, Phi2, Phi3;  // energy density terms
   double phi2, phi3;  // factors in the energy density terms
   double phi2_num, phi3_num;  // factors in the energy density terms
-  double n0, n1, n2, n3; // scalar weighted densities
+  double n0, n1, n2, n3;  // scalar weighted densities
   double n3n3, n3n3n3, oneMn3, logOneMn3, oneMn3squared;  // auxiliary variables
   double n2n2, n2n2n2;  // auxiliary variables
   double trace2, trace3;  // auxiliary variables
@@ -363,12 +362,12 @@ double FunctionalFMTSpherical::calc_local_energy_density(size_t position) {
       ntensorm2second * ntensorm2second * ntensorm2second +
       ntensorm2third * ntensorm2third * ntensorm2third;
   // Calculate factors in the energy density terms
-	if (n3 < 1e-5) {  // avoiding logarithm of very small numbers
+  if (n3 < 1e-5) {  // avoiding logarithm of very small numbers
     phi2 = 1. + .5 * n3 + .3 * n3n3 + .2 * n3n3n3;  // +O(n^4)
     phi3 = 1. - .125 * n3 - .05 * n3n3 - .025 * n3n3n3;  // +O(n^4)
   } else {
     phi2 = (6. * n3 - 3. * n3n3 + 6. * oneMn3 * logOneMn3) / n3n3n3;
-    phi3 = (6. * n3 - 9. * n3n3 + 6. * n3n3n3 + 6. * oneMn3squared * logOneMn3) /
+    phi3 = (6. * n3 - 9. * n3n3 + 6. * n3n3n3 + 6. * oneMn3squared * logOneMn3)/
         (4. * n3n3n3);
   }
   phi2_num = 1. + n3n3 * phi2 / 9.;

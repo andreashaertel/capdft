@@ -1,8 +1,8 @@
 // SPDX-FileCopyrightText: 2021 Moritz Bültmann <moritz.bueltmann@gmx.de>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "data_field.hpp"
-#include <cmath>
 #include <fftw3.h>
+#include <cmath>
 #include <fstream>
 #include <iostream>
 #include <iomanip>
@@ -53,7 +53,7 @@ DataField<T>::DataField(size_t array_count, size_t array_size)
   : array_count(array_count),
     array_size(array_size),
     bin_width(1.),
-    allocated_memory(false){
+    allocated_memory(false) {
   this->create(array_count, array_size);
   this->zeros();
 }
@@ -63,7 +63,7 @@ DataField<T>::DataField(size_t array_count, size_t array_size, double bin_width)
   : array_count(array_count),
     array_size(array_size),
     bin_width(bin_width),
-    allocated_memory(false){
+    allocated_memory(false) {
   this->create(array_count, array_size);
   this->zeros();
 }
@@ -73,7 +73,7 @@ DataField<T>::DataField(const DataField<T>& other)
   : array_count(other.get_array_count()),
     array_size(other.get_array_size()),
     bin_width(other.get_bin_width()),
-    allocated_memory(false){
+    allocated_memory(false) {
   this->create(array_count, array_size);
   // TODO(Moritz): *this = other
   for (size_t i = 0; i < array_count; ++i) {
@@ -88,7 +88,7 @@ DataField<fftw_complex>::DataField(
   : array_count(other.get_array_count()),
     array_size(other.get_array_size()),
     bin_width(other.get_bin_width()),
-    allocated_memory(false){
+    allocated_memory(false) {
   this->create(array_count, array_size);
   // TODO(Moritz): *this = other
   for (size_t i = 0; i < array_count; ++i) {
@@ -618,7 +618,8 @@ DataField<T> DataField<T>::operator+(DataField<T> other) {
 template <>
 DataField<fftw_complex> DataField<fftw_complex>::operator+(
     DataField<fftw_complex> other) {
-  DataField<fftw_complex> result(other.get_array_count(), other.get_array_size());
+  DataField<fftw_complex> result(
+      other.get_array_count(), other.get_array_size());
   if (this->array_count == other.get_array_count() &&
       this->array_size == other.get_array_size()
   ) {
@@ -669,7 +670,8 @@ DataField<T> DataField<T>::operator-(DataField<T> other) {
 template <>
 DataField<fftw_complex> DataField<fftw_complex>::operator-(
     DataField<fftw_complex> other) {
-  DataField<fftw_complex> result(other.get_array_count(), other.get_array_size());
+  DataField<fftw_complex> result(
+      other.get_array_count(), other.get_array_size());
   if (this->array_count == other.get_array_count() &&
       this->array_size == other.get_array_size()
   ) {
@@ -720,7 +722,8 @@ DataField<T> DataField<T>::operator*(DataField<T> other) {
 template <>
 DataField<fftw_complex> DataField<fftw_complex>::operator*(
     DataField<fftw_complex> other) {
-  DataField<fftw_complex> result(other.get_array_count(), other.get_array_size());
+  DataField<fftw_complex> result(
+      other.get_array_count(), other.get_array_size());
   if (this->array_count == other.get_array_count() &&
       this->array_size == other.get_array_size()
   ) {
@@ -773,17 +776,18 @@ DataField<T> DataField<T>::operator/(DataField<T> other) {
 template <>
 DataField<fftw_complex> DataField<fftw_complex>::operator/(
     DataField<fftw_complex> other) {
-  DataField<fftw_complex> result(other.get_array_count(), other.get_array_size());
+  DataField<fftw_complex> result(
+      other.get_array_count(), other.get_array_size());
   if (this->array_count == other.get_array_count() &&
       this->array_size == other.get_array_size()
   ) {
     for (size_t i = 0; i < this->array_count; ++i) {
       for (size_t j = 0; j < this->array_size; ++j) {
-        result.at(i, j)[0] = (this->element(i, j)[0] * other.element(i, j)[0] + 
+        result.at(i, j)[0] = (this->element(i, j)[0] * other.element(i, j)[0] +
             this->element(i, j)[1] * other.element(i, j)[1]) /
             (other.element(i, j)[0] * other.element(i, j)[0] +
             other.element(i, j)[1] * other.element(i, j)[1]);
-        result.at(i, j)[1] = (this->element(i, j)[1] * other.element(i, j)[0] - 
+        result.at(i, j)[1] = (this->element(i, j)[1] * other.element(i, j)[0] -
             this->element(i, j)[0] * other.element(i, j)[1]) /
             (other.element(i, j)[0] * other.element(i, j)[0] +
             other.element(i, j)[1] * other.element(i, j)[1]);
