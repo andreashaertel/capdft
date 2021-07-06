@@ -11,8 +11,8 @@
  */
 // _____________________________________________________________________________
 // Includes
-#include <vector>
 #include <fftw3.h>
+#include <vector>
 #include "functional.hpp"
 #include "properties.hpp"
 #include "system.hpp"
@@ -73,7 +73,7 @@ class FunctionalFMTSpherical : public Functional {
   /** \brief Bin sizes in real and Fourier space
    *
    */
-  double dr;  // TODO: think about renaming
+  double dr;  // TODO(Moritz): think about renaming
   double dkr;
   /** \brief Number of species
    *
@@ -158,7 +158,7 @@ class FunctionalFMTSpherical : public Functional {
    *  \return Returns the functional energy density at the specified position.
    *
    */
-   double calc_local_energy_density(size_t position);
+  double calc_local_energy_density(size_t position);
 
  protected:  // TODO(Moritz): swap protected and private
   /** \brief From the system object extract the system properties
@@ -190,6 +190,6 @@ class FunctionalFMTSpherical : public Functional {
    *
    */
   static const unsigned int flags_keep = FFTW_MEASURE | FFTW_PRESERVE_INPUT;
-  static const unsigned int flags_destroy = FFTW_MEASURE; 
+  static const unsigned int flags_destroy = FFTW_MEASURE;
 };
 #endif  // SRC_FUNCTIONAL_FMT_SPHERICAL_HPP_
