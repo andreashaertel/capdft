@@ -94,7 +94,7 @@ class FunctionalFMTSpherical : public Functional {
   /** \brief Pointer to density profiles
    *
    */
-  DataField* density_profile_pointer;
+  DataField<double>* density_profile_pointer;
   /** \brief Density profiles times the radial position
    *
    *  The sine transform of fftw does not require the point r=0, because it is
@@ -103,18 +103,18 @@ class FunctionalFMTSpherical : public Functional {
    *  transform starts at the second element.
    *
    */
-  DataField* density_profile_times_r;
+  DataField<double>* density_profile_times_r;
   /** \brief Fourier transformed density profile
    *
    *  Since it is the Sine transformed density_profile_times_r it also contains
    *  arrays of length grid_count+1.
    *
    */
-  DataField* density_profile_four;
+  DataField<double>* density_profile_four;
   /** \brief Functional derivatives
    *
    */
-  DataField* functional_derivative;
+  DataField<double>* functional_derivative;
   /** \brief Weighted densities
    *
    * There are three weighted density types: scalar, vectorial, tensorial.
@@ -125,19 +125,19 @@ class FunctionalFMTSpherical : public Functional {
    * the tensorial weighted density.
    *
    */
-  DataField* scalar_weighted_dens_real;
-  DataField* vector_weighted_dens_real;
-  DataField* tensor_weighted_dens_real;
-  DataField* scalar_weighted_dens_four;
-  DataField* vector_weighted_dens_four;
-  DataField* tensor_weighted_dens_four;
+  DataField<double>* scalar_weighted_dens_real;
+  DataField<double>* vector_weighted_dens_real;
+  DataField<double>* tensor_weighted_dens_real;
+  DataField<double>* scalar_weighted_dens_four;
+  DataField<double>* vector_weighted_dens_four;
+  DataField<double>* tensor_weighted_dens_four;
   /** \brief Weight functions
    *
    *  In the radially symmetric case we only need a few weight functions.
    *  Every vector element contains all weight function of another species.
    *
    */
-  std::vector<DataField> weights_four;
+  std::vector<DataField<double>> weights_four;
   /** \brief Calculate the weighted densities
    *
    */
@@ -149,7 +149,7 @@ class FunctionalFMTSpherical : public Functional {
   /** \brief Calculate the partial derivatives of the free energy densities
    *
    */
-  void calc_partial_derivatives();
+  void calc_partial_derivatives();  // TODO(Moritz): referenz rückgabe
   /** \brief Calculate the energy density
    *  
    *  \param The index of the position of which the energy density value is
@@ -160,7 +160,7 @@ class FunctionalFMTSpherical : public Functional {
    */
    double calc_local_energy_density(size_t position);
 
- protected:
+ protected:  // TODO(Moritz): swap protected and private
   /** \brief From the system object extract the system properties
    *
    */

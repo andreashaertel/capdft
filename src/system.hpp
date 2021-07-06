@@ -40,7 +40,7 @@ class System {
   /** \brief Obtain pointer of the density_profile
    *
    */
-  DataField* get_density_profile_pointer();
+  DataField<double>* get_density_profile_pointer();
 
  private:
   /** \brief Supplied system properties
@@ -54,7 +54,7 @@ class System {
   /** \brief Data field pointer that contains the density profile if initialized
    *
    */
-  DataField* density_profile;
+  DataField<double>* density_profile;
 
  protected:
 };

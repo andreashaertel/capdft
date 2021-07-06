@@ -7,11 +7,13 @@
  *
  */
 #include <cstddef>
+#include <fftw3.h>
 #include <vector>
 #include <string>
 /** \brief Container class for arrays (e.g. densities, functional derivatives)
  *
  */
+template <typename T>
 class DataField {
  public:
   /** \brief Constructors
@@ -26,28 +28,11 @@ class DataField {
   DataField();
   DataField(size_t array_count, size_t array_size);
   DataField(size_t array_count, size_t array_size, double bin_width);
-  DataField(const DataField& other);
+  DataField(const DataField<T>& other);
   /** \brief Destructor
    *
    */
   ~DataField();
-  /** \brief Access to one array element j of a certain array i (read/write)
-   *
-   */
-  double& at(size_t i, size_t j);
-  /** \brief Returns one array element j of a certain array i (read only)
-   *
-   */
-  double& element(size_t i, size_t j) const;
-  /** \brief Pointer access to one array i
-   *
-   */
-  double* array(size_t i);
-  /** \brief Returns outer iterators of the vector
-   *
-   */
-  std::vector<double*>::iterator begin();
-  std::vector<double*>::iterator end();
   /** \brief Free all allocated memory
    *
    */
@@ -60,6 +45,18 @@ class DataField {
    *
    */
   void recreate(size_t array_count, size_t array_size);
+  /** \brief Access to one array element j of a certain array i (read/write)
+   *
+   */
+  T& at(size_t i, size_t j);
+  /** \brief Returns one array element j of a certain array i (read only)
+   *
+   */
+  T& element(size_t i, size_t j) const;
+  /** \brief Pointer access to one array i
+   *
+   */
+  T* array(size_t i);
   /** \brief Returns the number of arrays
    *
    */
@@ -93,6 +90,7 @@ class DataField {
    *
    */
   void zeros();
+
   /** \brief The = operator copies the whole object
    *
    *  List of allowed operator actions:
@@ -115,150 +113,137 @@ class DataField {
    *  17.) DataField / <number>
    *
    */
-  DataField& operator=(DataField other);
+  DataField<T>& operator=(DataField<T> other);
   /** \brief The += operator
    *
    *  See list of all operator actions at operator=().
    *
    */
-  DataField& operator+=(DataField other);
+  DataField<T>& operator+=(DataField<T> other);
   /** \brief The -= operator
    *
    *  See list of all operator actions at operator=().
    *
    */
-  DataField& operator-=(DataField other);
+  DataField<T>& operator-=(DataField<T> other);
   /** \brief The *= operator
    *
    *  See list of all operator actions at operator=().
    *
    */
-  DataField& operator*=(DataField other);
+  DataField<T>& operator*=(DataField<T> other);
   /** \brief The /= operator
    *
    *  See list of all operator actions at operator=().
    *
    */
-  DataField& operator/=(DataField other);
+  DataField<T>& operator/=(DataField<T> other);
   /** \brief The += operator
    *
    *  See list of all operator actions at operator=().
    *
    */
-  DataField& operator+=(double other);
+  DataField<T>& operator+=(double other);
   /** \brief The -= operator
    *
    *  See list of all operator actions at operator=().
    *
    */
-  DataField& operator-=(double other);
+  DataField<T>& operator-=(double other);
   /** \brief The *= operator
    *
    *  See list of all operator actions at operator=().
    *
    */
-  DataField& operator*=(double other);
+  DataField<T>& operator*=(double other);
   /** \brief The /= operator
    *
    *  See list of all operator actions at operator=().
    *
    */
-  DataField& operator/=(double other);
+  DataField<T>& operator/=(double other);
   /** \brief The + operator adds two DataFields elementwise
    *
    *  See list of all operator actions at operator=().
    *
    */
-  DataField operator+(DataField other);
+  DataField<T> operator+(DataField<T> other);
   /** \brief The - operator subtracts two DataFields elementwise
    *
    *  See list of all operator actions at operator=().
    *
    */
-  DataField operator-(DataField other);
+  DataField<T> operator-(DataField<T> other);
   /** \brief The * operator multiplies two DataFields elementwise
    *
    *  See list of all operator actions at operator=().
    *
    */
-  DataField operator*(DataField other);
+  DataField<T> operator*(DataField<T> other);
   /** \brief The / operator divides a DataField by another DataField elementwise
    *
    *  See list of all operator actions at operator=().
    *
    */
-  DataField operator/(DataField other);
+  DataField<T> operator/(DataField<T> other);
   /** \brief The + operator adds a constant value to every entry
    *
    *  See list of all operator actions at operator=().
    *
    */
-  DataField operator+(double other);  // for commuted case see bottom
+  DataField<T> operator+(double other);  // for commuted case see bottom
   /** \brief The - operator subtracts a constant value from every entry
    *
    *  See list of all operator actions at operator=().
    *
    */
-  DataField operator-(double other);  // for commuted case see bottom
+  DataField<T> operator-(double other);  // for commuted case see bottom
   /** \brief The * operator multiplies every entry by a constant factor
    *
    *  See list of all operator actions at operator=().
    *
    */
-  DataField operator*(double other);  // for commuted case see bottom
+  DataField<T> operator*(double other);  // for commuted case see bottom
   /** \brief The / operator divides every entry by a constant value
    *
    *  See list of all operator actions at operator=().
    *
    */
-  DataField operator/(double other);  // for commuted case see bottom
+  DataField<T> operator/(double other);  // for commuted case see bottom
   /** \brief Addition operator has to be defined both ways for commutativity
    *
    *  See list of all operator actions at operator=().
    *
    */
-  friend DataField operator+(double current, DataField other);
+  template <typename U>
+  friend DataField<U> operator+(double current, DataField<U> other);
   /** \brief Subtraction operator has to be defined both ways for commutativity
    *
    *  See list of all operator actions at operator=().
    *
    */
-  friend DataField operator-(double current, DataField other);
+  template <typename V>
+  friend DataField<V> operator-(double current, DataField<V> other);
   /** \brief Multiplication operator has to be defined
    *
    *  See list of all operator actions at operator=().
    *
    */
-  friend DataField operator*(double current, DataField other);
+  template <typename W>
+  friend DataField<W> operator*(double current, DataField<W> other);
   /** \brief Division operator has to be defined both ways
    *
    *  See list of all operator actions at operator=().
    *
    */
-  friend DataField operator/(double current, DataField other);
-
- private:
-  /** \brief Number of arrays in "arrays"
-   *
-   */
-  size_t array_count;
-  /** \brief Size of the arrays in "arrays"
-   *
-   */
-  size_t array_size;
-  /** \brief Bin width of the data in "arrays"
-   *
-   */
-  double bin_width;
-  /** \brief Keeps track wether memory was allocated
-   *
-   */
-  bool allocated_memory;
-  /** \brief Stores pointers to the arrays containing the data
-   *
-   */
-  std::vector<double*> arrays;
+  template <typename X>
+  friend DataField<X> operator/(double current, DataField<X> other);
 
  protected:
+  size_t array_count;
+  size_t array_size;
+  double bin_width;
+  bool allocated_memory;
+  std::vector<T*> arrays;
 };
 #endif  // SRC_DATA_FIELD_HPP_
