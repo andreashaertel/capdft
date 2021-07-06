@@ -20,19 +20,19 @@ FunctionalFMTSpherical::FunctionalFMTSpherical(System* system) {
   extract_species_properties(system);
   // Initialize the density profile and density profile times radial position
   density_profile_pointer = system->get_density_profile_pointer();
-  density_profile_times_r = new DataField(species_count, grid_count+1);
+  density_profile_times_r = new DataField<double>(species_count, grid_count+1);
   update_density_times_r();
   // Initialize weighted densities
-  scalar_weighted_dens_real = new DataField(4, grid_count);
-  vector_weighted_dens_real = new DataField(2, grid_count);
-  tensor_weighted_dens_real = new DataField(2, grid_count);
-  scalar_weighted_dens_four = new DataField(4, grid_count+1);
-  vector_weighted_dens_four = new DataField(4, grid_count+1);
-  tensor_weighted_dens_four = new DataField(3, grid_count+1);
-  density_profile_four = new DataField(species_count, grid_count+1);
+  scalar_weighted_dens_real = new DataField<double>(4, grid_count);
+  vector_weighted_dens_real = new DataField<double>(2, grid_count);
+  tensor_weighted_dens_real = new DataField<double>(2, grid_count);
+  scalar_weighted_dens_four = new DataField<double>(4, grid_count+1);
+  vector_weighted_dens_four = new DataField<double>(4, grid_count+1);
+  tensor_weighted_dens_four = new DataField<double>(3, grid_count+1);
+  density_profile_four = new DataField<double>(species_count, grid_count+1);
   // Initialize weights
   for (size_t i = 0; i != species_count; ++i) {
-    weights_four.push_back(DataField(3, grid_count+1));
+    weights_four.push_back(DataField<double>(3, grid_count+1));
   }
   initialize_weights();
   // TODO(Moritz): Initialize the following objects
@@ -87,8 +87,8 @@ void FunctionalFMTSpherical::update_density_times_r() {
       if (j == 0) {
         density_profile_times_r->at(0, j) = 0.;
       } else {
-        density_profile_times_r->at(i, j-1) =
-            r * density_profile_pointer->element(index, j);
+        density_profile_times_r->at(i, j) =
+            r * density_profile_pointer->element(index, j-1);
       }
     }
   }
@@ -144,7 +144,7 @@ void FunctionalFMTSpherical::calc_bulk_derivative() {
 // _____________________________________________________________________________
 double FunctionalFMTSpherical::calc_energy() {
   double integral{0.};
-  DataField free_energy_density(1, grid_count);
+  DataField<double> free_energy_density(1, grid_count);
   // Calculate the weighted densities for the current density profile
   calc_weighted_densities();
   check_weighted_densities();
@@ -152,10 +152,8 @@ double FunctionalFMTSpherical::calc_energy() {
   for (size_t i = 0; i < grid_count; ++i) {
     free_energy_density.at(0, i) = calc_local_energy_density(i);
   }
-  free_energy_density.print();  // TODO: remove
   integral = radial_integration(free_energy_density.array(0), grid_count, dr);
-  
-  return integral;  // TODO(Moritz): correct value
+  return integral;
 }
 // _____________________________________________________________________________
 // _____________________________________________________________________________
@@ -281,20 +279,12 @@ void FunctionalFMTSpherical::calc_weighted_densities() {
     fftw_execute(*it);
   }
   // Normalize
-  for (size_t i = 0; i != grid_count+1; ++i) {  // TODO(Moritz): use overloaded
-    scalar_weighted_dens_four->at(0, i) *= 4. * M_PI * dkr / 2.;
-    scalar_weighted_dens_four->at(1, i) *= 4. * M_PI * dkr / 2.;
-    scalar_weighted_dens_four->at(2, i) *= 4. * M_PI * dkr / 2.;
-    scalar_weighted_dens_four->at(3, i) *= 4. * M_PI * dkr / 2.;
-    vector_weighted_dens_four->at(0, i) *= 4. * M_PI * dkr / 2.;
-    vector_weighted_dens_four->at(1, i) *= 4. * M_PI * dkr / 2.;
-    vector_weighted_dens_four->at(2, i) *= 4. * M_PI * dkr / 2.;
-    vector_weighted_dens_four->at(3, i) *= 4. * M_PI * dkr / 2.;
-    tensor_weighted_dens_four->at(0, i) *= 4. * M_PI * dkr / 2.;
-    tensor_weighted_dens_four->at(1, i) *= 4. * M_PI * dkr / 2.;
-    tensor_weighted_dens_four->at(2, i) *= 4. * M_PI * dkr / 2.;
-    // TODO(Moritz): The normalization is slightly wrong. Compare to old code.
-  }
+  *(scalar_weighted_dens_four) *= 4. * M_PI * dkr / 2.;
+  *(vector_weighted_dens_four) *= 4. * M_PI * dkr / 2.;
+  *(tensor_weighted_dens_four) *= 4. * M_PI * dkr / 2.;
+  *(scalar_weighted_dens_four) *= 1. / pow(2. * M_PI, 3);
+  *(vector_weighted_dens_four) *= 1. / pow(2. * M_PI, 3);
+  *(tensor_weighted_dens_four) *= 1. / pow(2. * M_PI, 3);
   // Assemble the terms correctly to obtain the weighted densities
   for (size_t i = 0; i != grid_count; ++i) {
     r = dr * static_cast<double>(i+1);
