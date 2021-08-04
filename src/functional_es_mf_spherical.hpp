@@ -43,11 +43,11 @@ class FunctionalESMFSpherical : public Functional {
    *  It uses the functions:
    *  calc_weighted_densities(),
    */
-  virtual void calc_derivative();
+  virtual void calc_derivative(DataField<double>* functional_derivative);
   /** \brief Calculate bulk derivatives
    *
    */
-  virtual void calc_bulk_derivative();
+  virtual void calc_bulk_derivative(std::vector<double>* bulk_derivative);
   /** \brief Calculate the energy value of this functional
    *
    *  Calculate the energy value of this functional, which approaches the excess
