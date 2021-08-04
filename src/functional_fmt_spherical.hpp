@@ -44,13 +44,15 @@ class FunctionalFMTSpherical : public Functional {
    *  It uses the functions:
    *  calc_weighted_densities(),
    *  check_weighted_densities(),
-   *  calc_partial_derivatives()
+   *  calc_partial_derivatives() (which uses calc_local_partial_derivatives())
    */
-  virtual void calc_derivative();
+  virtual void calc_derivative(DataField<double>* functional_derivative);
   /** \brief Calculate bulk derivatives
    *
+   * 
+   *
    */
-  virtual void calc_bulk_derivative();
+  virtual void calc_bulk_derivative(std::vector<double>* bulk_derivative);
   /** \brief Calculate the (excess free) energy value of this functional
    *
    *  Calculate the energy value of this functional, which corresponds to the
@@ -73,8 +75,22 @@ class FunctionalFMTSpherical : public Functional {
   /** \brief Bin sizes in real and Fourier space
    *
    */
-  double dr;  // TODO(Moritz): think about renaming
+  double dr;
   double dkr;
+  /** \brief Normalization factors for the Sine/Cosine transforms
+   *
+   *  Under normal circumstances one could just use dr/2 and dkr/2 as
+   *  normalization factors of sine transforms. However, dkr changes for
+   *  cosine transforms. The normalizations can be derived from carefully
+   *  reading section 2.5.2 ("Real even/odd DFTs").
+   *
+   *  Normalization for RODFT00: 2 * (grid_count + 1)
+   *  Normalization for REDFT00: 2 * ((grid_count+1) - 1) = 2 * grid_count
+   *  (Both need to be multiplied by (pi/2).)
+   *
+   */
+  double norm_sin;
+  double norm_cos;
   /** \brief Number of species
    *
    */
@@ -111,10 +127,6 @@ class FunctionalFMTSpherical : public Functional {
    *
    */
   DataField<double>* density_profile_four;
-  /** \brief Functional derivatives
-   *
-   */
-  DataField<double>* functional_derivative;
   /** \brief Weighted densities
    *
    * There are three weighted density types: scalar, vectorial, tensorial.
@@ -138,6 +150,35 @@ class FunctionalFMTSpherical : public Functional {
    *
    */
   std::vector<DataField<double>> weights_four;
+  /** \brief Partial derivatives of the free energy density w.r.t. the
+   *  weighted densities
+   *
+   * There are three partial derivative types: scalar, vectorial, tensorial.
+   * There are four arrays containing the four scalar partial derivatives.
+   * There are two arrays containing the z-components of the two vectorial
+   * partial derivatives.
+   * There are two arrays containing the first (= second) and third element of
+   * the tensorial partial derivative.
+   *
+   */
+  DataField<double>* scalar_partial_derivative_real;
+  DataField<double>* vector_partial_derivative_real;
+  DataField<double>* tensor_partial_derivative_real;
+  DataField<double>* scalar_partial_derivative_four;
+  DataField<double>* vector_partial_derivative_four;
+  DataField<double>* tensor_partial_derivative_four;
+  /** \brief Terms of the free energy density w.r.t. the weighted densities
+   *
+   * They are used as dummy for the convolution of the partial derivatives with
+   * the corresponding weight functions.
+   *
+   */
+  DataField<double>* scalar_derivative_terms_four;
+  DataField<double>* vector_derivative_terms_four;
+  DataField<double>* tensor_derivative_terms_four;
+  DataField<double>* scalar_derivative_four;
+  DataField<double>* vector_derivative_four;
+  DataField<double>* tensor_derivative_four;
   /** \brief Calculate the weighted densities
    *
    */
@@ -149,7 +190,18 @@ class FunctionalFMTSpherical : public Functional {
   /** \brief Calculate the partial derivatives of the free energy densities
    *
    */
-  void calc_partial_derivatives();  // TODO(Moritz): referenz rückgabe
+  void calc_partial_derivatives();
+  /** \brief Calculate the partial derivatives of the free energy densities at
+   *  one position
+   *
+   */
+  void calc_local_partial_derivatives(size_t i);
+  /** \brief Calculate the weighted partial derivatives of the free energy
+   *  densities
+   *
+   */
+  void calc_weighted_partial_derivatives(
+      DataField<double>* functional_derivative);
   /** \brief Calculate the energy density
    *  
    *  \param The index of the position of which the energy density value is

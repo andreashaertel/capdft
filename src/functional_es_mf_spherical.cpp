@@ -49,11 +49,13 @@ FunctionalESMFSpherical::~FunctionalESMFSpherical() {
   //
 }
 // _____________________________________________________________________________
-void FunctionalESMFSpherical::calc_derivative() {
+void FunctionalESMFSpherical::calc_derivative(
+    DataField<double>* functional_derivative) {
   //
 }
 // _____________________________________________________________________________
-void FunctionalESMFSpherical::calc_bulk_derivative() {
+void FunctionalESMFSpherical::calc_bulk_derivative(
+    std::vector<double>* bulk_derivative) {
   //
 }
 // _____________________________________________________________________________

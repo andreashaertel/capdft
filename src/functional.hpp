@@ -10,6 +10,8 @@
  *  abstract class.
  *
  */
+#include <vector>
+#include "data_field.hpp"
 // _____________________________________________________________________________
 /** \brief Functional is a template class
  *
@@ -24,11 +26,11 @@ class Functional {
    *  This function calculates the functional derivatives and updates the
    *  corresponding internal array.
    */
-  virtual void calc_derivative() = 0;
+  virtual void calc_derivative(DataField<double>* functional_derivative) = 0;
   /** Calculate bulk derivatives
    *
    */
-  virtual void calc_bulk_derivative() = 0;
+  virtual void calc_bulk_derivative(std::vector<double>* bulk_derivative) = 0;
   /** \brief Calculate the energy value of this functional
    *
    *  Calculate the energy value of this functional, which approaches the excess
