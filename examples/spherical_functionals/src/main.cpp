@@ -3,7 +3,7 @@
 /** \file examples/spherical_functional/src/main.cpp
  *  \brief Main file of the example of the spherical functionals.
  *  
- *  This main file contains examples to show how the and FunctionalFMTSpherical
+ *  This main file contains examples to show how the FunctionalFMTSpherical
  *  class works.
  *
  */
@@ -24,8 +24,8 @@
 int main(int argc, char** args) {
   // Set the desired system properties _________________________________________
   /* We start by defining the necessary geometric and physical properties.
-   * The general properties of a system are put into one Property conainer.
-   * The properties of every species are put in a separate Properties container.
+   * The general properties of a system are put into one Properties conainer.
+   * The properties of every species are put in separate Properties container.
    * The containers containing the species properties are encapsulated by an
    * std::vector.
    *
@@ -69,7 +69,7 @@ int main(int argc, char** args) {
   /* All the supplied data is now brought together in the System class.
    * The system class creates a density profile (DataField) from the given
    * information and does not allow modifictation of the properties.
-   * The system object is then used as input for our functional.
+   * The System object is then used as input for our functional.
    * In general the functional only copies the parameters it requires to
    * calculate the quantities of interest.
    * It also detects which species interact via this functional and calculates
@@ -81,13 +81,13 @@ int main(int argc, char** args) {
   // Create FMT Functional object
   FunctionalFMTSpherical my_fmt_functional(&my_system);
   // Picard iteration with the functional derivatives __________________________
-  /* Now that we processed all the ncessary parameters, it is time to calculate
+  /* Now that we processed all the necessary parameters, it is time to calculate
    * a density profile by iteratively calculating the functional derivatives.
    *
    * For that, we first have to specify an external potential, since otherwise
    * our profiles would be completely flat (bulk case).
    *
-   * We decided to mimic the shape of a spherical capacitor
+   * We decided to mimic the shape of a hard spherical capacitor
    * (without any charges). This external potential can also be used to
    * calculate pair correlation functions via the Percus trick, if the inner
    * part and the outer part are far away from each other.
