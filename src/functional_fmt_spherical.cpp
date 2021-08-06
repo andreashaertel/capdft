@@ -3,6 +3,7 @@
 #include "functional_fmt_spherical.hpp"
 #include <fftw3.h>
 #include <cmath>
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 // _____________________________________________________________________________
@@ -10,11 +11,12 @@ FunctionalFMTSpherical::FunctionalFMTSpherical() {
   //
 }
 // _____________________________________________________________________________
-FunctionalFMTSpherical::FunctionalFMTSpherical(System* system) {
+FunctionalFMTSpherical::FunctionalFMTSpherical(
+    System* system, const std::vector<size_t>& affected_species)
+  : affected_species(affected_species) {
   // Clear all std::vectors
   diameters.clear();
   bulk_densities.clear();
-  affected_species.clear();
   // Get system properties
   extract_system_properties(system);
   // Get species properties; excludes all species without diameter property
@@ -50,6 +52,10 @@ FunctionalFMTSpherical::FunctionalFMTSpherical(System* system) {
     weights_four.push_back(DataField<double>(3, grid_count+1));
   }
   initialize_weights();
+}
+// _____________________________________________________________________________
+FunctionalFMTSpherical::FunctionalFMTSpherical(System* system)
+  : FunctionalFMTSpherical(system, std::vector<size_t>(0)) {
 }
 // _____________________________________________________________________________
 FunctionalFMTSpherical::~FunctionalFMTSpherical() {
@@ -94,18 +100,40 @@ void FunctionalFMTSpherical::extract_system_properties(System* sys) {
 }
 // _____________________________________________________________________________
 void FunctionalFMTSpherical::extract_species_properties(System* sys) {
-  std::vector<Properties> properties = sys->get_species_properties();
+  // Sort the affected species numbers
+  std::sort(affected_species.begin(), affected_species.end());
+  // Remove duplicates
+  affected_species.erase(
+      unique(affected_species.begin(), affected_species.end()),
+      affected_species.end());
+  // If no affected species were specified, find them automatically
+  std::vector<Properties> spec_prop = sys->get_species_properties();
   double diameter{0.};
   double bulk_density{0.};
-  for (auto it = properties.begin(); it != properties.end(); ++it) {
-    if (it->get_property("diameter", &diameter)) {  // only species with diam.
-      if (!it->get_property("bulk density", &bulk_density)) {
-        exit(1);  // TODO(Moritz): throw error
+  if (affected_species.empty()) {
+    for (auto it = spec_prop.begin(); it != spec_prop.end(); ++it) {
+      if (it->get_property("diameter", &diameter)) {  // only species with diam.
+        if (!it->get_property("bulk density", &bulk_density)) {
+          std::cerr << "FunctionalFMTSpherical::extract_species_properties(): ";
+          std::cerr << "\"Error: A species with a diameter but no density ";
+          std::cerr << "was detected.\"" << std::endl;
+          exit(1);
+        }
+        affected_species.push_back(it - spec_prop.begin());
       }
-      diameters.push_back(diameter);
-      bulk_densities.push_back(bulk_density);
-      affected_species.push_back(it - properties.begin());
     }
+  }
+  // Extract properties
+  for (auto it = affected_species.begin(); it != affected_species.end(); ++it) {
+    if (!spec_prop.at(*it).get_property("diameter", &diameter) ||
+        !spec_prop.at(*it).get_property("bulk density", &bulk_density)) {
+      std::cerr << "FunctionalFMTSpherical::extract_species_properties(): ";
+      std::cerr << "\"Error: One species is missing a required parameter.";
+      std::cerr << std::endl;
+      exit(1);
+    }
+    diameters.push_back(diameter);
+    bulk_densities.push_back(bulk_density);
   }
   // Count species that interact via the hard sphere potential
   species_count = affected_species.size();
@@ -177,11 +205,29 @@ void FunctionalFMTSpherical::calc_derivative(
     std::cerr << "Error: Supplied DataField has incorrect array size.\"";
     std::cerr << std::endl;
     exit(1);
-  }  // TODO(Moritz): throw error
+  }
   // Calculate the weighted densities
   calc_weighted_densities();
   // Check whether there are unphysical values in the  weighted densities
   check_weighted_densities();
+  // From the weighted densities calculate the partial derivatives of the
+  // excess free energy
+  calc_partial_derivatives();
+  // Calculate the weighted partial derivatives
+  calc_weighted_partial_derivatives(functional_derivative);
+}
+// _____________________________________________________________________________
+void FunctionalFMTSpherical::calc_derivative_no_warnings(
+    DataField<double>* functional_derivative) {
+  // Check if the given DataField has correct array length
+  if (functional_derivative->get_array_size() != grid_count) {
+    std::cerr << "FunctionalFMTSpherical::calc_derivative(): \"";
+    std::cerr << "Error: Supplied DataField has incorrect array size.\"";
+    std::cerr << std::endl;
+    exit(1);
+  }
+  // Calculate the weighted densities
+  calc_weighted_densities();
   // From the weighted densities calculate the partial derivatives of the
   // excess free energy
   calc_partial_derivatives();

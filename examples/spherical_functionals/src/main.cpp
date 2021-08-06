@@ -22,7 +22,8 @@
 // _____________________________________________________________________________
 // Main function
 int main(int argc, char** args) {
-  // Set the desired system properties _________________________________________
+// _____________________________________________________________________________
+  // Set the desired system properties
   /* We start by defining the necessary geometric and physical properties.
    * The general properties of a system are put into one Properties conainer.
    * The properties of every species are put in separate Properties container.
@@ -39,6 +40,7 @@ int main(int argc, char** args) {
    * or a parameter file (e.g. via the ParameterHandler).
    * However, for this example we hard-coded the numbers to reduce complexity.
    */
+// _____________________________________________________________________________
   size_t grid_count = 1001;
   double system_length = 19.821782178217823;  // external pot. between two bins
   double bjerrum_length = 1.;  // not really needed
@@ -66,6 +68,7 @@ int main(int argc, char** args) {
   properties.add_property<double>("bulk density", .3);
   species_properties.push_back(properties);
   properties.clear();
+// _____________________________________________________________________________
   /* All the supplied data is now brought together in the System class.
    * The system class creates a density profile (DataField) from the given
    * information and does not allow modifictation of the properties.
@@ -75,12 +78,18 @@ int main(int argc, char** args) {
    * It also detects which species interact via this functional and calculates
    * the relevant quantities exclusively for them.
    */
+// _____________________________________________________________________________
   System my_system(system_properties, species_properties);
   // Obtain the density profile pointer for modification purposes (e.g. Picard)
   DataField<double>* density_profile = my_system.get_density_profile_pointer();
   // Create FMT Functional object
-  FunctionalFMTSpherical my_fmt_functional(&my_system);
-  // Picard iteration with the functional derivatives __________________________
+  // Either specify the species or let the constructor decide which species can
+  // interact via this functional
+  // FunctionalFMTSpherical my_fmt_functional(&my_system);
+  std::vector<size_t> affected_species{0, 2};  // selected species 0 and 2
+  FunctionalFMTSpherical my_fmt_functional(&my_system, affected_species);
+// _____________________________________________________________________________
+  // Picard iteration with the functional derivatives
   /* Now that we processed all the necessary parameters, it is time to calculate
    * a density profile by iteratively calculating the functional derivatives.
    *
@@ -94,6 +103,7 @@ int main(int argc, char** args) {
    * From a numerical point of view it is also more stable to limit the system
    * in such a way.
    */
+// _____________________________________________________________________________
   DataField<double> fmt_derivatives(species_properties.size(), grid_count);
   double deviation{std::numeric_limits<double>::max()};
   double maximum_deviation{1.0e-6};
@@ -129,19 +139,25 @@ int main(int argc, char** args) {
   while (deviation > maximum_deviation) {
     ++step;
     deviation = 0.;
-    my_fmt_functional.calc_derivative(&fmt_derivatives);
+    // Calculate the functional derivative; Suppress warnings about unphysical
+    // values
+    my_fmt_functional.calc_derivative_no_warnings(&fmt_derivatives);
     for (size_t i = 0; i != species_properties.size(); ++i) {
       species_properties.at(i).get_property("bulk density", &bulk_density);
       for (size_t j = 0; j != grid_count; ++j) {
+        // Calculate the right hand side of the update formula of cDFT
         proposed_density = bulk_density * exp_ext_potential.at(i, j) *
             exp(bulk_derivatives.at(i) - fmt_derivatives.at(i, j));
+        // Mix the new solution with the old one
         density_profile->at(i, j) = density_profile->at(i, j) * (1. - mixing) +
             mixing * proposed_density;
+        // Calculate how much the new density deviates from the old one at most
         if (fabs(density_profile->at(i, j) - proposed_density) > deviation) {
           deviation = fabs(density_profile->at(i, j) - proposed_density);
         }
       }
     }
+    // Print the deviation and the number of iteration steps taken
     std::cout << "Picard iteration step " << step;
     std::cout << ". Deviation: " << deviation << std::endl;
   }
