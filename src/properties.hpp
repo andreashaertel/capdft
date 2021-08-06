@@ -10,7 +10,7 @@
  */
 // _____________________________________________________________________________
 // Includes
-#include <stdexcept>
+#include <iostream>
 #include <string>
 #include <unordered_map>
 #include "data.hpp"
@@ -55,8 +55,10 @@ class Properties {
   bool get_property(const std::string& property_name, T* property_value) const {
     if (contains_property(property_name)) {
       if (typeid(T) != *(properties.at(property_name)->type)) {
-        throw std::invalid_argument(
-            "Requested type and property type not the same.");
+        std::cerr << "Properties::get_property(): \"";
+        std::cerr << "Error: Requested type and property type not the same.\"";
+        std::cerr << std::endl;
+        exit(1);
       }
       *property_value = (dynamic_cast<TemplateData<T>*>(
           properties.at(property_name)))->value;

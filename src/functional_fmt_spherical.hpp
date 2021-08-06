@@ -32,6 +32,8 @@ class FunctionalFMTSpherical : public Functional {
    */
   FunctionalFMTSpherical();
   explicit FunctionalFMTSpherical(System* system);
+  FunctionalFMTSpherical(System* system,
+      const std::vector<size_t>& affected_species);
   /** \brief Destructor
    *
    */
@@ -39,7 +41,7 @@ class FunctionalFMTSpherical : public Functional {
   /** \brief Calculate the functional derivatives
    *
    *  This function calculates the functional derivatives and updates the
-   *  corresponding internal array.
+   *  supplied DataField.
    *
    *  It uses the functions:
    *  calc_weighted_densities(),
@@ -47,6 +49,7 @@ class FunctionalFMTSpherical : public Functional {
    *  calc_partial_derivatives() (which uses calc_local_partial_derivatives())
    */
   virtual void calc_derivative(DataField<double>* functional_derivative);
+  void calc_derivative_no_warnings(DataField<double>* functional_derivative);
   /** \brief Calculate bulk derivatives
    *
    * 
@@ -179,6 +182,13 @@ class FunctionalFMTSpherical : public Functional {
   DataField<double>* scalar_derivative_four;
   DataField<double>* vector_derivative_four;
   DataField<double>* tensor_derivative_four;
+  /** \brief Flags for the sine and cosine transforms
+   *
+   *  The first one preserves the input, while the second one might destroy it.
+   *
+   */
+  static const unsigned int flags_keep = FFTW_MEASURE | FFTW_PRESERVE_INPUT;
+  static const unsigned int flags_destroy = FFTW_MEASURE;
   /** \brief Calculate the weighted densities
    *
    */
@@ -211,8 +221,6 @@ class FunctionalFMTSpherical : public Functional {
    *
    */
   double calc_local_energy_density(size_t position);
-
- protected:  // TODO(Moritz): swap protected and private
   /** \brief From the system object extract the system properties
    *
    */
@@ -232,16 +240,9 @@ class FunctionalFMTSpherical : public Functional {
    *
    */
   void initialize_weights();
-  /** \brief Radial integration  // TODO(Moritz): toolbox?
+  /** \brief Radial integration
    *
    */
   double radial_integration(double* data, int n, double delta);
-  /** \brief Flags for the sine and cosine transforms
-   *
-   *  The first one preserves the input, while the second one might destroy it.
-   *
-   */
-  static const unsigned int flags_keep = FFTW_MEASURE | FFTW_PRESERVE_INPUT;
-  static const unsigned int flags_destroy = FFTW_MEASURE;
 };
 #endif  // SRC_FUNCTIONAL_FMT_SPHERICAL_HPP_
