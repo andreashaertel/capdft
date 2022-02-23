@@ -17,7 +17,7 @@ class System {
   /** \brief Constructor
    *
    */
-  System();
+  //System();
   System(
       Properties system_properties,
       std::vector<Properties> species_properties);
