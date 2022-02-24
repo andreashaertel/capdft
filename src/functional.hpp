@@ -46,8 +46,8 @@ class Functional {
    *
    *  \param functional_derivative The double vector in which the functional 
    *         bulk derivative is stored. All contents are overwritten. The 
-   *         dimension of the vector must correspond to number of species set 
-   *         for the functional. 
+   *         dimension of the vector must correspond to the number of species
+   *         set for the functional. 
    */
   virtual void calc_bulk_derivative(std::vector<double>* bulk_derivative) = 0;
   /** \brief Calculate the energy value of this functional

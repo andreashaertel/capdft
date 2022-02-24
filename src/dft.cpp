@@ -107,7 +107,25 @@ void Dft::set_fugacities_from_bulk_densities() {
 }
 // _____________________________________________________________________________
 double Dft::iterate_densities() {
-  //
+  //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  // TODO: + Picard mixing parameter, now hard coded. 
+  //       + Check for numerical correct solution, maybe first calculate the 
+  //         result, then check, then store, ... 
+  // AH, 24.02.2022
+  //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  // Follow the Euler equation to calculate new density profiles: 
+  //  rho(r) = z_nu * e^(c^(1)(r; [rho_old])-beta v(r))
+  // Mixing: rho_new(r) = a * rho_new + (1.0-a) * rho_old
+  double mixing_factor = 0.05;
+  // TODO: 
+  // copy construct functional derivatives AND c1 AND new densities 
+  //                                                    from density profiles. 
+  // iterate over all functionals and add up derivatives. 
+  // get exp(beta external potential) from the system 
+  //       -> the system has to handle the external potential. 
+  // Determine the new densities. 
+  // Determine the deviation of both densities (a norm operator in DataField)
+  // mix densities and store. 
   return 0.0;
 }
 // _____________________________________________________________________________
