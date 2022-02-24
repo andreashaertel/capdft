@@ -123,6 +123,9 @@ class Dft {
    *  old density profiles and the newly calculated ones. <br>
    *  The fugacity of each species (property fugacity) is used during the 
    *  iteration according to the Euler equation. 
+   *
+   *  TODO: Picard mixing parameter, Check for numerical correct solution, and
+   *  more must still be incorporated. 
    * 
    *  \return Returns the deviation between the new and old density profiles. 
    *
