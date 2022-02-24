@@ -10,6 +10,7 @@
  */
 // _____________________________________________________________________________
 // Includes
+#include <stdexcept>
 #include <iostream>
 #include <string>
 #include <unordered_map>
@@ -48,6 +49,37 @@ class Properties {
     TemplateData<T>* new_property = new TemplateData<T>(property_value);
     properties[property_name] = new_property;
   }
+  /** \brief Update a property with an arbitrary data type. 
+   * 
+   *  If the property already exists, its value is updated. 
+   *  Otherwise, the property is add. 
+   * 
+   *  \param property_name Name of the property. 
+   *  \param property_value Value of the property. 
+   *
+   *  Example for calling the function: <br>
+   *  update_property<double>("Neuer Wert", 4.5);
+   *
+   */
+  //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  // TODO: Sollte diese Funktion protected sein und System als Friend 
+  //       ausgewiesen?
+  // AH, 24.02.2022
+  //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  template<typename T>
+  void update_property(
+      const std::string& property_name, T property_value) {
+    auto search = properties.find(property_name);
+    if (search != properties.end()) {
+      // Property exists: update value
+      delete(properties[property_name]);
+      TemplateData<T>* new_property = new TemplateData<T>(property_value);
+      properties[property_name] = new_property;
+    } else {
+      // Property does not exist: add value
+      this->add_property<T>(property_name, property_value);
+    }
+  }
   /** \brief Returns a property with an arbitrary data type
    *
    */
@@ -64,9 +96,28 @@ class Properties {
           properties.at(property_name)))->value;
       return true;
     } else {
+      throw &missing_property_error;
       return false;
     }
   }
+// _____________________________________________________________________________
+  /** \brief std::exception MissingPropertyException.
+   */
+  class MissingPropertyException : public std::exception {
+   public:
+    /** \brief Overwrite the exception information function what().
+     *
+     *  \return the text "The adressed property does not exist.".
+     */
+    virtual const char* what(void) const throw() {
+      return "The adressed property does not exist.";
+    }
+  }
+  /** \brief Exception MissingPropertyException missing_property_error.
+   *
+   *  The exception is thrown if a requested property is missing. 
+   */
+  missing_property_error;
 
  private:
   /** \brief Contains all properties.

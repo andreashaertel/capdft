@@ -1,5 +1,7 @@
 // SPDX-FileCopyrightText: 2021 Moritz Bültmann <moritz.bueltmann@gmx.de>
+// SPDX-FileCopyrightText: 2022 Andreas Härtel <http://andreashaertel.anno1982.de/>
 // SPDX-License-Identifier: LGPL-3.0-or-later
+#include <stdexcept>
 #include "system.hpp"
 // _____________________________________________________________________________
 //System::System() {
@@ -46,6 +48,25 @@ void System::bulk() {
     for (size_t i = 0; i != grid_count; ++i) {
       density_profile->at(it - species_properties.begin(), i) = bulk_density;
     }
+  }
+}
+// _____________________________________________________________________________
+void System::set_fugacities(std::vector<double>* fugacities) {
+  // Check for correct size of fugacities in comparison to the number of 
+  // species.
+  if (species_properties.size() != fugacities->size()) 
+    throw std::length_error("Size of vector chempot does not agree with number of species.");
+  //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  // TODO: It would be more save to give an index to each species and to connect
+  //       the fugacities to these indices. 
+  // AH, 24.02.2022
+  //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  // Iterate through all species and update the fugacities
+  std::vector<double>::iterator it2 = fugacities->begin();
+  for (std::vector<Properties>::iterator it = species_properties.begin(); 
+        it != species_properties.end(); ++it) {
+    it->update_property<double>("fugacity", *it2);
+    ++it2;
   }
 }
 // _____________________________________________________________________________

@@ -67,40 +67,62 @@ class Dft {
    *
    */
   bool remove_excess_functional(size_t index);
-  /** \brief Sets the chemical potentials of the system according to the 
+  /** \brief Sets the fugacity of each species in the system according to the 
    *         specified bulk densities. 
    *
-   *  The chemical potentials for all species are determined such that the 
-   *  given bulk densities minimize the functional. 
-   *  Then the species properties are updated accordingly with the new chemical
-   *  potentials. This method should be called after adding all excess 
+   *  The fugacities for all species are determined from the Euler equation of 
+   *  DFT, which in three dimensions read 
+   *  \f[\rho_\nu(\vec{r}) = \frac{e^{\beta\mu_\nu}}{\Lambda_\nu^3}
+        \exp(c^{(1)}_\nu(\vec{r})-\beta v_\nu(\vec{r})) . \f] 
+   *  The fugacities \f$z_\nu\f$ are defined such that the Euler equation 
+   *  follows as
+   *  \f[\rho_\nu(\vec{r}) = z_\nu 
+        \exp(c^{(1)}_\nu(\vec{r})-\beta v_\nu(\vec{r})) . \f]
+   *  Thus, in bulk (vanishing external potentials) we have 
+   *  \f[z_nu=\rho_\nu/\exp(c^{(1)}_\nu) .\f]
+   *  Here, the bulk densities and functional derivatives (via \f$c_\nu^{(1)}\f$
+   *  enter. 
+   *
+   *  Then the species properties are updated accordingly with the new 
+   *  fugacities. This method should be called after adding all excess 
    *  functionals to the Dft class. 
    *
    *  \param bulk_densities A vector that defines the bulk densities of all 
    *         species. 
    *
    */
-  void set_chempots_from_bulk_densities(std::vector<double>* bulk_densities);
-  /** \brief Sets the chemical potentials of the system according to the bulk
-   *         densities specified in the species properties. 
+  void set_fugacities_from_bulk_densities(std::vector<double>* bulk_densities);
+  /** \brief Sets the fugacity of each species in the system according to the
+   *         bulk densities specified in the species properties. 
    *
-   *  The chemical potentials for all species are determined such that the bulk
-   *  densities minimize the functional which are given in the species 
-   *  properties. The field bulk_density is expected in the properties vector
-   *  of each species of the system. 
+   *  The fugacities for all species are determined from the Euler equation of 
+   *  DFT, which in three dimensions read 
+   *  \f[\rho_\nu(\vec{r}) = \frac{e^{\beta\mu_\nu}}{\Lambda_\nu^3}
+        \exp(c^{(1)}_\nu(\vec{r})-\beta v_\nu(\vec{r})) . \f] 
+   *  The fugacities \f$z_\nu\f$ are defined such that the Euler equation 
+   *  follows as
+   *  \f[\rho_\nu(\vec{r}) = z_\nu 
+        \exp(c^{(1)}_\nu(\vec{r})-\beta v_\nu(\vec{r})) . \f]
+   *  Thus, in bulk (vanishing external potentials) we have 
+   *  \f[z_nu=\rho_\nu/\exp(c^{(1)}_\nu) .\f]
+   *  Here, the bulk densities and functional derivatives (via \f$c_\nu^{(1)}\f$
+   *  enter. The bulk densities are red for each species from the property 
+   *  bulk_density. 
    *
-   *  Then the species properties are updated accordingly with the new chemical
-   *  potentials. This method should be called after adding all excess 
+   *  Then the species properties are updated accordingly with the new
+   *  fugacities. This method should be called after adding all excess 
    *  functionals to the Dft class. 
    *
    */
-  void set_chempots_from_bulk_densities();
+  void set_fugacities_from_bulk_densities();
   /** \brief Iterates the system densities according to the set iteration 
    *         method. 
    *
    *  Performs one iteration step according to the set iteration method. 
    *  The iteration method also defines the deviation measure between the 
-   *  old density profiles and the newly calculated ones. 
+   *  old density profiles and the newly calculated ones. <br>
+   *  The fugacity of each species (property fugacity) is used during the 
+   *  iteration according to the Euler equation. 
    * 
    *  \return Returns the deviation between the new and old density profiles. 
    *

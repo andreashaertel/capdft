@@ -36,7 +36,21 @@ class System {
   /** \brief Write bulk values to the density profile
    *
    */
-  void bulk();
+  void bulk(); //VORSCHLAG: Aendern in: set_bulk_density()
+  /** \brief Set/Update fugacities in all species properties. 
+   *
+   *  Updates the property fugacity in each species_properties 
+   *  element in System. The fugacity \f$z_\nu\f$ of a species \f$\nu\f$ is 
+   *  defined via the Euler equation 
+   *  \f[\rho_\nu(\vec{r}) = z_\nu 
+        \exp(c^{(1)}_\nu(\vec{r})-\beta v_\nu(\vec{r})) . \f]
+   *  Accordingly, in three dimensions the fugacity of a species is defined by 
+   *  \f[z_nu=e^{\beta\mu_\nu}/\Lambda_\nu^3. <br>
+   *
+   *  \param fugacities Vector of fugacities for all species. 
+   *
+   */
+  void set_fugacities(std::vector<double>* fugacities);
   /** \brief Obtain pointer of the density_profile
    *
    */
