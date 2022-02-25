@@ -4,11 +4,11 @@
 #include "functional_fmt_spherical.hpp"
 #include "dft.hpp"
 // _____________________________________________________________________________
-Dft::Dft(System* system) {
+Dft::Dft(System* system):system(system) {
   // initialize internal parameters
   functional_index = 0;
   // Store the system. 
-  this->system = system;
+  //this->system = system;
   // add a functional_ideal object
   //AH:TODO
 }

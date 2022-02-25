@@ -8,6 +8,7 @@
 //  //
 //}
 // _____________________________________________________________________________
+template <typename AnyDataFrame>
 System::System(
     Properties system_properties,
     std::vector<Properties> species_properties)
@@ -20,6 +21,16 @@ System::System(
   density_profile = new DataField<double>(
       species_properties.size(), grid_count);
   bulk();
+  // Create density profiles
+  for (size_t i = 0; i < species_properties.size(); i++) {
+    AnyDataFrame* new_data = new AnyDataFrame(system_properties);
+    density_profiles.push_back(new_data);
+  }
+  // just a test: 
+  AnyDataFrame* sum = new AnyDataFrame(system_properties);
+  for (auto it = density_profiles.begin(); it != density_profiles.end(); ++it) {
+    sum += *it;
+  }
 }
 // _____________________________________________________________________________
 System::~System() {

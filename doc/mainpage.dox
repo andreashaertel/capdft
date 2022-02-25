@@ -1,5 +1,5 @@
-/** \mainpage Code library of the SophT group in Freiburg. 
- * 
+/** \mainpage CapDFT -- the C++ support for classical Density Functional Theory implementations. 
+ *
  *  \latexonly
  *  %\title{capDFT}
  *  %\author{me}
@@ -14,14 +14,26 @@
  *  For more information about Doxygen, please visit 
  *  [doxygen](http://www.doxygen.nl/index.html). 
  *
+ *
+ *  Table of Content
+ *   -# [Introduction](#intro_sec)
+ *   -# [A brief overview](#overview_sec)
+ *   -# [A simple example](#example_sec)
+ *   -# [Use of the library](#use_sec)
+ *
+ *
  *  \section intro_sec Introduction
  *
- *  capdft is a C++ code project of the 
- *  Statistical Physics of Soft Matter and Complex Systems 
- *  research group at the Institute of Physics in Freiburg, Germany. 
+ *  CapDFT is a C++ library and provides functionals and methods to implement classical Density 
+ *  Functional Theory (DFT) calculations. It has been developed in the <i>Statistical Physics of 
+ *  Soft Matter and Complex Systems</i> (SophT) group at the 
+ *  Institute of Physics in Freiburg i.Br., Germany, in the project 
+ *  ``Capacitive density functional theory for 
+ *  structure and screening in ionic fluids and electric double layers with applications in 
+ *  sustainability'' (project number [406121234](https://gepris.dfg.de/gepris/projekt/406121234)) 
+ *  which has been funded by the German Research Foundation (in German: <i>Deutsche 
+ *  Forschungsgemeinschaft</i>, [DFG](http://www.dfg.de/)). 
  * 
- *  The project contains the C++ library capdft. 
- *
  *  
  *  \section overview_sec A brief overview
  *
@@ -55,6 +67,29 @@
  *  Give proper references!
  *
  *
+ *  \section example_sec A simple example
+ *
+ *  Often, a simple example tells more than thousand words: 
+ *  
+ *      #include "capdft/include/capdft.hpp"
+ *      int main() {
+ *        set properties of simple system
+ *        Properties add (bulk_density 0.4)
+ *        System system = new System(...);
+ *        Dft dft = new Dft(system);
+ *        dft->add_excess_functional<FunctionalFMTCartesian>();
+ *        dft->set_fugacities_from_bulk_densities();
+ *        double error = 0;
+ *        do {
+ *        while (dft->iterate_densities() >= 0.0001);
+ *        double gc_energy = dft->calculate_gc_energy();
+ *        std::cout << " The pressure of a ... system is " << -gc_energy << " kT." << std::endl;
+ *        delete(dft);
+ *        delete(system);     <--- NEEDED?? 
+ *        return 0;
+ *      }
+ *
+ * 
  *  \section eq_example How to use equations
  * 
  *  \f$x+2\f$
