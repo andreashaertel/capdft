@@ -79,7 +79,7 @@ class Dft {
    *  \f[\rho_\nu(\vec{r}) = z_\nu 
         \exp(c^{(1)}_\nu(\vec{r})-\beta v_\nu(\vec{r})) . \f]
    *  Thus, in bulk (vanishing external potentials) we have 
-   *  \f[z_nu=\rho_\nu/\exp(c^{(1)}_\nu) .\f]
+   *  \f[z_\nu=\rho_\nu/\exp(c^{(1)}_\nu) .\f]
    *  Here, the bulk densities and functional derivatives (via \f$c_\nu^{(1)}\f$
    *  enter. 
    *
@@ -104,7 +104,7 @@ class Dft {
    *  \f[\rho_\nu(\vec{r}) = z_\nu 
         \exp(c^{(1)}_\nu(\vec{r})-\beta v_\nu(\vec{r})) . \f]
    *  Thus, in bulk (vanishing external potentials) we have 
-   *  \f[z_nu=\rho_\nu/\exp(c^{(1)}_\nu) .\f]
+   *  \f[z_\nu=\rho_\nu/\exp(c^{(1)}_\nu) .\f]
    *  Here, the bulk densities and functional derivatives (via \f$c_\nu^{(1)}\f$
    *  enter. The bulk densities are red for each species from the property 
    *  bulk_density. 

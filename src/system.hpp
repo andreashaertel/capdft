@@ -8,6 +8,7 @@
  */
 #include <vector>
 #include "data_field.hpp"
+#include "data_frame.hpp"
 #include "properties.hpp"
 /** \brief Container class that contains all Properties and DataFields
  *
@@ -18,6 +19,7 @@ class System {
    *
    */
   //System();
+  template <typename AnyDataFrame>
   System(
       Properties system_properties,
       std::vector<Properties> species_properties);
@@ -69,6 +71,7 @@ class System {
    *
    */
   DataField<double>* density_profile;
+  std::vector<DataFrame> density_profiles;
 
  protected:
 };
