@@ -49,6 +49,25 @@ DataField<double>* System::get_density_profile_pointer() {
   return density_profile;
 }
 // _____________________________________________________________________________
+const std::vector<DataFrame>& System::get_density_profiles() const {
+  return density_profiles;
+}
+// _____________________________________________________________________________
+void System::update_density_profiles(
+      std::vector<DataFrame> density_profiles) {
+  // Check for correct size of fugacities in comparison to the number of 
+  // species.
+  if (this->density_profiles.size() != density_profiles.size()) 
+    throw std::length_error("Size of vector density_profiles does not agree with number of species.");
+  // Iterate through all species and update the density profiles
+  auto it2 = density_profiles.begin();
+  for (auto it = this->density_profiles.begin(); 
+        it != this->density_profiles.end(); ++it) {
+    *it = *it2;
+    ++it2;
+  }
+}
+// _____________________________________________________________________________
 void System::bulk() {
   double bulk_density{0.};
   size_t grid_count{0};

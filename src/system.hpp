@@ -57,6 +57,26 @@ class System {
    *
    */
   DataField<double>* get_density_profile_pointer();
+  /** \brief Get current density profiles by reference. 
+   *
+   *  The density profiles are constant and cannot be changed. In order to 
+   *  update them, use update_density_profiles(). 
+   *
+   *  \return Constant vector of DataFrames by reference. The vector is over 
+   *          species in the system. 
+   *
+   */
+  const std::vector<DataFrame>& get_density_profiles() const;
+  /** \brief Update density profiles to new values. 
+   * 
+   *  Updates the density profiles to new values. 
+   *
+   *  \param density_profiles The new density profiles as DataFrame's in a 
+   *         vector over the species of the system. The data is not changed,
+   *         just values are copied. 
+   *
+   */
+  void update_density_profiles(std::vector<DataFrame> density_profiles);
 
  private:
   /** \brief Supplied system properties
