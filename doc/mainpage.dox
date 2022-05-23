@@ -1,5 +1,5 @@
-/** \mainpage Code library of the SophT group in Freiburg. 
- * 
+/** \mainpage CapDFT -- the C++ support for classical Density Functional Theory implementations. 
+ *
  *  \latexonly
  *  %\title{capDFT}
  *  %\author{me}
@@ -14,15 +14,82 @@
  *  For more information about Doxygen, please visit 
  *  [doxygen](http://www.doxygen.nl/index.html). 
  *
+ *
+ *  Table of Content
+ *   -# [Introduction](#intro_sec)
+ *   -# [A brief overview](#overview_sec)
+ *   -# [A simple example](#example_sec)
+ *   -# [Use of the library](#use_sec)
+ *
+ *
  *  \section intro_sec Introduction
  *
- *  capdft is a C++ code project of the 
- *  Statistical Physics of Soft Matter and Complex Systems 
- *  research group at the Institute of Physics in Freiburg, Germany. 
+ *  CapDFT is a C++ library and provides functionals and methods to implement classical Density 
+ *  Functional Theory (DFT) calculations. It has been developed in the <i>Statistical Physics of 
+ *  Soft Matter and Complex Systems</i> (SophT) group at the 
+ *  Institute of Physics in Freiburg i.Br., Germany, in the project 
+ *  ``Capacitive density functional theory for 
+ *  structure and screening in ionic fluids and electric double layers with applications in 
+ *  sustainability'' (project number [406121234](https://gepris.dfg.de/gepris/projekt/406121234)) 
+ *  which has been funded by the German Research Foundation (in German: <i>Deutsche 
+ *  Forschungsgemeinschaft</i>, [DFG](http://www.dfg.de/)). 
  * 
- *  The project contains the C++ library capdft. 
- *
  *  
+ *  \section overview_sec A brief overview
+ *
+ *  The library provides implementations of classical density functional theory (DFT) calculations 
+ *  on two layers. 
+ * 
+ *  On the first layer, functionals are explicitly defined for specific systems and geometries. 
+ *  For instance, the parallel plate geometry with translational invariance along the plates is implemented 
+ *  as the Cartesian geometry. For this geometry, different excess free energy functionals are available. 
+ *  Additionally, external potentials can be defined for all respective geometries. 
+ *  All functionals work on a physical system which is a contained of properties. This container also stores 
+ *  the density profiles of all species in form of DataFields for the respective geometry. The species are 
+ *  defined by species properties that are stored in the system as well. 
+ *
+ *  On the second layer, a Dft class acts as a contained for the system and for all (excess) functionals 
+ *  that shall act on the system. This container provides density iteration methods and functions to 
+ *  calculate DFT properties, as the grand canonical energy of the system. 
+ *
+ *  Currently, the library contains the following geometries and functionals: 
+ *   -# Cartesian (LINK: more details) <br>
+ *      A three-dimensional system with translational invariance in a Cartesian xy plane. 
+ *      Thus, the system is quasi one-dimensional. 
+ *     - FMT, White Bear mark II
+ *     - Mean-Field electrostatics with potential-boundary conditions
+ *     - \f$\delta\f$ functional [ref] for electrostatics with potential-boundary conditions
+ *   -# b
+ *     - es
+ *     - es
+ *
+ *  Provide more details on subpages. <br>
+ *  Give proper references!
+ *
+ *
+ *  \section example_sec A simple example
+ *
+ *  Often, a simple example tells more than thousand words: 
+ *  
+ *      #include "capdft/include/capdft.hpp"
+ *      int main() {
+ *        set properties of simple system
+ *        Properties add (bulk_density 0.4)
+ *        System system = new System(...);
+ *        Dft dft = new Dft(system);
+ *        dft->add_excess_functional<FunctionalFMTCartesian>();
+ *        dft->set_fugacities_from_bulk_densities();
+ *        double error = 0;
+ *        do {
+ *        while (dft->iterate_densities() >= 0.0001);
+ *        double gc_energy = dft->calculate_gc_energy();
+ *        std::cout << " The pressure of a ... system is " << -gc_energy << " kT." << std::endl;
+ *        delete(dft);
+ *        delete(system);     <--- NEEDED?? 
+ *        return 0;
+ *      }
+ *
+ * 
  *  \section eq_example How to use equations
  * 
  *  \f$x+2\f$
