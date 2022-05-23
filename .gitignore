@@ -11,3 +11,4 @@ calc_rdf
 bin
 obj
 include
+spherical_profile.dat
