@@ -8,6 +8,7 @@
  */
 #include <vector>
 #include "data_field.hpp"
+#include "data_frame.hpp"
 #include "properties.hpp"
 /** \brief Container class that contains all Properties and DataFields
  *
@@ -17,7 +18,8 @@ class System {
   /** \brief Constructor
    *
    */
-  System();
+  //System();
+  template <typename AnyDataFrame>
   System(
       Properties system_properties,
       std::vector<Properties> species_properties);
@@ -36,11 +38,45 @@ class System {
   /** \brief Write bulk values to the density profile
    *
    */
-  void bulk();
+  void bulk(); //VORSCHLAG: Aendern in: set_bulk_density()
+  /** \brief Set/Update fugacities in all species properties. 
+   *
+   *  Updates the property fugacity in each species_properties 
+   *  element in System. The fugacity \f$z_\nu\f$ of a species \f$\nu\f$ is 
+   *  defined via the Euler equation 
+   *  \f[\rho_\nu(\vec{r}) = z_\nu 
+        \exp(c^{(1)}_\nu(\vec{r})-\beta v_\nu(\vec{r})) . \f]
+   *  Accordingly, in three dimensions the fugacity of a species is defined by 
+   *  \f[z_nu=e^{\beta\mu_\nu}/\Lambda_\nu^3. <br>
+   *
+   *  \param fugacities Vector of fugacities for all species. 
+   *
+   */
+  void set_fugacities(std::vector<double>* fugacities);
   /** \brief Obtain pointer of the density_profile
    *
    */
   DataField<double>* get_density_profile_pointer();
+  /** \brief Get current density profiles by reference. 
+   *
+   *  The density profiles are constant and cannot be changed. In order to 
+   *  update them, use update_density_profiles(). 
+   *
+   *  \return Constant vector of DataFrames by reference. The vector is over 
+   *          species in the system. 
+   *
+   */
+  const std::vector<DataFrame>& get_density_profiles() const;
+  /** \brief Update density profiles to new values. 
+   * 
+   *  Updates the density profiles to new values. 
+   *
+   *  \param density_profiles The new density profiles as DataFrame's in a 
+   *         vector over the species of the system. The data is not changed,
+   *         just values are copied. 
+   *
+   */
+  void update_density_profiles(std::vector<DataFrame> density_profiles);
 
  private:
   /** \brief Supplied system properties
@@ -55,6 +91,7 @@ class System {
    *
    */
   DataField<double>* density_profile;
+  std::vector<DataFrame> density_profiles;
 
  protected:
 };
