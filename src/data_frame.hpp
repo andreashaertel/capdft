@@ -57,6 +57,7 @@ class DataFrame {
    *  declaration. 
    *
    */
+  DataFrame();
   explicit DataFrame(const Properties properties);
   DataFrame(const DataFrame& other);
   /** \brief Virtual destructor
@@ -71,7 +72,7 @@ class DataFrame {
    *          False otherwise. 
    *
    */
-  virtual bool same_size(const DataFrame& other) = 0;
+  virtual bool same_size(const DataFrame& other) const = 0;
 
   /** \brief The = operator copies the content of other into this. */
   virtual DataFrame& operator=(const DataFrame& other) = 0;
