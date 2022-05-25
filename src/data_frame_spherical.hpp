@@ -1,219 +1,209 @@
-// SPDX-FileCopyrightText: 2021 Moritz Bültmann <moritz.bueltmann@gmx.de>
+// SPDX-FileCopyrightText: 2022 Moritz Bültmann <moritz.bueltmann@gmx.de>
 // SPDX-FileCopyrightText: 2022 Andreas Härtel <http://andreashaertel.anno1982.de/>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #ifndef SRC_DATA_FRAME_SPHERICAL_HPP_
 #define SRC_DATA_FRAME_SPHERICAL_HPP_
 /** \file data_frame.hpp
- *  \brief This file contains the declarations of the virtual DataFrame class
+ *  \brief This file contains the declarations of the DataFrameSpherical class,
+ *  which is a child of DataFrame.
  *
  */
 #include "src/properties.hpp"
+#include "src/data_frame.hpp"
 /** \brief Container class for general data (e.g. density profiles or functional
- *         derivatives)
+ *  derivatives) derived from DataFrame
  *
- *  The DataFrame is the general data object of the capDFT project which can 
- *  hold data profiles as density profiles, functional derivatives, or external
- *  potential fields. The DataFrame provides functionality required by classes 
- *  like System or Dft to perform calculations on data (without any knowledge
- *  on the specific implementation). 
- * 
- *  Specific implementations of a DataFrame have to be derived from DataFrame 
- *  and must agree with the respective functional implementations of this 
- *  specific geometry. A name convention for derived realizations is: <br>
- *  Let the specific geometry be called GeometryA. Then the respective 
- *  DataFrame child should be called DataFrameGeometryA and be stored in the 
- *  files data_frame_geometry_a.*. The respective functional implementations 
- *  should follow a corresponding name convention, functional_KIND_geometry_a.*.
- *
- *  A DataFrame must implement the following operators: 
- *   -# DataFrame = DataFrame   (virtual)
- *   -# DataFrame += DataFrame  (virtual)
- *   -# DataFrame -= DataFrame  (virtual)
- *   -# DataFrame *= DataFrame  (virtual)
- *   -# DataFrame /= DataFrame  (virtual)
- *   -# DataFrame *= (double)   (virtual)
- *   -# DataFrame + DataFrame   (virtual)
- *   -# DataFrame - DataFrame   (virtual)
- *   -# DataFrame * DataFrame   (virtual)
- *   -# DataFrame / DataFrame   (virtual)
- *   -# DataFrame * (double)    (virtual)
- *   -# (double) * DataFrame
- *   -# exp (DataFrame)         (virtual)
+ *  The DataFrameSpherical is a child of the general data object of the capDFT
+ *  project DataFrame, which can hold data profiles as density profiles,
+ *  functional derivatives, or external potential fields.
+ *  The DataFrameSpherical provides the specific implementation of the
+ *  DataFrame class for the spherical geometry.
+ *  It contains all virtual functions of the parent and 
  *
  */
-class DataFrame {
+template <typename T>
+class DataFrameSpherical : public DataFrame {
  public:
-  /** \brief Virtual Constructors
+  /** \brief Constructors
    *
-   *  A DataFrame must have two Constructors: 
+   *  A DataFrameSpherical has two Constructors: 
    *  One to construct a new implementation, and a second one to create a copy 
-   *  of an existing one. To create a new implementation, parameters may be 
-   *  required: They can be provided via a Properties object, for instance the 
-   *  system properties of the System class. 
-   *  The Properties must must be offered in the Constructor.
+   *  of an existing one. To create a new implementation, parameters are handed
+   *  over to the constructor as Properties.
    *
-   *  The copy Constructor, however, just creates a copy of an existing 
-   *  DataFrame realization and, thus, does not require the Template type 
-   *  declaration. 
+   *  The copy Constructor, however, just creates a copy of an existing
+   *  DataFrameSpherical.
    *
    */
-  explicit DataFrame(const Properties properties);
-  DataFrame(const DataFrame& other);
+  explicit DataFrameSpherical(const Properties properties);
+  DataFrameSpherical(const DataFrameSpherical<T>& other);
   /** \brief Virtual destructor
    *
    */
-  virtual ~DataFrame() = 0;
-  /** \brief Test for DataFrame other having the same size as this. 
+  virtual ~DataFrameSpherical();
+  /** \brief Return internal array size. 
    *
-   *  \param other The DataFrame thats size is compared to this DataFrame. 
+   *  \return The size of the internal array as size_t. 
    *
-   *  \return True, if the other DataFrame has the same size as this one, 
+   */
+  size_t size() const;
+  /** \brief Test for DataFrameSpherical other having the same size as this. 
+   *
+   *  \param other The DataFrameSpherical thats size is compared to this DataFrameSpherical. 
+   *
+   *  \return True, if the other DataFrameSpherical has the same size as this one, 
    *          False otherwise. 
    *
    */
-  virtual bool same_size(const DataFrame& other) = 0;
-
+  virtual bool same_size(const DataFrameSpherical<T>& other) const;
   /** \brief The = operator copies the content of other into this. */
-  virtual DataFrame& operator=(const DataFrame& other) = 0;
+  virtual DataFrameSpherical<T>& operator=(const DataFrameSpherical<T>& other);
   /** \brief The += operator adds the content of other to this and then returns
    *         this. 
    */
-  virtual DataFrame& operator+=(const DataFrame& other) = 0;
+  virtual DataFrameSpherical<T>& operator+=(const DataFrameSpherical<T>& other);
   /** \brief The -= operator subtracts the content of other from this and then
    *         returns this. 
    */
-  virtual DataFrame& operator-=(const DataFrame& other) = 0;
+  virtual DataFrameSpherical<T>& operator-=(const DataFrameSpherical<T>& other);
   /** \brief The *= operator multiplies the content of other to this and then
    *         returns this. 
    */
-  virtual DataFrame& operator*=(const DataFrame& other) = 0;
+  virtual DataFrameSpherical<T>& operator*=(const DataFrameSpherical<T>& other);
   /** \brief The /= operator divides this by the content of other and then 
    *         returns this. 
    */
-  virtual DataFrame& operator/=(const DataFrame& other) = 0;
+  virtual DataFrameSpherical<T>& operator/=(const DataFrameSpherical<T>& other);
   /** \brief The *= operator for scalar multiplication multiplies all entries of
    *         this with the scalar value other and then returns this. 
    */
-  virtual DataFrame& operator*=(const double other) = 0;
+  virtual DataFrameSpherical<T>& operator*=(const double other);
   /** \brief The + operator adds the content of this and other and returns the 
    *         result. 
    *
    *  Use the following code: 
    *
-   *      DataFrame& operator+(const DataFrame& other) {
+   *      DataFrameSpherical& operator+(const DataFrameSpherical& other) {
    *        // Check for correct sizes
    *        if (! this->same_size(other))
    *        throw &bad_size_error;
    *        // Use existing copy Constructor and += operators.
-   *        DataFrame result(*this);
+   *        DataFrameSpherical result(*this);
    *        result += other;
    *        return result;
    *      };
    *
    */
-  virtual DataFrame& operator+(const DataFrame& other) = 0;
+  virtual DataFrameSpherical<T>& operator+(const DataFrameSpherical<T>& other)
+      = 0;
   /** \brief The - operator subtracts the content of this and other and returns
    *         the result. 
    *
    *  Use the following code: 
    *
-   *      DataFrame& DataFrame::operator-(const DataFrame& other) {
+   *      DataFrameSpherical& DataFrameSpherical::operator-(const DataFrameSpherical& other) {
    *        // Check for correct sizes
    *        if (! this->same_size(other))
    *        throw &bad_size_error;
    *        // Use existing copy Constructor and -= operators.
-   *        DataFrame result(*this);
+   *        DataFrameSpherical result(*this);
    *        result -= other;
    *        return result;
    *      }
    *
    */
-  virtual DataFrame& operator-(const DataFrame& other) = 0;
+  virtual DataFrameSpherical<T>& operator-(const DataFrameSpherical<T>& other)
+      = 0;
   /** \brief The * operator multiplies the content of this and other and returns
    *         the result. 
    *
    *  Use the following code: 
    *
-   *      DataFrame& DataFrame::operator*(const DataFrame& other) {
+   *      DataFrameSpherical& DataFrameSpherical::operator*(const DataFrameSpherical& other) {
    *        // Check for correct sizes
    *        if (! this->same_size(other))
    *        throw &bad_size_error;
    *        // Use existing copy Constructor and *= operators.
-   *        DataFrame result(*this);
+   *        DataFrameSpherical result(*this);
    *        result *= other;
    *        return result;
    *      }
    *
    */
-  virtual DataFrame& operator*(const DataFrame& other) = 0;
+  virtual DataFrameSpherical<T>& operator*(const DataFrameSpherical<T>& other)
+      = 0;
   /** \brief The / operator divides the content of this and other and returns 
    *         the result. 
    *
    *  Use the following code: 
    *
-   *      DataFrame& DataFrame::operator/(const DataFrame& other) {
+   *      DataFrameSpherical& DataFrameSpherical::operator/(const DataFrameSpherical& other) {
    *      // Check for correct sizes
    *      if (! this->same_size(other))
    *      throw &bad_size_error;
    *      // Use existing copy Constructor and /= operators.
-   *      DataFrame result(*this);
+   *      DataFrameSpherical result(*this);
    *      result /= other;
    *      return result;
    *    }
    *
    */
-  virtual DataFrame& operator/(const DataFrame& other) = 0;
+  virtual DataFrameSpherical<T>& operator/(const DataFrameSpherical<T>& other)
+      = 0;
   /** \brief The * operator multiplies the content of this and the scalar other
    *         and returns the result. 
    *
    *  Use the following code: 
    *
-   *      DataFrame& DataFrame::operator*(const double other) {
+   *      DataFrameSpherical& DataFrameSpherical::operator*(const double other) {
    *        // Use existing copy Constructor and *= for double operators.
-   *        DataFrame result(*this);
+   *        DataFrameSpherical result(*this);
    *        result *= other;
    *        return result;
    *      }
    *
    */
-  virtual DataFrame& operator*(const double other) = 0;
-  /** \brief The * operator for (double) * DataFrame. 
+  virtual DataFrameSpherical<T>& operator*(const double other) = 0;
+  /** \brief Exponential function applied to all elements of DataFrameSpherical. 
+   *
+   */
+  virtual DataFrameSpherical<T>& exp() = 0;
+  /** \brief Natural logarithm function applied to all elements of
+   *  DataFrameSpherical. 
+   *
+   */
+  virtual DataFrameSpherical<T>& log_natural() = 0;
+  /** \brief The * operator for (double) * DataFrameSpherical. 
    *
    *  Use the following code: 
    *
-   *      friend DataFrame& operator*(const double current, const DataFrame& 
-   *        other) {
+   *      friend DataFrameSpherical& operator*(const double current,
+   *          const DataFrameSpherical& other) {
    *        // Use existing copy Constructor and *= for double operators.
-   *        DataFrame result(other);
+   *        DataFrameSpherical result(other);
    *        result *= current;
    *        return result;
    *      }
    *
    */
-  friend DataFrame& operator*(const double current, const DataFrame& other);
-  /** \brief Exponential function applied to all elements of DataFrame. 
-   *
-   */
-  virtual DataFrame& exp() = 0;
-  /** \brief Natural logarithm function applied to all elements of DataFrame. 
-   *
-   */
-  virtual DataFrame& log_natural() = 0;
+  template <typename U>
+  friend DataFrameSpherical<U>& operator*(
+      const double current, const DataFrameSpherical<U>& other);
   /** \brief std::exception BadSizeException.
    */
   class BadSizeException : public std::exception {
    public:
     /** \brief Overwrite the exception information function what().
      *
-     *  \return the text "Size of DataFrame's does not match.".
+     *  \return the text "Size of DataFrameSphericals does not match.".
      */
     virtual const char* what(void) const throw() {
-      return "Size of DataFrames does not match.";
+      return "Size of DataFrameSphericals does not match.";
     }
   }
   /** \brief Exception BadSizeException bad_size_error.
    *
-   *  The exception is thrown if two DataFrames do not match in size. 
+   *  The exception is thrown if two DataFrameSphericals do not match in size. 
    */
   bad_size_error;
 
@@ -221,6 +211,8 @@ class DataFrame {
   //
 
  private:
-  //
+ /** \brief Size of the internal array
+  */
+  size_t array_size;
 };
 #endif  // SRC_DATA_FRAME_SPHERICAL_HPP_
