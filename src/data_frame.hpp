@@ -32,13 +32,13 @@
  *   -# DataFrame *= DataFrame  (virtual)
  *   -# DataFrame /= DataFrame  (virtual)
  *   -# DataFrame *= (double)   (virtual)
- *   -# DataFrame + DataFrame
- *   -# DataFrame - DataFrame
- *   -# DataFrame * DataFrame
- *   -# DataFrame / DataFrame
- *   -# DataFrame * (double)
+ *   -# DataFrame + DataFrame   (virtual)
+ *   -# DataFrame - DataFrame   (virtual)
+ *   -# DataFrame * DataFrame   (virtual)
+ *   -# DataFrame / DataFrame   (virtual)
+ *   -# DataFrame * (double)    (virtual)
  *   -# (double) * DataFrame
- *   -# exp (DataFrame )        (virtual)
+ *   -# exp (DataFrame)         (virtual)
  *
  */
 class DataFrame {
@@ -50,7 +50,7 @@ class DataFrame {
    *  of an existing one. To create a new implementation, parameters may be 
    *  required: They can be provided via a Properties object, for instance the 
    *  system properties of the System class. 
-   *  The Properties must must be offered in the Constructor. 
+   *  The Properties must must be offered in the Constructor.
    *
    *  The copy Constructor, however, just creates a copy of an existing 
    *  DataFrame realization and, thus, does not require the Template type 
@@ -63,23 +63,6 @@ class DataFrame {
    *
    */
   virtual ~DataFrame() = 0;
-  ///** \brief Print arrays to specified output with custom or standard precision
-  // *
-  // */
-  //void print(std::ostream& outstream, std::streamsize stream_size) const;
-  //void print(std::ostream& outstream) const;
-  ///** \brief Print all values to standard output
-  // *
-  // */
-  //void print() const;
-  ///** \brief Write a certain number to all arrays
-  // *
-  // */
-  //void set_all_elements_to(const double number);
-  ///** \brief Write zeros to all arrays
-  // *
-  // */
-  //void zeros();
   /** \brief Test for DataFrame other having the same size as this. 
    *
    *  \param other The DataFrame thats size is compared to this DataFrame. 
@@ -208,11 +191,14 @@ class DataFrame {
    *
    */
   friend DataFrame& operator*(const double current, const DataFrame& other);
-  /** \brief Exponential function applied on all elements of DataFrame. 
+  /** \brief Exponential function applied to all elements of DataFrame. 
    *
    */
   virtual DataFrame& exp() = 0;
-
+  /** \brief Natural logarithm function applied to all elements of DataFrame. 
+   *
+   */
+  virtual DataFrame& log_natural() = 0;
   /** \brief std::exception BadSizeException.
    */
   class BadSizeException : public std::exception {
@@ -222,7 +208,7 @@ class DataFrame {
      *  \return the text "Size of DataFrame's does not match.".
      */
     virtual const char* what(void) const throw() {
-      return "Size of DataFrame's does not match.";
+      return "Size of DataFrames does not match.";
     }
   }
   /** \brief Exception BadSizeException bad_size_error.

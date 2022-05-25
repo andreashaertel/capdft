@@ -54,7 +54,7 @@ const std::vector<DataFrame>& System::get_density_profiles() const {
 }
 // _____________________________________________________________________________
 void System::update_density_profiles(
-      std::vector<DataFrame> density_profiles) {
+    std::vector<DataFrame> density_profiles) {
   // Check for correct size of fugacities in comparison to the number of 
   // species.
   if (this->density_profiles.size() != density_profiles.size()) 
