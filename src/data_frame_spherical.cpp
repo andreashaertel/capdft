@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "src/data_frame_spherical.hpp"
 #include "src/data_frame.hpp"
+#include <fftw3.h>
 // Class type declarations
 template class DataFrameSpherical<double>;
 // template class DataFrameSpherical<int>;
@@ -48,19 +49,31 @@ bool DataFrameSpherical<T>::same_size(const DataFrameSpherical<T>& other)
 }
 // _____________________________________________________________________________
 template <typename T>
+T& DataFrameSpherical<T>::at(size_t i) {
+  if (i >= array_size) {
+    std::cerr << "DataFrameSpherical::at(): \"Error: Index out of range\".";
+    std::cerr << std::endl;
+    exit(1);
+  }
+  return data[i];
+}
+// _____________________________________________________________________________
+template <typename T>
 DataFrameSpherical<T>& DataFrameSpherical<T>::operator=(const DataFrameSpherical<T>& other) {
-  if (this->array_size == other.get_array_count()) {
-    for (size_t j = 0; j < this->array_size; ++j) {
-      this->at(i, j) = other.element(i, j);
+  if (this->size() == other.size()) {
+    for (size_t i = 0; i < this->array_size; ++i) {
+      this->at(i) = other.at(i);
     }
   } else {
-    std::cerr << "DataField::operator=():";
-    std::cerr << " \"ERROR: Dimensions do not match. Cannot copy.\"";
+    std::cerr << "DataFrameSpherical::operator=():";
+    std::cerr << " \"ERROR: Array sizes do not match. Cannot copy.\"";
     std::cerr << std::endl;
     exit(1);
   }
   return *this;
 }
+// TODO(Moritz): implement a constant version of at() like element()
+// TODO(Moritz): initialize memory for array in constructor
 // _____________________________________________________________________________
 template <typename T>
 DataFrameSpherical<T>& DataFrameSpherical<T>::operator+=(const DataFrameSpherical<T>& other) {
