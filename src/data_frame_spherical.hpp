@@ -47,6 +47,13 @@ class DataFrameSpherical : public DataFrame {
    *
    */
   size_t size() const;
+  /** \brief Access the array element at position i.
+   *  You can also modify an element in that way.
+   *
+   *  \return The array element reference at position i.
+   *
+   */
+  T& at(size_t i);
   /** \brief Test for DataFrameSpherical other having the same size as this. 
    *
    *  \param other The DataFrameSpherical thats size is compared to this DataFrameSpherical. 
@@ -214,5 +221,8 @@ class DataFrameSpherical : public DataFrame {
  /** \brief Size of the internal array
   */
   size_t array_size;
+ /** \brief Array holding the data of size array_size
+  */
+  T* data;
 };
 #endif  // SRC_DATA_FRAME_SPHERICAL_HPP_
