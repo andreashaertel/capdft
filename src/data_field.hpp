@@ -90,7 +90,6 @@ class DataField {
    *
    */
   void zeros();
-
   /** \brief The = operator copies the whole object
    *
    *  List of allowed operator actions:

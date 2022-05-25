@@ -12,8 +12,8 @@
 // _____________________________________________________________________________
 // Includes
 #include <vector>
-#include "functional.hpp"
-#include "properties.hpp"
+#include "src/functional.hpp"
+#include "src/properties.hpp"
 // Class forward declarations
 // _____________________________________________________________________________
 /** \brief This class calculates the elctrostatic mean field functional.

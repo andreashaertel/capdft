@@ -30,7 +30,7 @@ class Properties {
   *  valancies of all species. For this reason, System is declared as a friend.
   *
   */
- friend class System;
+  friend class System;
  public:
   /** \brief Constructors
    *
@@ -78,26 +78,6 @@ class Properties {
       return false;
     }
   }
-// _____________________________________________________________________________
-  /** \brief std::exception MissingPropertyException.
-   */
-  class MissingPropertyException : public std::exception {
-   public:
-    /** \brief Overwrite the exception information function what().
-     *
-     *  \return the text "The adressed property does not exist.".
-     */
-    virtual const char* what(void) const throw() {
-      return "The adressed property does not exist.";
-    }
-  }
-  /** \brief Exception MissingPropertyException missing_property_error.
-   *
-   *  The exception is thrown if a requested property is missing. 
-   */
-  missing_property_error;
-
- private:
   /** \brief Data class is a universal type class. 
    *
    *  The Data class is used to derive a TemplateData class that stores data of
@@ -139,6 +119,23 @@ class Properties {
    *
    */
   std::unordered_map<std::string, Data*> properties;
+  /** \brief std::exception MissingPropertyException.
+   */
+  class MissingPropertyException : public std::exception {
+   public:
+    /** \brief Overwrite the exception information function what().
+     *
+     *  \return the text "The adressed property does not exist.".
+     */
+    virtual const char* what(void) const throw() {
+      return "The adressed property does not exist.";
+    }
+  }
+  /** \brief Exception MissingPropertyException missing_property_error.
+   *
+   *  The exception is thrown if a requested property is missing. 
+   */
+  missing_property_error;
 
  protected:
   /** \brief Update a property with an arbitrary data type. 

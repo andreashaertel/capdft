@@ -7,9 +7,9 @@
  *
  */
 #include <vector>
-#include "data_field.hpp"
-#include "data_frame.hpp"
-#include "properties.hpp"
+#include "src/data_field.hpp"
+#include "src/data_frame.hpp"
+#include "src/properties.hpp"
 /** \brief Container class that contains all Properties and DataFields
  *
  */
@@ -18,7 +18,7 @@ class System {
   /** \brief Constructor
    *
    */
-  //System();
+  // System();
   template <typename AnyDataFrame>
   System(
       Properties system_properties,
@@ -38,7 +38,7 @@ class System {
   /** \brief Write bulk values to the density profile
    *
    */
-  void bulk(); //VORSCHLAG: Aendern in: set_bulk_density()
+  void bulk();  // TODO(Andreas): Vorschlag: "Aendern in: set_bulk_density()"
   /** \brief Set/Update fugacities in all species properties. 
    *
    *  Updates the property fugacity in each species_properties 
