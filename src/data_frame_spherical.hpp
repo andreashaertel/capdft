@@ -1,8 +1,8 @@
 // SPDX-FileCopyrightText: 2021 Moritz Bültmann <moritz.bueltmann@gmx.de>
 // SPDX-FileCopyrightText: 2022 Andreas Härtel <http://andreashaertel.anno1982.de/>
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#ifndef SRC_DATA_FRAME_HPP_
-#define SRC_DATA_FRAME_HPP_
+#ifndef SRC_DATA_FRAME_SPHERICAL_HPP_
+#define SRC_DATA_FRAME_SPHERICAL_HPP_
 /** \file data_frame.hpp
  *  \brief This file contains the declarations of the virtual DataFrame class
  *
@@ -223,4 +223,4 @@ class DataFrame {
  private:
   //
 };
-#endif  // SRC_DATA_FRAME_HPP_
+#endif  // SRC_DATA_FRAME_SPHERICAL_HPP_

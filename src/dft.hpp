@@ -12,9 +12,9 @@
  */
 #include <vector>
 #include <map>
-#include "data_field.hpp"
-#include "properties.hpp"
-#include "system.hpp"
+#include "src/data_field.hpp"
+#include "src/properties.hpp"
+#include "src/system.hpp"
 /** \brief Class that holds the system and all functionals and provides DFT 
  *         methods
  *
@@ -34,7 +34,8 @@ class Dft {
    *  changed at any later time. 
    *
    */
-  Dft(System* system);
+  // TODO(Andreas): input as reference(&), output as pointers(*) (from Moritz)
+  explicit Dft(System* system);
   /** \brief Destructor
    *
    */
@@ -145,7 +146,7 @@ class Dft {
   /** \brief Physical system holding properties and density DataFields. */
   System* system;
   /** \brief Functionals that have been add. */
-  std::map<size_t,Functional*> functional;
+  std::map<size_t, Functional*> functional;
   /** \brief Functional index of the last add functional, initial value is 0. */
   size_t functional_index;
 

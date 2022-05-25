@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2021 Moritz Bültmann <moritz.bueltmann@gmx.de>
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#include "functional_fmt_spherical.hpp"
+#include "src/functional_fmt_spherical.hpp"
 #include <fftw3.h>
 #include <cmath>
 #include <algorithm>
