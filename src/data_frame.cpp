@@ -6,7 +6,7 @@ DataFrame::DataFrame() {
   //
 }
 // _____________________________________________________________________________
-DataFrame::DataFrame(const Properties properties) {
+DataFrame::DataFrame(const Properties& properties) {
   //
 }
 // _____________________________________________________________________________

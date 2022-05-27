@@ -58,7 +58,7 @@ class DataFrame {
    *
    */
   DataFrame();
-  explicit DataFrame(const Properties properties);
+  explicit DataFrame(const Properties& properties);
   DataFrame(const DataFrame& other);
   /** \brief Virtual destructor
    *

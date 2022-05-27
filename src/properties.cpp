@@ -28,3 +28,5 @@ bool Properties::contains_property(const std::string& property_name) const {
   }
 }
 // _____________________________________________________________________________
+// Some template functions are implemented in the header.
+// _____________________________________________________________________________
