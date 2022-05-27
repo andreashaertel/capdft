@@ -35,7 +35,7 @@ class DataFrameSpherical : public DataFrame {
    *  DataFrameSpherical.
    *
    */
-  explicit DataFrameSpherical(const Properties properties);
+  explicit DataFrameSpherical(const Properties& properties);
   DataFrameSpherical(const DataFrameSpherical<T>& other);
   /** \brief Virtual destructor
    *
@@ -54,6 +54,13 @@ class DataFrameSpherical : public DataFrame {
    *
    */
   T& at(size_t i);
+  /** \brief Access the array element at position i like at(),
+   *  but without modifying it.
+   *
+   *  \return The array element reference at position i.
+   *
+   */
+  T& element(size_t i) const;
   /** \brief Test for DataFrameSpherical other having the same size as this. 
    *
    *  \param other The DataFrameSpherical thats size is compared to this DataFrameSpherical. 
