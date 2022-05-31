@@ -5,20 +5,22 @@
 #define SRC_DATA_FRAME_SPHERICAL_HPP_
 /** \file data_frame.hpp
  *  \brief This file contains the declarations of the DataFrameSpherical class,
- *  which is a child of DataFrame.
+ *  which is a child class of DataFrame.
  *
  */
 #include "src/properties.hpp"
 #include "src/data_frame.hpp"
 /** \brief Container class for general data (e.g. density profiles or functional
- *  derivatives) derived from DataFrame
+ *         derivatives) derived from DataFrame
  *
  *  The DataFrameSpherical is a child of the general data object of the capDFT
  *  project DataFrame, which can hold data profiles as density profiles,
  *  functional derivatives, or external potential fields.
  *  The DataFrameSpherical provides the specific implementation of the
  *  DataFrame class for the spherical geometry.
- *  It contains all virtual functions of the parent and 
+ *  It contains all virtual functions of the parent and some additional quality
+ *  of life functions. The use of templates makes the extension to other vaiable
+ *  types like "int" easier.
  *
  */
 template <typename T>
@@ -36,8 +38,8 @@ class DataFrameSpherical : public DataFrame {
    *
    */
   explicit DataFrameSpherical(const Properties& properties);
-  DataFrameSpherical(const DataFrameSpherical<T>& other);
-  /** \brief Virtual destructor
+  DataFrameSpherical(const DataFrame& other);
+  /** \brief Destructor
    *
    */
   virtual ~DataFrameSpherical();
@@ -48,161 +50,141 @@ class DataFrameSpherical : public DataFrame {
    */
   size_t size() const;
   /** \brief Access the array element at position i.
-   *  You can also modify an element in that way.
+   *         You can also modify an element in that way.
+   *
+   *  Writing: my_object.at(i) = 5.;
+   *  Reading: my_var = my_object.at(i);
    *
    *  \return The array element reference at position i.
    *
    */
   T& at(size_t i);
   /** \brief Access the array element at position i like at(),
-   *  but without modifying it.
+   *         but without modifying it.
    *
    *  \return The array element reference at position i.
    *
    */
   T& element(size_t i) const;
-  /** \brief Test for DataFrameSpherical other having the same size as this. 
+  /** \brief Test if the DataFrameSpherical object other has the same size as
+   *         this object. 
    *
-   *  \param other The DataFrameSpherical thats size is compared to this DataFrameSpherical. 
+   *  \param other The DataFrameSpherical thats size is compared to this
+   *         DataFrameSpherical. 
    *
-   *  \return True, if the other DataFrameSpherical has the same size as this one, 
-   *          False otherwise. 
+   *  \return true, if the other DataFrameSpherical has the same size as this
+   *          one, false otherwise. 
    *
    */
   virtual bool same_size(const DataFrameSpherical<T>& other) const;
-  /** \brief The = operator copies the content of other into this. */
-  virtual DataFrameSpherical<T>& operator=(const DataFrameSpherical<T>& other);
+  /** \brief The = operator copies the content of other into this object.
+   *
+   *  \return DataFrameSpherical reference of this object.
+   *
+   **/
+  virtual DataFrameSpherical<T>& operator=(const DataFrame& other);
   /** \brief The += operator adds the content of other to this and then returns
-   *         this. 
+   *         this object reference. 
+   *
+   *  \return DataFrameSpherical reference of this object.
+   *
    */
-  virtual DataFrameSpherical<T>& operator+=(const DataFrameSpherical<T>& other);
+  virtual DataFrameSpherical<T>& operator+=(const DataFrame& other);
   /** \brief The -= operator subtracts the content of other from this and then
    *         returns this. 
+   *
+   *  \return DataFrameSpherical reference of this object.
+   *
    */
-  virtual DataFrameSpherical<T>& operator-=(const DataFrameSpherical<T>& other);
+  virtual DataFrameSpherical<T>& operator-=(const DataFrame& other);
   /** \brief The *= operator multiplies the content of other to this and then
    *         returns this. 
+   *
+   *  \return DataFrameSpherical reference of this object.
+   *
    */
-  virtual DataFrameSpherical<T>& operator*=(const DataFrameSpherical<T>& other);
+  virtual DataFrameSpherical<T>& operator*=(const DataFrame& other);
   /** \brief The /= operator divides this by the content of other and then 
    *         returns this. 
+   *
+   *  \return DataFrameSpherical reference of this object.
+   *
    */
-  virtual DataFrameSpherical<T>& operator/=(const DataFrameSpherical<T>& other);
+  virtual DataFrameSpherical<T>& operator/=(const DataFrame& other);
   /** \brief The *= operator for scalar multiplication multiplies all entries of
    *         this with the scalar value other and then returns this. 
+   *
+   *  \return DataFrameSpherical reference of this object.
+   *
    */
   virtual DataFrameSpherical<T>& operator*=(const double other);
-  /** \brief The + operator adds the content of this and other and returns the 
-   *         result. 
+  /** \brief The + operator adds the content of this object and the
+   *         DataFrame other and returns the result. 
    *
-   *  Use the following code: 
-   *
-   *      DataFrameSpherical& operator+(const DataFrameSpherical& other) {
-   *        // Check for correct sizes
-   *        if (! this->same_size(other))
-   *        throw &bad_size_error;
-   *        // Use existing copy Constructor and += operators.
-   *        DataFrameSpherical result(*this);
-   *        result += other;
-   *        return result;
-   *      };
+   *  \return DataFrame object which is the sum of this object and
+   *          and the DataFrameSpherical other.
    *
    */
-  virtual DataFrameSpherical<T>& operator+(const DataFrameSpherical<T>& other)
-      = 0;
-  /** \brief The - operator subtracts the content of this and other and returns
-   *         the result. 
+  virtual DataFrame operator+(const DataFrame& other);
+  /** \brief The - operator subtracts the content of this object and the
+   *         DataFrame other and returns the result. 
    *
-   *  Use the following code: 
-   *
-   *      DataFrameSpherical& DataFrameSpherical::operator-(const DataFrameSpherical& other) {
-   *        // Check for correct sizes
-   *        if (! this->same_size(other))
-   *        throw &bad_size_error;
-   *        // Use existing copy Constructor and -= operators.
-   *        DataFrameSpherical result(*this);
-   *        result -= other;
-   *        return result;
-   *      }
+   *  \return DataFrame object which is the difference of this object
+   *          and the DataFrame other.
    *
    */
-  virtual DataFrameSpherical<T>& operator-(const DataFrameSpherical<T>& other)
-      = 0;
-  /** \brief The * operator multiplies the content of this and other and returns
-   *         the result. 
+  virtual DataFrame operator-(const DataFrame& other);
+  /** \brief The * operator multiplies the content of this object and the
+   *         DataFrame other and returns the result. 
    *
-   *  Use the following code: 
-   *
-   *      DataFrameSpherical& DataFrameSpherical::operator*(const DataFrameSpherical& other) {
-   *        // Check for correct sizes
-   *        if (! this->same_size(other))
-   *        throw &bad_size_error;
-   *        // Use existing copy Constructor and *= operators.
-   *        DataFrameSpherical result(*this);
-   *        result *= other;
-   *        return result;
-   *      }
+   *  \return DataFrame object which is the product of this object and
+   *          the DataFrame other.
    *
    */
-  virtual DataFrameSpherical<T>& operator*(const DataFrameSpherical<T>& other)
-      = 0;
-  /** \brief The / operator divides the content of this and other and returns 
-   *         the result. 
+  virtual DataFrame operator*(const DataFrame& other);
+  /** \brief The / operator divides the content of this object and the DataFrame
+   *         other and returns the result. 
    *
-   *  Use the following code: 
-   *
-   *      DataFrameSpherical& DataFrameSpherical::operator/(const DataFrameSpherical& other) {
-   *      // Check for correct sizes
-   *      if (! this->same_size(other))
-   *      throw &bad_size_error;
-   *      // Use existing copy Constructor and /= operators.
-   *      DataFrameSpherical result(*this);
-   *      result /= other;
-   *      return result;
-   *    }
+   *  \return DataFrame object which is the quotient of this object and the
+   *          DataFrame other.
    *
    */
-  virtual DataFrameSpherical<T>& operator/(const DataFrameSpherical<T>& other)
-      = 0;
-  /** \brief The * operator multiplies the content of this and the scalar other
-   *         and returns the result. 
+  virtual DataFrame operator/(const DataFrame& other);
+  /** \brief The * operator multiplies the content of this object and the scalar
+   *         other and returns the result. 
    *
-   *  Use the following code: 
-   *
-   *      DataFrameSpherical& DataFrameSpherical::operator*(const double other) {
-   *        // Use existing copy Constructor and *= for double operators.
-   *        DataFrameSpherical result(*this);
-   *        result *= other;
-   *        return result;
-   *      }
+   *  \return DataFrame object which is the product this object and
+   *          the double other.
    *
    */
-  virtual DataFrameSpherical<T>& operator*(const double other) = 0;
-  /** \brief Exponential function applied to all elements of DataFrameSpherical. 
+  virtual DataFrame operator*(const T other);
+  /** \brief The * operator for (<typename T>) * DataFrameSpherical. 
    *
-   */
-  virtual DataFrameSpherical<T>& exp() = 0;
-  /** \brief Natural logarithm function applied to all elements of
-   *  DataFrameSpherical. 
-   *
-   */
-  virtual DataFrameSpherical<T>& log_natural() = 0;
-  /** \brief The * operator for (double) * DataFrameSpherical. 
-   *
-   *  Use the following code: 
-   *
-   *      friend DataFrameSpherical& operator*(const double current,
-   *          const DataFrameSpherical& other) {
-   *        // Use existing copy Constructor and *= for double operators.
-   *        DataFrameSpherical result(other);
-   *        result *= current;
-   *        return result;
-   *      }
+   *  \return DataFrameSpherical object which is the product of a the variable
+   *          current and the DataFrameSpherical other.
    *
    */
   template <typename U>
-  friend DataFrameSpherical<U>& operator*(
-      const double current, const DataFrameSpherical<U>& other);
+  friend DataFrameSpherical<U> operator*(const U current,
+      const DataFrameSpherical<U>& other);
+  /** \brief Exponential function that returns a DataFrameSpherical where all
+   *         elements of DataFrameSpherical other were exponentiated.
+   *
+   *  \return DataFrameSpherical with exponentiated values of the
+   *          DataFrameSpherical other.
+   *
+   */
+  template <typename V>
+  friend DataFrameSpherical<V> exp(DataFrameSpherical<V>& other);
+  /** \brief Natural logarithm that returns a DataFrameSpherical where all
+   *         elements of DataFrameSpherical other were logarithmized.
+   *
+   *  \return DataFrameSpherical with logarithmized values of the
+   *          DataFrameSpherical other.
+   *
+   */
+  template <typename W>
+  friend DataFrameSpherical<W> log_natural(DataFrameSpherical<W>& other);
   /** \brief std::exception BadSizeException.
    */
   class BadSizeException : public std::exception {

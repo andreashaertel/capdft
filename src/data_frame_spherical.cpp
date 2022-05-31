@@ -4,6 +4,7 @@
 #include "src/data_frame_spherical.hpp"
 #include "src/data_frame.hpp"
 #include <fftw3.h>
+#include <cmath>
 // Class type declarations
 template class DataFrameSpherical<double>;
 // template class DataFrameSpherical<int>;
@@ -71,21 +72,25 @@ DataFrameSpherical<double>::DataFrameSpherical(const Properties& properties)
   data = new double[array_size];
 }
 // _____________________________________________________________________________
+// TODO(Moritz): Check if type is correct before casting
 template <typename T>
-DataFrameSpherical<T>::DataFrameSpherical(const DataFrameSpherical<T>& other) {
-  this->array_size = other.size();
+DataFrameSpherical<T>::DataFrameSpherical(const DataFrame& other) {
+  const DataFrameSpherical<T>& other_casted =
+      dynamic_cast<const DataFrameSpherical<T>&>(other);
+  this->array_size = other_casted.size();
   data = new T[array_size];
   for (size_t i = 0; i < array_size; ++i) {
-    this->at(i) = other.element(i);
+    this->at(i) = other_casted.element(i);
   }
 }
 template <>
-DataFrameSpherical<double>::DataFrameSpherical(
-    const DataFrameSpherical<double>& other) {
-  this->array_size = other.size();
+DataFrameSpherical<double>::DataFrameSpherical(const DataFrame& other) {
+  const DataFrameSpherical<double>& other_casted =
+      dynamic_cast<const DataFrameSpherical<double>&>(other);
+  this->array_size = other_casted.size();
   data = new double[array_size];
   for (size_t i = 0; i < array_size; ++i) {
-    this->at(i) = other.element(i);
+    this->at(i) = other_casted.element(i);
   }
 }
 // _____________________________________________________________________________
@@ -111,12 +116,15 @@ bool DataFrameSpherical<double>::same_size(
 // _____________________________________________________________________________
 template <typename T>
 DataFrameSpherical<T>& DataFrameSpherical<T>::operator=(
-    const DataFrameSpherical<T>& other) {
-  if (this->size() == other.size()) {
+    const DataFrame& other) {
+  const DataFrameSpherical<T>& other_casted =
+      dynamic_cast<const DataFrameSpherical<T>&>(other);
+  if (this->same_size(other_casted)) {
     for (size_t i = 0; i < this->array_size; ++i) {
-      this->at(i) = other.element(i);
+      this->at(i) = other_casted.element(i);
     }
   } else {
+    throw bad_size_error;
     std::cerr << "DataFrameSpherical::operator=():";
     std::cerr << " \"ERROR: Array sizes do not match. Cannot copy.\"";
     std::cerr << std::endl;
@@ -126,12 +134,15 @@ DataFrameSpherical<T>& DataFrameSpherical<T>::operator=(
 }
 template <>
 DataFrameSpherical<double>& DataFrameSpherical<double>::operator=(
-    const DataFrameSpherical<double>& other) {
-  if (this->size() == other.size()) {
+    const DataFrame& other) {
+  const DataFrameSpherical<double>& other_casted =
+      dynamic_cast<const DataFrameSpherical<double>&>(other);
+  if (this->same_size(other_casted)) {
     for (size_t i = 0; i < this->array_size; ++i) {
-      this->at(i) = other.element(i);
+      this->at(i) = other_casted.element(i);
     }
   } else {
+    throw bad_size_error;
     std::cerr << "DataFrameSpherical::operator=():";
     std::cerr << " \"ERROR: Array sizes do not match. Cannot copy.\"";
     std::cerr << std::endl;
@@ -142,12 +153,15 @@ DataFrameSpherical<double>& DataFrameSpherical<double>::operator=(
 // _____________________________________________________________________________
 template <typename T>
 DataFrameSpherical<T>& DataFrameSpherical<T>::operator+=(
-    const DataFrameSpherical<T>& other) {
-  if (this->size() == other.size()) {
+    const DataFrame& other) {
+  const DataFrameSpherical<T>& other_casted =
+      dynamic_cast<const DataFrameSpherical<T>&>(other);
+  if (this->same_size(other_casted)) {
     for (size_t i = 0; i < this->array_size; ++i) {
-      this->at(i) += other.element(i);
+      this->at(i) += other_casted.element(i);
     }
   } else {
+    throw bad_size_error;
     std::cerr << "DataFrameSpherical::operator+=():";
     std::cerr << " \"ERROR: Dimensions do not match. Cannot add.\"";
     std::cerr << std::endl;
@@ -157,12 +171,15 @@ DataFrameSpherical<T>& DataFrameSpherical<T>::operator+=(
 }
 template <>
 DataFrameSpherical<double>& DataFrameSpherical<double>::operator+=(
-    const DataFrameSpherical<double>& other) {
-  if (this->size() == other.size()) {
+    const DataFrame& other) {
+  const DataFrameSpherical<double>& other_casted =
+      dynamic_cast<const DataFrameSpherical<double>&>(other);
+  if (this->same_size(other_casted)) {
     for (size_t i = 0; i < this->array_size; ++i) {
-      this->at(i) += other.element(i);
+      this->at(i) += other_casted.element(i);
     }
   } else {
+    throw bad_size_error;
     std::cerr << "DataFrameSpherical::operator+=():";
     std::cerr << " \"ERROR: Dimensions do not match. Cannot add.\"";
     std::cerr << std::endl;
@@ -173,12 +190,15 @@ DataFrameSpherical<double>& DataFrameSpherical<double>::operator+=(
 // _____________________________________________________________________________
 template <typename T>
 DataFrameSpherical<T>& DataFrameSpherical<T>::operator-=(
-    const DataFrameSpherical<T>& other) {
-  if (this->size() == other.size()) {
+    const DataFrame& other) {
+  const DataFrameSpherical<T>& other_casted =
+      dynamic_cast<const DataFrameSpherical<T>&>(other);
+  if (this->same_size(other_casted)) {
     for (size_t i = 0; i < this->array_size; ++i) {
-      this->at(i) -= other.element(i);
+      this->at(i) -= other_casted.element(i);
     }
   } else {
+    throw bad_size_error;
     std::cerr << "DataFrameSpherical::operator-=():";
     std::cerr << " \"ERROR: Dimensions do not match. Cannot subtract.\"";
     std::cerr << std::endl;
@@ -188,12 +208,15 @@ DataFrameSpherical<T>& DataFrameSpherical<T>::operator-=(
 }
 template <>
 DataFrameSpherical<double>& DataFrameSpherical<double>::operator-=(
-    const DataFrameSpherical<double>& other) {
-  if (this->size() == other.size()) {
+    const DataFrame& other) {
+  const DataFrameSpherical<double>& other_casted =
+      dynamic_cast<const DataFrameSpherical<double>&>(other);
+  if (this->same_size(other_casted)) {
     for (size_t i = 0; i < this->array_size; ++i) {
-      this->at(i) -= other.element(i);
+      this->at(i) -= other_casted.element(i);
     }
   } else {
+    throw bad_size_error;
     std::cerr << "DataFrameSpherical::operator-=():";
     std::cerr << " \"ERROR: Dimensions do not match. Cannot subtract.\"";
     std::cerr << std::endl;
@@ -204,12 +227,15 @@ DataFrameSpherical<double>& DataFrameSpherical<double>::operator-=(
 // _____________________________________________________________________________
 template <typename T>
 DataFrameSpherical<T>& DataFrameSpherical<T>::operator*=(
-    const DataFrameSpherical<T>& other) {
-  if (this->size() == other.size()) {
+    const DataFrame& other) {
+  const DataFrameSpherical<T>& other_casted =
+      dynamic_cast<const DataFrameSpherical<T>&>(other);
+  if (this->same_size(other_casted)) {
     for (size_t i = 0; i < this->array_size; ++i) {
-      this->at(i) *= other.element(i);
+      this->at(i) *= other_casted.element(i);
     }
   } else {
+    throw bad_size_error;
     std::cerr << "DataFrameSpherical::operator*=():";
     std::cerr << " \"ERROR: Dimensions do not match. Cannot multiply.\"";
     std::cerr << std::endl;
@@ -219,12 +245,15 @@ DataFrameSpherical<T>& DataFrameSpherical<T>::operator*=(
 }
 template <>
 DataFrameSpherical<double>& DataFrameSpherical<double>::operator*=(
-    const DataFrameSpherical<double>& other) {
-  if (this->size() == other.size()) {
+    const DataFrame& other) {
+  const DataFrameSpherical<double>& other_casted =
+      dynamic_cast<const DataFrameSpherical<double>&>(other);
+  if (this->same_size(other_casted)) {
     for (size_t i = 0; i < this->array_size; ++i) {
-      this->at(i) *= other.element(i);
+      this->at(i) *= other_casted.element(i);
     }
   } else {
+    throw bad_size_error;
     std::cerr << "DataFrameSpherical::operator*=():";
     std::cerr << " \"ERROR: Dimensions do not match. Cannot multiply.\"";
     std::cerr << std::endl;
@@ -235,12 +264,15 @@ DataFrameSpherical<double>& DataFrameSpherical<double>::operator*=(
 // _____________________________________________________________________________
 template <typename T>
 DataFrameSpherical<T>& DataFrameSpherical<T>::operator/=(
-    const DataFrameSpherical<T>& other) {
-  if (this->size() == other.size()) {
+    const DataFrame& other) {
+  const DataFrameSpherical<T>& other_casted =
+      dynamic_cast<const DataFrameSpherical<T>&>(other);
+  if (this->size() == other_casted.size()) {
     for (size_t i = 0; i < this->array_size; ++i) {
-      this->at(i) /= other.element(i);
+      this->at(i) /= other_casted.element(i);
     }
   } else {
+    throw bad_size_error;
     std::cerr << "DataFrameSpherical::operator/=():";
     std::cerr << " \"ERROR: Dimensions do not match. Cannot divide.\"";
     std::cerr << std::endl;
@@ -250,12 +282,15 @@ DataFrameSpherical<T>& DataFrameSpherical<T>::operator/=(
 }
 template <>
 DataFrameSpherical<double>& DataFrameSpherical<double>::operator/=(
-    const DataFrameSpherical<double>& other) {
-  if (this->size() == other.size()) {
+    const DataFrame& other) {
+  const DataFrameSpherical<double>& other_casted =
+      dynamic_cast<const DataFrameSpherical<double>&>(other);
+  if (this->size() == other_casted.size()) {
     for (size_t i = 0; i < this->array_size; ++i) {
-      this->at(i) /= other.element(i);
+      this->at(i) /= other_casted.element(i);
     }
   } else {
+    throw bad_size_error;
     std::cerr << "DataFrameSpherical::operator/=():";
     std::cerr << " \"ERROR: Dimensions do not match. Cannot divide.\"";
     std::cerr << std::endl;
@@ -281,92 +316,206 @@ DataFrameSpherical<double>& DataFrameSpherical<double>::operator*=(
 }
 // _____________________________________________________________________________
 template <typename T>
-DataFrameSpherical<T>& DataFrameSpherical<T>::operator+(
-    const DataFrameSpherical<T>& other) {
+DataFrame DataFrameSpherical<T>::operator+(
+    const DataFrame& other) {
+  const DataFrameSpherical<T>& other_casted =
+      dynamic_cast<const DataFrameSpherical<T>&>(other);
   DataFrameSpherical<T> result(*this);
-  //if (this->size() == other.size()) {
-  //  result += other;
-  //} else {
-  //  std::cerr << "DataField::operator+():";
-  //  std::cerr << " \"ERROR: Dimensions do not match. Cannot add.\"";
-  //  std::cerr << std::endl;
-  //  exit(1);
-  //}
-  //return result;
+  if (this->same_size(other_casted)) {
+    result += other_casted;
+  } else {
+    throw bad_size_error;
+    std::cerr << "DataFrameSpherical::operator+():";
+    std::cerr << " \"ERROR: Dimensions do not match. Cannot add.\"";
+    std::cerr << std::endl;
+    exit(1);
+  }
+  return result;
 }
 template <>
-DataFrameSpherical<double>& DataFrameSpherical<double>::operator+(
-    const DataFrameSpherical<double>& other) {
+DataFrame DataFrameSpherical<double>::operator+(
+    const DataFrame& other) {
+  const DataFrameSpherical<double>& other_casted =
+      dynamic_cast<const DataFrameSpherical<double>&>(other);
   DataFrameSpherical<double> result(*this);
-  //if (this->size() == other.size()) {
-  //  result += other;
-  //} else {
-  //  std::cerr << "DataField::operator+():";
-  //  std::cerr << " \"ERROR: Dimensions do not match. Cannot add.\"";
-  //  std::cerr << std::endl;
-  //  exit(1);
-  //}
-  //return result;
+  if (this->same_size(other_casted)) {
+    result += other_casted;
+  } else {
+    throw bad_size_error;
+    std::cerr << "DataFrameSpherical::operator+():";
+    std::cerr << " \"ERROR: Dimensions do not match. Cannot add.\"";
+    std::cerr << std::endl;
+    exit(1);
+  }
+  return result;
 }
 // _____________________________________________________________________________
 template <typename T>
-DataFrameSpherical<T>& DataFrameSpherical<T>::operator-(
-    const DataFrameSpherical<T>& other) {
-//  DataFrameSpherical<T> result(*this);
-//  if (this->size() == other.size()) {
-//    result -= other;
-//  } else {
-//    std::cerr << "DataField::operator-():";
-//    std::cerr << " \"ERROR: Dimensions do not match. Cannot subtract.\"";
-//    std::cerr << std::endl;
-//    exit(1);
-//  }
-//  return result;
+DataFrame DataFrameSpherical<T>::operator-(
+    const DataFrame& other) {
+  const DataFrameSpherical<T>& other_casted =
+      dynamic_cast<const DataFrameSpherical<T>&>(other);
+  DataFrameSpherical<T> result(*this);
+  if (this->same_size(other_casted)) {
+    result -= other_casted;
+  } else {
+    throw bad_size_error;
+    std::cerr << "DataFrameSpherical::operator-():";
+    std::cerr << " \"ERROR: Dimensions do not match. Cannot subtract.\"";
+    std::cerr << std::endl;
+    exit(1);
+  }
+  return result;
+}
+template <>
+DataFrame DataFrameSpherical<double>::operator-(
+    const DataFrame& other) {
+  const DataFrameSpherical<double>& other_casted =
+      dynamic_cast<const DataFrameSpherical<double>&>(other);
+  DataFrameSpherical<double> result(*this);
+  if (this->same_size(other_casted)) {
+    result -= other_casted;
+  } else {
+    throw bad_size_error;
+    std::cerr << "DataFrameSpherical::operator-():";
+    std::cerr << " \"ERROR: Dimensions do not match. Cannot subtract.\"";
+    std::cerr << std::endl;
+    exit(1);
+  }
+  return result;
 }
 // _____________________________________________________________________________
 template <typename T>
-DataFrameSpherical<T>& DataFrameSpherical<T>::operator*(
-    const DataFrameSpherical<T>& other) {
-//  DataFrameSpherical<T> result(*this);
-//  if (this->size() == other.size()) {
-//    result *= other;
-//  } else {
-//    std::cerr << "DataField::operator*():";
-//    std::cerr << " \"ERROR: Dimensions do not match. Cannot multiply.\"";
-//    std::cerr << std::endl;
-//    exit(1);
-//  }
-//  return result;
+DataFrame DataFrameSpherical<T>::operator*(
+    const DataFrame& other) {
+  const DataFrameSpherical<T>& other_casted =
+      dynamic_cast<const DataFrameSpherical<T>&>(other);
+  DataFrameSpherical<T> result(*this);
+  if (this->same_size(other_casted)) {
+    result *= other_casted;
+  } else {
+    throw bad_size_error;
+    std::cerr << "DataFrameSpherical::operator*():";
+    std::cerr << " \"ERROR: Dimensions do not match. Cannot multiply.\"";
+    std::cerr << std::endl;
+    exit(1);
+  }
+  return result;
+}
+template <>
+DataFrame DataFrameSpherical<double>::operator*(
+    const DataFrame& other) {
+  const DataFrameSpherical<double>& other_casted =
+      dynamic_cast<const DataFrameSpherical<double>&>(other);
+  DataFrameSpherical<double> result(*this);
+  if (this->same_size(other_casted)) {
+    result *= other_casted;
+  } else {
+    throw bad_size_error;
+    std::cerr << "DataFrameSpherical::operator*():";
+    std::cerr << " \"ERROR: Dimensions do not match. Cannot multiply.\"";
+    std::cerr << std::endl;
+    exit(1);
+  }
+  return result;
 }
 // _____________________________________________________________________________
 template <typename T>
-DataFrameSpherical<T>& DataFrameSpherical<T>::operator/(
-    const DataFrameSpherical<T>& other) {
-//  DataFrameSpherical<T> result(*this);
-//  if (this->size() == other.size()) {
-//    result /= other;
-//  } else {
-//    std::cerr << "DataField::operator/():";
-//    std::cerr << " \"ERROR: Dimensions do not match. Cannot divide.\"";
-//    std::cerr << std::endl;
-//    exit(1);
-//  }
-//  return result;
+DataFrame DataFrameSpherical<T>::operator/(
+    const DataFrame& other) {
+  const DataFrameSpherical<T>& other_casted =
+      dynamic_cast<const DataFrameSpherical<T>&>(other);
+  DataFrameSpherical<T> result(*this);
+  if (this->same_size(other_casted)) {
+    result /= other_casted;
+  } else {
+    throw bad_size_error;
+    std::cerr << "DataFrameSpherical::operator/():";
+    std::cerr << " \"ERROR: Dimensions do not match. Cannot divide.\"";
+    std::cerr << std::endl;
+    exit(1);
+  }
+  return result;
+}
+template <>
+DataFrame DataFrameSpherical<double>::operator/(
+    const DataFrame& other) {
+  const DataFrameSpherical<double>& other_casted =
+      dynamic_cast<const DataFrameSpherical<double>&>(other);
+  DataFrameSpherical<double> result(*this);
+  if (this->same_size(other_casted)) {
+    result /= other_casted;
+  } else {
+    throw bad_size_error;
+    std::cerr << "DataFrameSpherical::operator/():";
+    std::cerr << " \"ERROR: Dimensions do not match. Cannot divide.\"";
+    std::cerr << std::endl;
+    exit(1);
+  }
+  return result;
 }
 // _____________________________________________________________________________
 template <typename T>
-DataFrameSpherical<T>& DataFrameSpherical<T>::operator*(const double other) {
-
+DataFrame DataFrameSpherical<T>::operator*(const T other) {
+  DataFrameSpherical<T> result(*this);
+  result *= other;
+  return result;
+}
+template <>
+DataFrame DataFrameSpherical<double>::operator*(const double other) {
+  DataFrameSpherical<double> result(*this);
+  result *= other;
+  return result;
 }
 // _____________________________________________________________________________
-DataFrameSpherical<T>& DataFrameSpherical<T>::exp() {
-
+template <typename U>
+DataFrameSpherical<U> operator*(const U current,
+    const DataFrameSpherical<U>& other) {
+  DataFrameSpherical<U> result(other);
+  result *= current;
+  return result;
+}
+template <>
+DataFrameSpherical<double> operator*(const double current,
+    const DataFrameSpherical<double>& other) {
+  DataFrameSpherical<double> result(other);
+  result *= current;
+  return result;
 }
 // _____________________________________________________________________________
-DataFrameSpherical<T>& DataFrameSpherical<T>::log_natural() {
-
+template <typename V>
+DataFrameSpherical<V> exp(DataFrameSpherical<V>& other) {
+  DataFrameSpherical<V> result(other);
+  for (size_t i = 0; i < other.array_size; ++i) {
+    result.at(i) = exp(other.element(i));
+  }
+  return result;
+}
+template <>
+DataFrameSpherical<double> exp(DataFrameSpherical<double>& other) {
+  DataFrameSpherical<double> result(other);
+  for (size_t i = 0; i < other.array_size; ++i) {
+    result.at(i) = exp(other.element(i));
+  }
+  return result;
 }
 // _____________________________________________________________________________
+template <typename W>
+DataFrameSpherical<W> log_natural(DataFrameSpherical<W>& other) {
+  DataFrameSpherical<W> result(other);
+  for (size_t i = 0; i < other.array_size; ++i) {
+    result.at(i) = log(other.element(i));
+  }
+  return result;
+}
+template <>
+DataFrameSpherical<double> log_natural(DataFrameSpherical<double>& other) {
+  DataFrameSpherical<double> result(other);
+  for (size_t i = 0; i < other.array_size; ++i) {
+    result.at(i) = log(other.element(i));
+  }
+  return result;
+}
 // _____________________________________________________________________________
 // _____________________________________________________________________________
 // _____________________________________________________________________________
