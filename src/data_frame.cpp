@@ -14,5 +14,5 @@ DataFrame::DataFrame(const DataFrame& other) {
   //
 }
 // _____________________________________________________________________________
-// This section should stay empty, because this is the template (abstract)
+// This section should stay empty, because this is the virtual template
 // DataFrame class.

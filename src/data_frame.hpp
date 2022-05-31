@@ -63,39 +63,30 @@ class DataFrame {
   /** \brief Virtual destructor
    *
    */
-  virtual ~DataFrame() = 0;
-  /** \brief Test for DataFrame other having the same size as this. 
-   *
-   *  \param other The DataFrame thats size is compared to this DataFrame. 
-   *
-   *  \return True, if the other DataFrame has the same size as this one, 
-   *          False otherwise. 
-   *
-   */
-  virtual bool same_size(const DataFrame& other) const = 0;
+  virtual ~DataFrame();
 
   /** \brief The = operator copies the content of other into this. */
-  virtual DataFrame& operator=(const DataFrame& other) = 0;
+  virtual DataFrame& operator=(const DataFrame& other);
   /** \brief The += operator adds the content of other to this and then returns
    *         this. 
    */
-  virtual DataFrame& operator+=(const DataFrame& other) = 0;
+  virtual DataFrame& operator+=(const DataFrame& other);
   /** \brief The -= operator subtracts the content of other from this and then
    *         returns this. 
    */
-  virtual DataFrame& operator-=(const DataFrame& other) = 0;
+  virtual DataFrame& operator-=(const DataFrame& other);
   /** \brief The *= operator multiplies the content of other to this and then
    *         returns this. 
    */
-  virtual DataFrame& operator*=(const DataFrame& other) = 0;
+  virtual DataFrame& operator*=(const DataFrame& other);
   /** \brief The /= operator divides this by the content of other and then 
    *         returns this. 
    */
-  virtual DataFrame& operator/=(const DataFrame& other) = 0;
+  virtual DataFrame& operator/=(const DataFrame& other);
   /** \brief The *= operator for scalar multiplication multiplies all entries of
    *         this with the scalar value other and then returns this. 
    */
-  virtual DataFrame& operator*=(const double other) = 0;
+  virtual DataFrame& operator*=(const double other);
   /** \brief The + operator adds the content of this and other and returns the 
    *         result. 
    *
@@ -112,7 +103,7 @@ class DataFrame {
    *      };
    *
    */
-  virtual DataFrame& operator+(const DataFrame& other) = 0;
+  virtual DataFrame operator+(const DataFrame& other);
   /** \brief The - operator subtracts the content of this and other and returns
    *         the result. 
    *
@@ -129,7 +120,7 @@ class DataFrame {
    *      }
    *
    */
-  virtual DataFrame& operator-(const DataFrame& other) = 0;
+  virtual DataFrame operator-(const DataFrame& other);
   /** \brief The * operator multiplies the content of this and other and returns
    *         the result. 
    *
@@ -146,7 +137,7 @@ class DataFrame {
    *      }
    *
    */
-  virtual DataFrame& operator*(const DataFrame& other) = 0;
+  virtual DataFrame operator*(const DataFrame& other);
   /** \brief The / operator divides the content of this and other and returns 
    *         the result. 
    *
@@ -163,7 +154,7 @@ class DataFrame {
    *    }
    *
    */
-  virtual DataFrame& operator/(const DataFrame& other) = 0;
+  virtual DataFrame operator/(const DataFrame& other);
   /** \brief The * operator multiplies the content of this and the scalar other
    *         and returns the result. 
    *
@@ -177,7 +168,16 @@ class DataFrame {
    *      }
    *
    */
-  virtual DataFrame& operator*(const double other) = 0;
+  virtual DataFrame operator*(const double other);
+  /** \brief Exponential function applied to all elements of DataFrameSpherical. 
+   *
+   */
+  friend DataFrame exp(const DataFrame& other);
+  /** \brief Natural logarithm function applied to all elements of
+   *  DataFrameSpherical. 
+   *
+   */
+  friend DataFrame log_natural(const DataFrame& other);
   /** \brief The * operator for (double) * DataFrame. 
    *
    *  Use the following code: 
@@ -191,15 +191,7 @@ class DataFrame {
    *      }
    *
    */
-  friend DataFrame& operator*(const double current, const DataFrame& other);
-  /** \brief Exponential function applied to all elements of DataFrame. 
-   *
-   */
-  virtual DataFrame& exp() = 0;
-  /** \brief Natural logarithm function applied to all elements of DataFrame. 
-   *
-   */
-  virtual DataFrame& log_natural() = 0;
+  friend DataFrame operator*(const double current, const DataFrame& other);
   /** \brief std::exception BadSizeException.
    */
   class BadSizeException : public std::exception {
