@@ -74,7 +74,7 @@ Show all branches
 git branch
 ```
 
-Merge onto main. First switch to main branch then ...
+Merge onto master. First switch to master branch then ...
 ```bash
 git merge <branch>
 ```
