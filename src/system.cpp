@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: 2022 Andreas Härtel <http://andreashaertel.anno1982.de/>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include <stdexcept>
-#include "src/system.hpp"
+#include "system.hpp"  // NOLINT
 // _____________________________________________________________________________
 // System::System() {
 //  //

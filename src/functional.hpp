@@ -10,7 +10,7 @@
  *
  */
 #include <vector>
-#include "src/data_field.hpp"
+#include "data_field.hpp"  // NOLINT
 // _____________________________________________________________________________
 /** \brief Functional is a template class
  *

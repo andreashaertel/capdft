@@ -13,9 +13,9 @@
 // Includes
 #include <fftw3.h>
 #include <vector>
-#include "src/functional.hpp"
-#include "src/properties.hpp"
-#include "src/system.hpp"
+#include "functional.hpp"  // NOLINT
+#include "properties.hpp"  // NOLINT
+#include "system.hpp"  // NOLINT
 // Class forward declarations
 // _____________________________________________________________________________
 /** \brief FunctionalFMTSpherical calculates the FMT functional in spherical

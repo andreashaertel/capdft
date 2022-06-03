@@ -12,9 +12,9 @@
  */
 #include <vector>
 #include <map>
-#include "src/data_field.hpp"
-#include "src/properties.hpp"
-#include "src/system.hpp"
+#include "data_field.hpp"  // NOLINT
+#include "properties.hpp"  // NOLINT
+#include "system.hpp"  // NOLINT
 /** \brief Class that holds the system and all functionals and provides DFT 
  *         methods
  *

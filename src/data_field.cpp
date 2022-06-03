@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2021 Moritz Bültmann <moritz.bueltmann@gmx.de>
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#include "src/data_field.hpp"
+#include "data_field.hpp"  // NOLINT
 #include <fftw3.h>
 #include <cmath>
 #include <fstream>

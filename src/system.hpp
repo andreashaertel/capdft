@@ -7,9 +7,9 @@
  *
  */
 #include <vector>
-#include "src/data_field.hpp"
-#include "src/data_frame.hpp"
-#include "src/properties.hpp"
+#include "data_field.hpp"  // NOLINT
+#include "data_frame.hpp"  // NOLINT
+#include "properties.hpp"  // NOLINT
 /** \brief Container class that contains all Properties and DataFields
  *
  */
