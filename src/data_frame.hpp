@@ -7,7 +7,7 @@
  *  \brief This file contains the declarations of the virtual DataFrame class
  *
  */
-#include "src/properties.hpp"
+#include "properties.hpp"  // NOLINT
 /** \brief Container class for general data (e.g. density profiles or functional
  *         derivatives)
  *
@@ -64,7 +64,6 @@ class DataFrame {
    *
    */
   virtual ~DataFrame();
-
   /** \brief The = operator copies the content of other into this. */
   virtual DataFrame& operator=(const DataFrame& other);
   /** \brief The += operator adds the content of other to this and then returns

@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include <cmath>
 #include <utility>  // for pair<>
-#include "src/functional_fmt_spherical.hpp"
-#include "src/dft.hpp"
+#include "functional_fmt_spherical.hpp"  // NOLINT
+#include "dft.hpp"  // NOLINT
 // _____________________________________________________________________________
 Dft::Dft(System* system):system(system) {
   // initialize internal parameters
