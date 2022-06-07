@@ -21,9 +21,8 @@ int main(int argc, char** args) {
    * To see how the Properties class works see the "properties" example.
    */
 // _____________________________________________________________________________
-  size_t grid_count = 1001;
+  size_t grid_count = 101;
   double system_length = 19.821782178217823;
-  double bin_width = system_length / static_cast<double>(grid_count);
   // Create object of Properties class
   Properties system_properties;
   // Put the system properties into a Properties container
@@ -48,14 +47,14 @@ int main(int argc, char** args) {
    */
 // _____________________________________________________________________________
   for (size_t i = 0; i < my_data_frame1.size(); ++i) {
-    my_data_frame1.at(i) = bin_width * static_cast<double>(i);
-    my_data_frame2.at(i) = -bin_width * static_cast<double>(i);
+    my_data_frame1.at(i) = static_cast<double>(i+1);
+    my_data_frame2.at(i) = -static_cast<double>(i+1);
   }
   for (size_t i = 0; i < my_data_frame1.size(); ++i) {
-    my_data_frame3.at(i)[0] = bin_width * static_cast<double>(i);
-    my_data_frame3.at(i)[1] = bin_width * static_cast<double>(i);
-    my_data_frame4.at(i)[0] = -bin_width * static_cast<double>(i);
-    my_data_frame4.at(i)[1] = -bin_width * static_cast<double>(i);
+    my_data_frame3.at(i)[0] = static_cast<double>(i);
+    my_data_frame3.at(i)[1] = static_cast<double>(i);
+    my_data_frame4.at(i)[0] = -static_cast<double>(i);
+    my_data_frame4.at(i)[1] = -static_cast<double>(i);
   }
   // my_data_frame1.at(2001);  // error: out of bounds (2001>1001)
 // _____________________________________________________________________________
@@ -69,8 +68,10 @@ int main(int argc, char** args) {
   my_data_frame1 /= my_data_frame2;
   my_data_frame1 += my_data_frame2;
   my_data_frame1 -= my_data_frame2;
-  //result = 4.2 * my_data_frame1 * exp(my_data_frame2 + my_data_frame2);
-  result = exp(my_data_frame2 + my_data_frame2);
+  my_data_frame1.print();
+  result = 4.2 * exp(my_data_frame1 + my_data_frame2);
+  result.print();
+  (my_data_frame3-my_data_frame4).print();
 // _____________________________________________________________________________
   return 0;
 }

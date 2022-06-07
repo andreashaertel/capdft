@@ -125,7 +125,7 @@ class FunctionalFMTSpherical : public Functional {
   DataField<double>* density_profile_times_r;
   /** \brief Fourier transformed density profile
    *
-   *  Since it is the Sine transformed density_profile_times_r it also contains
+   *  Since it is the sine transformed density_profile_times_r it also contains
    *  arrays of length grid_count+1.
    *
    */
