@@ -15,13 +15,11 @@ SDIR = src/
 # All files from the normal repository that are used in this example ###########
 REPOSDIR = ../../src/
 REPOFILE = properties
-REPOFILE += data
 REPOFILE += data_field
+REPOFILE += df_spherical
 REPOFILE += system
-REPOFILE += template_data
 REPOFILE += functional
 REPOFILE += functional_fmt_spherical
-REPOFILE += functional_es_mf_spherical
 # Get host name ################################################################
 HOST = $(shell hostname)
 # Offsets for binaries and objects #############################################

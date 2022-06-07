@@ -18,7 +18,6 @@
 #include "../../../src/system.hpp"
 #include "../../../src/functional.hpp"
 #include "../../../src/functional_fmt_spherical.hpp"
-#include "../../../src/functional_es_mf_spherical.hpp"
 // _____________________________________________________________________________
 // Main function
 int main(int argc, char** args) {
@@ -79,9 +78,10 @@ int main(int argc, char** args) {
    * the relevant quantities exclusively for them.
    */
 // _____________________________________________________________________________
-  System my_system(system_properties, species_properties);
+  System<DFSpherical<double>> my_system(system_properties, species_properties);
   // Obtain the density profile pointer for modification purposes (e.g. Picard)
-  DataField<double>* density_profile = my_system.get_density_profile_pointer();
+  std::vector<DFSpherical<double>>* density_profiles =
+      my_system.get_density_profiles_pointer();
   // Create FMT Functional object
   // Either specify the species or let the constructor decide which species can
   // interact via this functional
@@ -104,68 +104,74 @@ int main(int argc, char** args) {
    * in such a way.
    */
 // _____________________________________________________________________________
-  DataField<double> fmt_derivatives(species_properties.size(), grid_count);
-  double deviation{std::numeric_limits<double>::max()};
-  double maximum_deviation{1.0e-6};
+  double maximum_deviation{std::numeric_limits<double>::max()};
+  double target_deviation{1.0e-6};
   double r{0.};
   double dr{system_length / static_cast<double>(grid_count)};
   double diameter{0.};
   double bulk_density{0.};
-  double proposed_density{0.};
   double mixing{1.0e-1};
   size_t step{0};
+  DFSpherical<double> proposed_density(system_properties);
+  DFSpherical<double> deviations(system_properties);
   std::vector<double> bulk_derivatives(species_properties.size());
+  std::vector<DFSpherical<double>> fmt_derivatives;
+  std::vector<DFSpherical<double>> exp_ext_potential;
+  for (size_t i = 0; i != species_properties.size(); ++i) {
+    fmt_derivatives.push_back(DFSpherical<double>(system_properties));
+    exp_ext_potential.push_back(DFSpherical<double>(system_properties));
+  }
   // Set external (hard) potential
-  DataField<double> exp_ext_potential(species_properties.size(), grid_count);
   for (size_t i = 0; i != species_properties.size(); ++i) {
     species_properties.at(i).get_property("diameter", &diameter);
     species_properties.at(i).get_property("bulk density", &bulk_density);
     for (size_t j = 0; j != grid_count; ++j) {
       r = dr * static_cast<double>(j + 1);
       if (r < diameter) {
-        exp_ext_potential.at(i, j) = 0.;
+        exp_ext_potential.at(i).at(j) = 0.;
       } else if (system_length - r < 1.5 * diameter) {
-        exp_ext_potential.at(i, j) = 0.;
+        exp_ext_potential.at(i).at(j) = 0.;
       } else {
-        exp_ext_potential.at(i, j) = 1.;
+        exp_ext_potential.at(i).at(j) = 1.;
       }
     }
   }
   // Initial guess for the density profiles
-  *(density_profile) = *(density_profile) * exp_ext_potential;
+  for (size_t i = 0; i < species_properties.size(); ++i) {
+    density_profiles->at(i) = density_profiles->at(i) * exp_ext_potential.at(i);
+  }
   // Get the bulk derivatives
   my_fmt_functional.calc_bulk_derivative(&bulk_derivatives);
   // Picard iterations
-  while (deviation > maximum_deviation) {
+  while (maximum_deviation > target_deviation) {
     ++step;
-    deviation = 0.;
     // Calculate the functional derivative; Suppress warnings about unphysical
     // values
     my_fmt_functional.calc_derivative_no_warnings(&fmt_derivatives);
     for (size_t i = 0; i != species_properties.size(); ++i) {
       species_properties.at(i).get_property("bulk density", &bulk_density);
-      for (size_t j = 0; j != grid_count; ++j) {
-        // Calculate the right hand side of the update formula of cDFT
-        proposed_density = bulk_density * exp_ext_potential.at(i, j) *
-            exp(bulk_derivatives.at(i) - fmt_derivatives.at(i, j));
-        // Mix the new solution with the old one
-        density_profile->at(i, j) = density_profile->at(i, j) * (1. - mixing) +
-            mixing * proposed_density;
-        // Calculate how much the new density deviates from the old one at most
-        if (fabs(density_profile->at(i, j) - proposed_density) > deviation) {
-          deviation = fabs(density_profile->at(i, j) - proposed_density);
-        }
-      }
+
+      // Calculate the right hand side of the update formula of cDFT.
+      // No iteration over the grid is needed, because of the overloaded
+      // operators of DFSpherical.
+      proposed_density = bulk_density * exp_ext_potential.at(i) *
+          exp(bulk_derivatives.at(i)) * exp(fmt_derivatives.at(i));
+      // Mix the new solution with the old one
+      density_profiles->at(i) = density_profiles->at(i) * (1. - mixing) +
+          mixing * proposed_density;
+      // Calculate how much the new density deviates from the old one at most
+      deviations = abs(density_profiles->at(i) - proposed_density);
+      maximum_deviation = max(deviations);
     }
     // Print the deviation and the number of iteration steps taken
     std::cout << "Picard iteration step " << step;
-    std::cout << ". Deviation: " << deviation << std::endl;
+    std::cout << ". Deviation: " << maximum_deviation << std::endl;
   }
   // Write density profile to file
   std::fstream out_stream;
   out_stream.open("spherical_profile.dat", std::ios::out);
-  density_profile->set_bin_width(dr);
-  density_profile->print(out_stream);
+  //density_profiles->set_bin_width(dr);  // TODO(Moritz): fix
+  //density_profiles->print(out_stream);  // TODO(Moritz): fix
   out_stream.close();
   // Obtain grand potential of the system
   double energy;

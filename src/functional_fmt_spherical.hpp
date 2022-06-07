@@ -13,7 +13,6 @@
 // Includes
 #include <vector>
 #include <fftw3.h>
-#include "functional.hpp"  // NOLINT
 #include "data_field.hpp"  // NOLINT
 #include "df_spherical.hpp"  // NOLINT
 #include "properties.hpp"  // NOLINT
@@ -27,7 +26,7 @@
  *  derivative values.
  *
  */
-class FunctionalFMTSpherical : public Functional {
+class FunctionalFMTSpherical {
  public:
   /** \brief Constructors
    *
@@ -50,14 +49,16 @@ class FunctionalFMTSpherical : public Functional {
    *  check_weighted_densities(),
    *  calc_partial_derivatives() (which uses calc_local_partial_derivatives())
    */
-  virtual void calc_derivative(DataField<double>* functional_derivative);
-  void calc_derivative_no_warnings(DataField<double>* functional_derivative);
+  void calc_derivative(
+      std::vector<DFSpherical<double>>* functional_derivative);
+  void calc_derivative_no_warnings(
+      std::vector<DFSpherical<double>>* functional_derivative);
   /** \brief Calculate bulk derivatives
    *
    * 
    *
    */
-  virtual void calc_bulk_derivative(std::vector<double>* bulk_derivative);
+  void calc_bulk_derivative(std::vector<double>* bulk_derivative);
   /** \brief Calculate the (excess free) energy value of this functional
    *
    *  Calculate the energy value of this functional, which corresponds to the
@@ -66,7 +67,7 @@ class FunctionalFMTSpherical : public Functional {
    *
    *  \return Returns the functional energy value
    */
-  virtual double calc_energy();
+  double calc_energy();
 
  private:
   /** \brief System length (radius of the sperical geometry)
@@ -115,23 +116,23 @@ class FunctionalFMTSpherical : public Functional {
   /** \brief Pointer to density profiles
    *
    */
-  std::vector<DFSpherical<double>>* density_profile_pointer;
+  std::vector<DFSpherical<double>>* density_profiles_pointer;
   /** \brief Density profiles times the radial position
-   *
+   *  
    *  The sine transform of fftw does not require the point r=0, because it is
    *  zero anyways. The cosine transform, however has a non-zero value there.
    *  For this reason the the array is of length grid_count+1 and a sine
    *  transform starts at the second element.
    *
    */
-  DataField<double>* density_profile_times_r;
+  std::vector<DFSpherical<double>> density_profiles_times_r;
   /** \brief Fourier transformed density profile
    *
-   *  Since it is the sine transformed density_profile_times_r it also contains
+   *  Since it is the sine transformed density_profiles_times_r it also contains
    *  arrays of length grid_count+1.
    *
    */
-  DataField<double>* density_profile_four;
+  std::vector<DFSpherical<double>> density_profiles_four;
   /** \brief Weighted densities
    *
    * There are three weighted density types: scalar, vectorial, tensorial.
@@ -213,7 +214,7 @@ class FunctionalFMTSpherical : public Functional {
    *
    */
   void calc_weighted_partial_derivatives(
-      DataField<double>* functional_derivative);
+      std::vector<DFSpherical<double>>* functional_derivative);
   /** \brief Calculate the energy density
    *  
    *  \param The index of the position of which the energy density value is

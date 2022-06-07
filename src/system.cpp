@@ -42,12 +42,12 @@ const std::vector<Properties>& System<T>::get_species_properties() const {
 }
 // _____________________________________________________________________________
 template <typename T>  // Template for different data frames DF*
-const std::vector<T>* System<T>::get_density_profiles_pointer() const {
+std::vector<T>* System<T>::get_density_profiles_pointer() {
   return &density_profiles;
 }
 // _____________________________________________________________________________
 template <typename T>  // Template for different data frames DF*
-const std::vector<T>& System<T>::get_density_profiles() const {
+std::vector<T>& System<T>::get_density_profiles() {
   return density_profiles;
 }
 // _____________________________________________________________________________

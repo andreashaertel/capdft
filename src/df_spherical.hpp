@@ -36,6 +36,7 @@ class DFSpherical {
    *  DFSpherical.
    *
    */
+  explicit DFSpherical(size_t array_size);
   explicit DFSpherical(const Properties& properties);
   DFSpherical(const DFSpherical<T>& other);
   /** \brief Destructor
@@ -65,6 +66,15 @@ class DFSpherical {
    *
    */
   T& element(size_t i) const;
+  /** \brief Function that returns the data array pointer.
+   *
+   */
+  T* array();
+  /** \brief Function that sets all elements in the DFSpherical object to
+   *         a certain value.
+   *
+   */
+  void set_all_elements_to(T value);
   /** \brief Test if the DFSpherical object other has the same size as
    *         this object. 
    *
@@ -192,6 +202,15 @@ class DFSpherical {
    *
    */
   friend DFSpherical<T> log_natural(const DFSpherical<T>& other);
+  /** \brief Apply the modulus (absolute value) to all elements.
+   *
+   */
+  friend DFSpherical<T> abs(const DFSpherical<T>& other);
+  /** \brief Return the largest element of the array.
+   *         Makes only sense for data of type double.
+   *
+   */
+  friend double max(const DFSpherical<double>& other);
   #pragma GCC diagnostic pop
   /** \brief std::exception BadSizeException.
    */
