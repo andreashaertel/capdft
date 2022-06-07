@@ -1,18 +1,21 @@
 // SPDX-FileCopyrightText: 2021 Moritz Bültmann <moritz.bueltmann@gmx.de>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "functional_fmt_spherical.hpp"  // NOLINT
-#include <fftw3.h>
 #include <cmath>
 #include <algorithm>
 #include <fstream>
 #include <iostream>
+#include <fftw3.h>
+#include "data_field.hpp"  // NOLINT
+#include "df_spherical.hpp"  // NOLINT
 // _____________________________________________________________________________
 FunctionalFMTSpherical::FunctionalFMTSpherical() {
   //
 }
 // _____________________________________________________________________________
 FunctionalFMTSpherical::FunctionalFMTSpherical(
-    System* system, const std::vector<size_t>& affected_species)
+    System<DFSpherical<double>>* system,
+    const std::vector<size_t>& affected_species)
   : affected_species(affected_species) {
   // Clear all std::vectors
   diameters.clear();
@@ -22,7 +25,7 @@ FunctionalFMTSpherical::FunctionalFMTSpherical(
   // Get species properties; excludes all species without diameter property
   extract_species_properties(system);
   // Initialize the density profile and density profile times radial position
-  density_profile_pointer = system->get_density_profile_pointer();
+  density_profile_pointer = system->get_density_profiles_pointer();
   density_profile_times_r = new DataField<double>(species_count, grid_count+1);
   density_profile_four = new DataField<double>(species_count, grid_count+1);
   update_density_times_r();
@@ -54,7 +57,8 @@ FunctionalFMTSpherical::FunctionalFMTSpherical(
   initialize_weights();
 }
 // _____________________________________________________________________________
-FunctionalFMTSpherical::FunctionalFMTSpherical(System* system)
+FunctionalFMTSpherical::FunctionalFMTSpherical(
+    System<DFSpherical<double>>* system)
   : FunctionalFMTSpherical(system, std::vector<size_t>(0)) {
 }
 // _____________________________________________________________________________
@@ -85,7 +89,8 @@ FunctionalFMTSpherical::~FunctionalFMTSpherical() {
   tensor_derivative_terms_four->~DataField();
 }
 // _____________________________________________________________________________
-void FunctionalFMTSpherical::extract_system_properties(System* sys) {
+void FunctionalFMTSpherical::extract_system_properties(
+    System<DFSpherical<double>>* sys) {
   Properties properties(sys->get_system_properties());
   properties.get_property("length", &length);
   properties.get_property("grid count", &grid_count);
@@ -99,7 +104,8 @@ void FunctionalFMTSpherical::extract_system_properties(System* sys) {
       sqrt(M_PI / (2. * static_cast<double>(2 * grid_count)));
 }
 // _____________________________________________________________________________
-void FunctionalFMTSpherical::extract_species_properties(System* sys) {
+void FunctionalFMTSpherical::extract_species_properties(
+    System<DFSpherical<double>>* sys) {
   // Sort the affected species numbers
   std::sort(affected_species.begin(), affected_species.end());
   // Remove duplicates
@@ -152,7 +158,7 @@ void FunctionalFMTSpherical::update_density_times_r() {
         density_profile_times_r->at(0, j) = 0.;
       } else {
         density_profile_times_r->at(i, j) =
-            r * density_profile_pointer->element(index, j-1);
+            r * density_profile_pointer->at(index).at(j-1);
       }
     }
   }

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2021 Moritz Bültmann <moritz.bueltmann@gmx.de>
+// SPDX-FileCopyrightText: 2022 Moritz Bültmann <moritz.bueltmann@gmx.de>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #ifndef SRC_FUNCTIONAL_FMT_SPHERICAL_HPP_
 #define SRC_FUNCTIONAL_FMT_SPHERICAL_HPP_
@@ -11,9 +11,11 @@
  */
 // _____________________________________________________________________________
 // Includes
-#include <fftw3.h>
 #include <vector>
+#include <fftw3.h>
 #include "functional.hpp"  // NOLINT
+#include "data_field.hpp"  // NOLINT
+#include "df_spherical.hpp"  // NOLINT
 #include "properties.hpp"  // NOLINT
 #include "system.hpp"  // NOLINT
 // Class forward declarations
@@ -31,8 +33,8 @@ class FunctionalFMTSpherical : public Functional {
    *
    */
   FunctionalFMTSpherical();
-  explicit FunctionalFMTSpherical(System* system);
-  FunctionalFMTSpherical(System* system,
+  explicit FunctionalFMTSpherical(System<DFSpherical<double>>* system);
+  FunctionalFMTSpherical(System<DFSpherical<double>>* system,
       const std::vector<size_t>& affected_species);
   /** \brief Destructor
    *
@@ -113,7 +115,7 @@ class FunctionalFMTSpherical : public Functional {
   /** \brief Pointer to density profiles
    *
    */
-  DataField<double>* density_profile_pointer;
+  std::vector<DFSpherical<double>>* density_profile_pointer;
   /** \brief Density profiles times the radial position
    *
    *  The sine transform of fftw does not require the point r=0, because it is
@@ -224,11 +226,11 @@ class FunctionalFMTSpherical : public Functional {
   /** \brief From the system object extract the system properties
    *
    */
-  void extract_system_properties(System* sys);
+  void extract_system_properties(System<DFSpherical<double>>* sys);
   /** \brief From the system object extract the species properties
    *
    */
-  void extract_species_properties(System* sys);
+  void extract_species_properties(System<DFSpherical<double>>* sys);
   /** \brief The density profile is changed outside of this functional, thus
    *  we need to update the internal arrays it before calculating something.
    */

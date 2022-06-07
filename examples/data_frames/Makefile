@@ -15,7 +15,7 @@ SDIR = src/
 # All files from the normal repository that are used in this example ###########
 REPOSDIR = ../../src/
 REPOFILE = properties
-REPOFILE += data_frame_spherical
+REPOFILE += df_spherical
 # Get host name ################################################################
 HOST = $(shell hostname)
 # Offsets for binaries and objects #############################################
