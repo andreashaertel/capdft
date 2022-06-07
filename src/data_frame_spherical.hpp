@@ -76,6 +76,15 @@ class DFSpherical {
    *
    */
   bool same_size(const DFSpherical<T>& other) const;
+  /** \brief Print arrays to specified output with custom or standard precision
+   *
+   */
+  void print(std::ostream& outstream, std::streamsize stream_size) const;
+  void print(std::ostream& outstream) const;
+  /** \brief Print all values to standard output
+   *
+   */
+  void print() const;
   /** \brief The = operator copies the content of other into this object.
    *
    *  \return DFSpherical reference of this object.

@@ -381,7 +381,49 @@ DFSpherical<fftw_complex> log_natural(
   return result;
 }
 // _____________________________________________________________________________
-// TODO(Moritz): print functions
+template <typename T>
+void DFSpherical<T>::print(
+    std::ostream& outstream, std::streamsize stream_size) const {
+  // Save previous output precision
+  std::streamsize old_stream_size = outstream.precision();
+  // Header
+  outstream.precision(stream_size);
+  outstream << "# [index] [data]" << std::endl;
+  // Data
+  for (size_t i = 0; i < array_size; ++i) {
+    outstream << i << " " << this->element(i) << std::endl;
+  }
+  // Restore output precision
+  outstream.precision(old_stream_size);
+}
+template <>
+void DFSpherical<fftw_complex>::print(
+    std::ostream& outstream, std::streamsize stream_size) const {
+  // Save previous output precision
+  std::streamsize old_stream_size = outstream.precision();
+  // Header
+  outstream.precision(stream_size);
+  outstream << "# [index] [data]" << std::endl;
+  // Data
+  for (size_t i = 0; i < array_size; ++i) {
+    outstream << i << " ";
+    outstream << this->element(i)[0];  // real part
+    outstream << "+i" << this->element(i)[1];  // imaginary part
+    outstream << std::endl;
+  }
+  // Restore output precision
+  outstream.precision(old_stream_size);
+}
+// _____________________________________________________________________________
+template <typename T>
+void DFSpherical<T>::print(std::ostream& outstream) const {
+  print(outstream, std::numeric_limits<double>::max_digits10);
+}
+// _____________________________________________________________________________
+template <typename T>
+void DFSpherical<T>::print() const {
+  print(std::cout);
+}
 // _____________________________________________________________________________
 // _____________________________________________________________________________
 // _____________________________________________________________________________
