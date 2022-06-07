@@ -11,7 +11,7 @@
 #include <cmath>
 #include <fftw3.h>
 #include "../../../src/properties.hpp"
-#include "../../../src/data_frame_spherical.hpp"
+#include "../../../src/df_spherical.hpp"
 // _____________________________________________________________________________
 // Main function
 int main(int argc, char** args) {

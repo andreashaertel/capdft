@@ -22,15 +22,17 @@
  *
  */
 class Properties {
- /** \brief The System class has full access on the properties. 
-  *
-  *  In general, the properties must not been changed once they are defined to 
-  *  avoid manipulation of calculations during runtime. However, the System 
-  *  needs to have access on properties in order to, for instance, update the 
-  *  valancies of all species. For this reason, System is declared as a friend.
-  *
-  */
-  friend class System;
+  /** \brief The System class has full access on the properties. 
+   *
+   *  In general, the properties must not been changed once they are defined to 
+   *  avoid manipulation of calculations during runtime. However, the System 
+   *  needs to have access on properties in order to, for instance, update the 
+   *  valancies of all species. For this reason, System is declared as a friend.
+   *
+   */
+  // TODO(Andreas): Keine gute idee, wenn System ein template ist.
+  //                Warum nicht die update-Funktion public machen?
+  //friend class System;
  public:
   /** \brief Constructors
    *
@@ -141,13 +143,13 @@ class Properties {
   /** \brief Update a property with an arbitrary data type. 
    * 
    *  If the property already exists, its value is updated. 
-   *  Otherwise, the property is add. 
+   *  Otherwise, the property is added.
    * 
    *  \param property_name Name of the property. 
    *  \param property_value Value of the property. 
    *
    *  Example for calling the function: <br>
-   *  update_property<double>("Neuer Wert", 4.5);
+   *  update_property<double>("my property", 4.5);
    *
    */
   template<typename T>

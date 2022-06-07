@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2022 Moritz Bültmann <moritz.bueltmann@gmx.de>
 // SPDX-FileCopyrightText: 2022 Andreas Härtel <http://andreashaertel.anno1982.de/>
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#include "data_frame_spherical.hpp"  // NOLINT
+#include "df_spherical.hpp"  // NOLINT
 #include <cmath>
 #include <fftw3.h>
 // Class type declarations

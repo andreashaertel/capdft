@@ -1,15 +1,18 @@
 // SPDX-FileCopyrightText: 2021 Moritz Bültmann <moritz.bueltmann@gmx.de>
 // SPDX-FileCopyrightText: 2022 Andreas Härtel <http://andreashaertel.anno1982.de/>
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#include <stdexcept>
 #include "system.hpp"  // NOLINT
+#include <stdexcept>
+// Class type declarations
+template class System<DFSpherical<double>>;
 // _____________________________________________________________________________
-// System::System() {
-//  //
-//}
+template <typename T>  // Template for different data frames DF*
+ System<T>::System() {
+  //
+}
 // _____________________________________________________________________________
-template <typename AnyDataFrame>
-System::System(
+template <typename T>  // Template for different data frames DF*
+System<T>::System(
     Properties system_properties,
     std::vector<Properties> species_properties)
   : system_properties(system_properties),
@@ -18,57 +21,54 @@ System::System(
   size_t grid_count{0};
   system_properties.get_property("grid count", &grid_count);
   // From the system properties create the density Profile
-  density_profile = new DataField<double>(
-      species_properties.size(), grid_count);
-  bulk();
-  // Create density profiles
   for (size_t i = 0; i < species_properties.size(); i++) {
-    AnyDataFrame* new_data = new AnyDataFrame(system_properties);
-    density_profiles.push_back(new_data);
+    density_profiles.push_back(T(system_properties));
   }
-  // just a test:
-  AnyDataFrame* sum = new AnyDataFrame(system_properties);
-  for (auto it = density_profiles.begin(); it != density_profiles.end(); ++it) {
-    sum += *it;
-  }
+  set_bulk_densities();
 }
 // _____________________________________________________________________________
-System::~System() {
-  density_profile->~DataField();
+template <typename T>  // Template for different data frames DF*
+System<T>::~System() {
 }
 // _____________________________________________________________________________
-const Properties& System::get_system_properties() const {
+template <typename T>  // Template for different data frames DF*
+const Properties& System<T>::get_system_properties() const {
   return system_properties;
 }
 // _____________________________________________________________________________
-const std::vector<Properties>& System::get_species_properties() const {
+template <typename T>  // Template for different data frames DF*
+const std::vector<Properties>& System<T>::get_species_properties() const {
   return species_properties;
 }
 // _____________________________________________________________________________
-DataField<double>* System::get_density_profile_pointer() {
-  return density_profile;
+template <typename T>  // Template for different data frames DF*
+const std::vector<T>* System<T>::get_density_profiles_pointer() const {
+  return &density_profiles;
 }
 // _____________________________________________________________________________
-const std::vector<DataFrame>& System::get_density_profiles() const {
+template <typename T>  // Template for different data frames DF*
+const std::vector<T>& System<T>::get_density_profiles() const {
   return density_profiles;
 }
 // _____________________________________________________________________________
-void System::update_density_profiles(
-    std::vector<DataFrame> density_profiles) {
+template <typename T>  // Template for different data frames DF*
+void System<T>::update_density_profiles(
+    const std::vector<T>& other_density_profiles) {
   // Check for correct size of fugacities in comparison to the number of
   // species.
-  if (this->density_profiles.size() != density_profiles.size())
+  if (this->density_profiles.size() != other_density_profiles.size())
     throw std::length_error("Size of vector density_profiles does not agree with number of species.");  // NOLINT
   // Iterate through all species and update the density profiles
-  auto it2 = density_profiles.begin();
-  for (auto it = this->density_profiles.begin();
-      it != this->density_profiles.end(); ++it) {
-    *it = *it2;
-    ++it2;
+  auto it_other = other_density_profiles.begin();
+  for (auto it_this = this->density_profiles.begin();
+      it_this != this->density_profiles.end(); ++it_this) {
+    *it_this = *it_other;
+    ++it_other;
   }
 }
 // _____________________________________________________________________________
-void System::bulk() {
+template <typename T>  // Template for different data frames DF*
+void System<T>::set_bulk_densities() {
   double bulk_density{0.};
   size_t grid_count{0};
   system_properties.get_property("grid count", &grid_count);
@@ -76,15 +76,18 @@ void System::bulk() {
       ++it) {
     it->get_property("bulk density", &bulk_density);
     for (size_t i = 0; i != grid_count; ++i) {
-      density_profile->at(it - species_properties.begin(), i) = bulk_density;
+      density_profiles.at(it - species_properties.begin()).at(i) = bulk_density;
     }
   }
 }
 // _____________________________________________________________________________
-void System::set_fugacities(std::vector<double>* fugacities) {
+template <typename T>  // Template for different data frames DF*
+void System<T>::set_fugacities(std::vector<double>& fugacities) {
+  // TODO(Andreas): input-variablen -> Referenzen
+  // TODO(Andreas): output-variablen -> Pointer
   // Check for correct size of fugacities in comparison to the number of
   // species.
-  if (species_properties.size() != fugacities->size()) {
+  if (species_properties.size() != fugacities.size()) {
     throw std::length_error("Size of vector chempot does not agree with number of species.");  // NOLINT
   }
   //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -93,11 +96,11 @@ void System::set_fugacities(std::vector<double>* fugacities) {
   // AH, 24.02.2022
   //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   // Iterate through all species and update the fugacities
-  std::vector<double>::iterator it2 = fugacities->begin();
-  for (std::vector<Properties>::iterator it = species_properties.begin();
-        it != species_properties.end(); ++it) {
-    it->update_property<double>("fugacity", *it2);
-    ++it2;
-  }
+  //std::vector<double>::iterator it2 = fugacities.begin();
+  //for (std::vector<Properties>::iterator it = species_properties.begin();
+  //      it != species_properties.end(); ++it) {
+  //  it->update_property<double>("fugacity", *it2);
+  //  ++it2;
+  //}
 }
 // _____________________________________________________________________________

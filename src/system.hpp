@@ -8,18 +8,20 @@
  */
 #include <vector>
 #include "data_field.hpp"  // NOLINT
+#include "df_spherical.hpp"  // NOLINT
 #include "data_frame.hpp"  // NOLINT
 #include "properties.hpp"  // NOLINT
-/** \brief Container class that contains all Properties and DataFields
+/** \brief Template Container class that contains all system Properties and
+ *         density profiles stored in data fields (DF*)
  *
  */
+template <typename T>  // Template for different data frames DF*
 class System {
  public:
   /** \brief Constructor
    *
    */
-  // System();
-  template <typename AnyDataFrame>
+  System();
   System(
       Properties system_properties,
       std::vector<Properties> species_properties);
@@ -38,7 +40,7 @@ class System {
   /** \brief Write bulk values to the density profile
    *
    */
-  void bulk();  // TODO(Andreas): Vorschlag: "Aendern in: set_bulk_density()"
+  void set_bulk_densities();
   /** \brief Set/Update fugacities in all species properties. 
    *
    *  Updates the property fugacity in each species_properties 
@@ -52,31 +54,32 @@ class System {
    *  \param fugacities Vector of fugacities for all species. 
    *
    */
-  void set_fugacities(std::vector<double>* fugacities);
-  /** \brief Obtain pointer of the density_profile
+  void set_fugacities(std::vector<double>& fugacities);
+  /** \brief Obtain pointer of the density_profiles
    *
    */
-  DataField<double>* get_density_profile_pointer();
+  const std::vector<T>* get_density_profiles_pointer() const;
   /** \brief Get current density profiles by reference. 
    *
    *  The density profiles are constant and cannot be changed. In order to 
    *  update them, use update_density_profiles(). 
    *
-   *  \return Constant vector of DataFrames by reference. The vector is over 
+   *  \return Constant vector of DF* by reference. The vector is over 
    *          species in the system. 
    *
    */
-  const std::vector<DataFrame>& get_density_profiles() const;
+  const std::vector<T>& get_density_profiles() const;
   /** \brief Update density profiles to new values. 
    * 
    *  Updates the density profiles to new values. 
    *
-   *  \param density_profiles The new density profiles as DataFrame's in a 
+   *  \param density_profiles The new density profiles as DF*s in a 
    *         vector over the species of the system. The data is not changed,
-   *         just values are copied. 
+   *         values are just copied. 
    *
    */
-  void update_density_profiles(std::vector<DataFrame> density_profiles);
+  void update_density_profiles(
+      const std::vector<T>& other_density_profiles);
 
  private:
   /** \brief Supplied system properties
@@ -90,8 +93,7 @@ class System {
   /** \brief Data field pointer that contains the density profile if initialized
    *
    */
-  DataField<double>* density_profile;
-  std::vector<DataFrame> density_profiles;
+  std::vector<T> density_profiles;
 
  protected:
 };
