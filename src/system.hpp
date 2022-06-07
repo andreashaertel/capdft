@@ -58,7 +58,7 @@ class System {
   /** \brief Obtain pointer of the density_profiles
    *
    */
-  const std::vector<T>* get_density_profiles_pointer() const;
+  std::vector<T>* get_density_profiles_pointer();
   /** \brief Get current density profiles by reference. 
    *
    *  The density profiles are constant and cannot be changed. In order to 
@@ -68,7 +68,7 @@ class System {
    *          species in the system. 
    *
    */
-  const std::vector<T>& get_density_profiles() const;
+  std::vector<T>& get_density_profiles();
   /** \brief Update density profiles to new values. 
    * 
    *  Updates the density profiles to new values. 

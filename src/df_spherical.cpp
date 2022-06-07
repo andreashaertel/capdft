@@ -35,9 +35,49 @@ T& DFSpherical<T>::element(size_t i) const {
 }
 // _____________________________________________________________________________
 template <typename T>
+T* DFSpherical<T>::array() {
+  return data;
+}
+// _____________________________________________________________________________
+template <typename T>
+void DFSpherical<T>::set_all_elements_to(T value) {
+  for (size_t i = 0; i < array_size; ++i) {
+    this->at(i) = value;
+  }
+}
+template <>
+void DFSpherical<fftw_complex>::set_all_elements_to(fftw_complex value) {
+  for (size_t i = 0; i < array_size; ++i) {
+    this->at(i)[0] = value[0];
+    this->at(i)[1] = value[1];
+  }
+}
+// _____________________________________________________________________________
+template <typename T>
+DFSpherical<T>::DFSpherical(size_t array_size) : array_size(array_size) {
+  data = new T[array_size];
+  set_all_elements_to(0.);
+}
+template <>
+DFSpherical<fftw_complex>::DFSpherical(size_t array_size)
+  : array_size(array_size) {
+  data = new fftw_complex[array_size];
+  fftw_complex zero{0.,0.};
+  set_all_elements_to(zero);
+}
+// _____________________________________________________________________________
+template <typename T>
 DFSpherical<T>::DFSpherical(const Properties& properties) {
   properties.get_property("grid count", &array_size);
   data = new T[array_size];
+  set_all_elements_to(0.);
+}
+template <>
+DFSpherical<fftw_complex>::DFSpherical(const Properties& properties) {
+  properties.get_property("grid count", &array_size);
+  data = new fftw_complex[array_size];
+  fftw_complex zero{0.,0.};
+  set_all_elements_to(zero);
 }
 // _____________________________________________________________________________
 template <typename T>
@@ -68,6 +108,50 @@ template <typename T>
 bool DFSpherical<T>::same_size(
     const DFSpherical<T>& other) const {
   return (this->size() == other.size());
+}
+// _____________________________________________________________________________
+template <typename T>
+void DFSpherical<T>::print(
+    std::ostream& outstream, std::streamsize stream_size) const {
+  // Save previous output precision
+  std::streamsize old_stream_size = outstream.precision();
+  // Header
+  outstream.precision(stream_size);
+  outstream << "# [index] [data]" << std::endl;
+  // Data
+  for (size_t i = 0; i < array_size; ++i) {
+    outstream << i << " " << this->element(i) << std::endl;
+  }
+  // Restore output precision
+  outstream.precision(old_stream_size);
+}
+template <>
+void DFSpherical<fftw_complex>::print(
+    std::ostream& outstream, std::streamsize stream_size) const {
+  // Save previous output precision
+  std::streamsize old_stream_size = outstream.precision();
+  // Header
+  outstream.precision(stream_size);
+  outstream << "# [index] [data]" << std::endl;
+  // Data
+  for (size_t i = 0; i < array_size; ++i) {
+    outstream << i << " ";
+    outstream << this->element(i)[0];  // real part
+    outstream << "+i" << this->element(i)[1];  // imaginary part
+    outstream << std::endl;
+  }
+  // Restore output precision
+  outstream.precision(old_stream_size);
+}
+// _____________________________________________________________________________
+template <typename T>
+void DFSpherical<T>::print(std::ostream& outstream) const {
+  print(outstream, std::numeric_limits<double>::max_digits10);
+}
+// _____________________________________________________________________________
+template <typename T>
+void DFSpherical<T>::print() const {
+  print(std::cout);
 }
 // _____________________________________________________________________________
 template <typename T>
@@ -381,51 +465,25 @@ DFSpherical<fftw_complex> log_natural(
   return result;
 }
 // _____________________________________________________________________________
-template <typename T>
-void DFSpherical<T>::print(
-    std::ostream& outstream, std::streamsize stream_size) const {
-  // Save previous output precision
-  std::streamsize old_stream_size = outstream.precision();
-  // Header
-  outstream.precision(stream_size);
-  outstream << "# [index] [data]" << std::endl;
-  // Data
-  for (size_t i = 0; i < array_size; ++i) {
-    outstream << i << " " << this->element(i) << std::endl;
+DFSpherical<double> abs(const DFSpherical<double>& other) {
+  DFSpherical<double> result(other);
+  for (size_t i = 0; i < other.array_size; ++i) {
+    result.at(i) = fabs(result.at(i));
   }
-  // Restore output precision
-  outstream.precision(old_stream_size);
+  return result;
 }
-template <>
-void DFSpherical<fftw_complex>::print(
-    std::ostream& outstream, std::streamsize stream_size) const {
-  // Save previous output precision
-  std::streamsize old_stream_size = outstream.precision();
-  // Header
-  outstream.precision(stream_size);
-  outstream << "# [index] [data]" << std::endl;
-  // Data
-  for (size_t i = 0; i < array_size; ++i) {
-    outstream << i << " ";
-    outstream << this->element(i)[0];  // real part
-    outstream << "+i" << this->element(i)[1];  // imaginary part
-    outstream << std::endl;
+DFSpherical<fftw_complex> abs(const DFSpherical<fftw_complex>& other) {
+  DFSpherical<fftw_complex> result(other);
+  for (size_t i = 0; i < other.array_size; ++i) {
+    result.at(i)[0] = sqrt(pow(result.at(i)[0], 2) + pow(result.at(i)[1], 2));
+    result.at(i)[1] = 0.;
   }
-  // Restore output precision
-  outstream.precision(old_stream_size);
+  return result;
 }
 // _____________________________________________________________________________
-template <typename T>
-void DFSpherical<T>::print(std::ostream& outstream) const {
-  print(outstream, std::numeric_limits<double>::max_digits10);
+double max(const DFSpherical<double>& other) {
+  return *std::max_element(other.data, other.data + other.array_size);
 }
-// _____________________________________________________________________________
-template <typename T>
-void DFSpherical<T>::print() const {
-  print(std::cout);
-}
-// _____________________________________________________________________________
-// _____________________________________________________________________________
 // _____________________________________________________________________________
 // _____________________________________________________________________________
 // _____________________________________________________________________________
