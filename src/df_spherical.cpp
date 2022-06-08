@@ -54,6 +54,11 @@ void DFSpherical<fftw_complex>::set_all_elements_to(fftw_complex value) {
 }
 // _____________________________________________________________________________
 template <typename T>
+DFSpherical<T>::DFSpherical() : array_size(0) {
+  data = new T[array_size];
+}
+// _____________________________________________________________________________
+template <typename T>
 DFSpherical<T>::DFSpherical(size_t array_size) : array_size(array_size) {
   data = new T[array_size];
   set_all_elements_to(0.);
