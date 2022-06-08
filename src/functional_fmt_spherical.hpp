@@ -13,7 +13,6 @@
 // Includes
 #include <vector>
 #include <fftw3.h>
-#include "data_field.hpp"  // NOLINT
 #include "df_spherical.hpp"  // NOLINT
 #include "properties.hpp"  // NOLINT
 #include "system.hpp"  // NOLINT
@@ -54,7 +53,7 @@ class FunctionalFMTSpherical {
   /** \brief Calculate the functional derivatives
    *
    *  This function calculates the functional derivatives and updates the
-   *  supplied DataField.
+   *  supplied DFSpherical.
    *
    *  It uses the functions:
    *  calc_weighted_densities(),
@@ -155,19 +154,19 @@ class FunctionalFMTSpherical {
    * the tensorial weighted density.
    *
    */
-  DataField<double>* scalar_weighted_dens_real;
-  DataField<double>* vector_weighted_dens_real;
-  DataField<double>* tensor_weighted_dens_real;
-  DataField<double>* scalar_weighted_dens_four;
-  DataField<double>* vector_weighted_dens_four;
-  DataField<double>* tensor_weighted_dens_four;
+  std::vector<DFSpherical<double>> scalar_weighted_dens_real;
+  std::vector<DFSpherical<double>> vector_weighted_dens_real;
+  std::vector<DFSpherical<double>> tensor_weighted_dens_real;
+  std::vector<DFSpherical<double>> scalar_weighted_dens_four;
+  std::vector<DFSpherical<double>> vector_weighted_dens_four;
+  std::vector<DFSpherical<double>> tensor_weighted_dens_four;
   /** \brief Weight functions
    *
    *  In the radially symmetric case we only need a few weight functions.
    *  Every vector element contains all weight function of another species.
    *
    */
-  std::vector<DataField<double>> weights_four;
+  std::vector<std::vector<DFSpherical<double>>> weights_four;
   /** \brief Partial derivatives of the free energy density w.r.t. the
    *  weighted densities
    *
@@ -179,24 +178,24 @@ class FunctionalFMTSpherical {
    * the tensorial partial derivative.
    *
    */
-  DataField<double>* scalar_partial_derivative_real;
-  DataField<double>* vector_partial_derivative_real;
-  DataField<double>* tensor_partial_derivative_real;
-  DataField<double>* scalar_partial_derivative_four;
-  DataField<double>* vector_partial_derivative_four;
-  DataField<double>* tensor_partial_derivative_four;
+  std::vector<DFSpherical<double>> scalar_partial_derivative_real;
+  std::vector<DFSpherical<double>> vector_partial_derivative_real;
+  std::vector<DFSpherical<double>> tensor_partial_derivative_real;
+  std::vector<DFSpherical<double>> scalar_partial_derivative_four;
+  std::vector<DFSpherical<double>> vector_partial_derivative_four;
+  std::vector<DFSpherical<double>> tensor_partial_derivative_four;
   /** \brief Terms of the free energy density w.r.t. the weighted densities
    *
    * They are used as dummy for the convolution of the partial derivatives with
    * the corresponding weight functions.
    *
    */
-  DataField<double>* scalar_derivative_terms_four;
-  DataField<double>* vector_derivative_terms_four;
-  DataField<double>* tensor_derivative_terms_four;
-  DataField<double>* scalar_derivative_four;
-  DataField<double>* vector_derivative_four;
-  DataField<double>* tensor_derivative_four;
+  std::vector<DFSpherical<double>> scalar_derivative_terms_four;
+  std::vector<DFSpherical<double>> vector_derivative_terms_four;
+  std::vector<DFSpherical<double>> tensor_derivative_terms_four;
+  std::vector<DFSpherical<double>> scalar_derivative_four;
+  std::vector<DFSpherical<double>> vector_derivative_four;
+  std::vector<DFSpherical<double>> tensor_derivative_four;
   /** \brief Flags for the sine and cosine transforms
    *
    *  The first one preserves the input, while the second one might destroy it.
@@ -244,17 +243,21 @@ class FunctionalFMTSpherical {
    *
    */
   void extract_species_properties(System<DFSpherical<double>>* sys);
+  /** \brief Initialize all data frame vectors
+   *
+   */
+  void initialize_all_data_frames();
   /** \brief The density profile is changed outside of this functional, thus
    *  we need to update the internal arrays it before calculating something.
    */
   void update_density_times_r();
-  /** \brief Initialize the weight functions in Fourier space
+  /** \brief Calculate the weight functions in Fourier space
    *  For radially symmetric systems only a few weights are actually needed.
    *  The different weighted densities are obtained by introducing the
    *  prefactors in the convolution.
    *
    */
-  void initialize_weights();
+  void calc_weights();
   /** \brief Radial integration
    *
    */

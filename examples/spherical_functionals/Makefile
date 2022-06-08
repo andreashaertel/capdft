@@ -15,7 +15,6 @@ SDIR = src/
 # All files from the normal repository that are used in this example ###########
 REPOSDIR = ../../src/
 REPOFILE = properties
-REPOFILE += data_field
 REPOFILE += df_spherical
 REPOFILE += system
 REPOFILE += functional

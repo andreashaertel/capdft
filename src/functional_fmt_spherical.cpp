@@ -6,14 +6,13 @@
 #include <fstream>
 #include <iostream>
 #include <fftw3.h>
-#include "data_field.hpp"  // NOLINT
 #include "df_spherical.hpp"  // NOLINT
 // _____________________________________________________________________________
 FunctionalFMTSpherical::FunctionalFMTSpherical() {
   //
 }
 // _____________________________________________________________________________
-FunctionalFMTSpherical::FunctionalFMTSpherical(  // TODO(Moritz): System von pointer zu referenz
+FunctionalFMTSpherical::FunctionalFMTSpherical(  // TODO(Moritz): System von pointer zu referenz  // NOLINT
     System<DFSpherical<double>>* system,
     const std::vector<size_t>& affected_species)
   : affected_species(affected_species) {
@@ -26,37 +25,10 @@ FunctionalFMTSpherical::FunctionalFMTSpherical(  // TODO(Moritz): System von poi
   extract_species_properties(system);
   // Initialize the density profile and density profile times radial position
   density_profiles_pointer = system->get_density_profiles_pointer();
-  for (size_t i = 0; i < species_count; ++i) {
-    density_profiles_times_r.push_back(DFSpherical<double>(grid_count+1));
-    density_profiles_four.push_back(DFSpherical<double>(grid_count+1));
-  }
+  initialize_all_data_frames();
   update_density_times_r();
-  // Initialize weighted densities
-  scalar_weighted_dens_real = new DataField<double>(4, grid_count);
-  vector_weighted_dens_real = new DataField<double>(2, grid_count);
-  tensor_weighted_dens_real = new DataField<double>(2, grid_count);
-  scalar_weighted_dens_four = new DataField<double>(4, grid_count+1);
-  vector_weighted_dens_four = new DataField<double>(4, grid_count+1);
-  tensor_weighted_dens_four = new DataField<double>(3, grid_count+1);
-  // Initialize partial derivatives
-  scalar_partial_derivative_real = new DataField<double>(4, grid_count);
-  vector_partial_derivative_real = new DataField<double>(2, grid_count);
-  tensor_partial_derivative_real = new DataField<double>(2, grid_count);
-  scalar_partial_derivative_four = new DataField<double>(4, grid_count+1);
-  vector_partial_derivative_four = new DataField<double>(4, grid_count+1);
-  tensor_partial_derivative_four = new DataField<double>(4, grid_count+1);
-  // Initialize derivative terms
-  scalar_derivative_four = new DataField<double>(4, grid_count);
-  vector_derivative_four = new DataField<double>(2, grid_count);
-  tensor_derivative_four = new DataField<double>(2, grid_count);
-  scalar_derivative_terms_four = new DataField<double>(4, grid_count+1);
-  vector_derivative_terms_four = new DataField<double>(4, grid_count+1);
-  tensor_derivative_terms_four = new DataField<double>(4, grid_count+1);
-  // Initialize weights
-  for (size_t i = 0; i != species_count; ++i) {
-    weights_four.push_back(DataField<double>(3, grid_count+1));
-  }
-  initialize_weights();
+  // Calculate weights
+  calc_weights();
 }
 // _____________________________________________________________________________
 FunctionalFMTSpherical::FunctionalFMTSpherical(
@@ -65,27 +37,7 @@ FunctionalFMTSpherical::FunctionalFMTSpherical(
 }
 // _____________________________________________________________________________
 FunctionalFMTSpherical::~FunctionalFMTSpherical() {
-  // Free memory of weighted densities
-  scalar_weighted_dens_real->~DataField();
-  vector_weighted_dens_real->~DataField();
-  tensor_weighted_dens_real->~DataField();
-  scalar_weighted_dens_four->~DataField();
-  vector_weighted_dens_four->~DataField();
-  tensor_weighted_dens_four->~DataField();
-  // Free memory of partial derivatives
-  scalar_partial_derivative_real->~DataField();
-  vector_partial_derivative_real->~DataField();
-  tensor_partial_derivative_real->~DataField();
-  scalar_partial_derivative_four->~DataField();
-  vector_partial_derivative_four->~DataField();
-  tensor_partial_derivative_four->~DataField();
-  // Free memory of derivative dummy variablea
-  scalar_derivative_four->~DataField();
-  vector_derivative_four->~DataField();
-  tensor_derivative_four->~DataField();
-  scalar_derivative_terms_four->~DataField();
-  vector_derivative_terms_four->~DataField();
-  tensor_derivative_terms_four->~DataField();
+  //
 }
 // _____________________________________________________________________________
 void FunctionalFMTSpherical::extract_system_properties(
@@ -144,6 +96,56 @@ void FunctionalFMTSpherical::extract_species_properties(
   species_count = affected_species.size();
 }
 // _____________________________________________________________________________
+void FunctionalFMTSpherical::initialize_all_data_frames() {
+  // Initialize density profile time radial position and its Fourier transform
+  for (size_t i = 0; i < species_count; ++i) {
+    density_profiles_times_r.push_back(DFSpherical<double>(grid_count+1));
+    density_profiles_four.push_back(DFSpherical<double>(grid_count+1));
+  }
+  // Initialize weighted densities
+  for (size_t i = 0; i < 2; ++i) {
+    vector_weighted_dens_real.push_back(DFSpherical<double>(grid_count));
+    tensor_weighted_dens_real.push_back(DFSpherical<double>(grid_count));
+  }
+  for (size_t i = 0; i < 3; ++i) {
+    tensor_weighted_dens_four.push_back(DFSpherical<double>(grid_count+1));
+  }
+  for (size_t i = 0; i < 4; ++i) {
+    scalar_weighted_dens_real.push_back(DFSpherical<double>(grid_count));
+    scalar_weighted_dens_four.push_back(DFSpherical<double>(grid_count+1));
+    vector_weighted_dens_four.push_back(DFSpherical<double>(grid_count+1));
+  }
+  // Initialize partial derivatives
+  for (size_t i = 0; i < 2; ++i) {
+    vector_partial_derivative_real.push_back(DFSpherical<double>(grid_count));
+    tensor_partial_derivative_real.push_back(DFSpherical<double>(grid_count));
+  }
+  for (size_t i = 0; i < 4; ++i) {
+    scalar_partial_derivative_real.push_back(DFSpherical<double>(grid_count));
+    scalar_partial_derivative_four.push_back(DFSpherical<double>(grid_count+1));
+    vector_partial_derivative_four.push_back(DFSpherical<double>(grid_count+1));
+    tensor_partial_derivative_four.push_back(DFSpherical<double>(grid_count+1));
+  }
+  // Initialize derivative terms
+  for (size_t i = 0; i < 2; ++i) {
+    vector_derivative_four.push_back(DFSpherical<double>(grid_count));
+    tensor_derivative_four.push_back(DFSpherical<double>(grid_count));
+  }
+  for (size_t i = 0; i < 4; ++i) {
+    scalar_derivative_four.push_back(DFSpherical<double>(grid_count));
+    scalar_derivative_terms_four.push_back(DFSpherical<double>(grid_count+1));
+    vector_derivative_terms_four.push_back(DFSpherical<double>(grid_count+1));
+    tensor_derivative_terms_four.push_back(DFSpherical<double>(grid_count+1));
+  }
+  // Initialize weights
+  for (size_t i = 0; i < species_count; ++i) {
+    weights_four.push_back(std::vector<DFSpherical<double>>(0));
+    for (size_t j = 0; j < 3; ++j) {
+      weights_four.at(i).push_back(DFSpherical<double>(grid_count+1));
+    }
+  }
+}
+// _____________________________________________________________________________
 void FunctionalFMTSpherical::update_density_times_r() {
   double r{0.};
   size_t index{0};
@@ -163,7 +165,7 @@ void FunctionalFMTSpherical::update_density_times_r() {
   }
 }
 // _____________________________________________________________________________
-void FunctionalFMTSpherical::initialize_weights() {
+void FunctionalFMTSpherical::calc_weights() {
   // Declare auxiliary variables. R means radius of the hard sphere.
   // kr is the radial position in Fourier space. Hence, RR is the square of R
   // and so on.
@@ -174,41 +176,40 @@ void FunctionalFMTSpherical::initialize_weights() {
     R = diameters.at(i) / 2.;
     RR = R * R;
     RRR = RR * R;
-    for (size_t j = 0; j != grid_count + 1; ++j) {
+    // Calculate limits kr --> 0
+    // scalar weight 3 (theta)
+    weights_four.at(i).at(0).at(0) = 4. * M_PI * RRR / 3.;
+    // scalar weight 2 (delta)
+    weights_four.at(i).at(1).at(0) = 4. * M_PI * RR;
+    // tensorial
+    weights_four.at(i).at(2).at(0) =
+        weights_four.at(i).at(1).at(0) -
+        3. * weights_four.at(i).at(0).at(0) / R;
+    for (size_t j = 1; j != grid_count + 1; ++j) {
       kr = dkr * static_cast<double>(j);
       Rkr = R * kr;
       krkr = kr * kr;
       krkrkr = krkr * kr;
-      // Calculate limits kr --> 0
-      if (j == 0) {
-        // scalar weight 3 (theta)
-        weights_four.at(i).at(0, j) = 4. * M_PI * RRR / 3.;
-        // scalar weight 2 (delta)
-        weights_four.at(i).at(1, j) = 4. * M_PI * RR;
-        // tensorial
-        weights_four.at(i).at(2, j) =
-            weights_four.at(i).at(1, j) - 3. * weights_four.at(i).at(0, j) / R;
-      } else {
-        // scalar weight 3 (theta)
-        weights_four.at(i).at(0, j) = 4. * M_PI * (sin(Rkr) - Rkr * cos(Rkr)) /
-            krkrkr;
-        // scalar weight 2 (delta)
-        weights_four.at(i).at(1, j) = 4. * M_PI * R * sin(Rkr) / kr;
-        // tensorial
-        weights_four.at(i).at(2, j) =
-            weights_four.at(i).at(1, j) - 3. * weights_four.at(i).at(0, j) / R;
-      }
+      // scalar weight 3 (theta)
+      weights_four.at(i).at(0).at(j) = 4. * M_PI * (sin(Rkr) - Rkr * cos(Rkr)) /
+          krkrkr;
+      // scalar weight 2 (delta)
+      weights_four.at(i).at(1).at(j) = 4. * M_PI * R * sin(Rkr) / kr;
+      // tensorial
+      weights_four.at(i).at(2).at(j) =
+          weights_four.at(i).at(1).at(j) -
+          3. * weights_four.at(i).at(0).at(j) / R;
     }
   }
 }
 // _____________________________________________________________________________
 void FunctionalFMTSpherical::calc_derivative(
     std::vector<DFSpherical<double>>* functional_derivative) {
-  // Check if the given DataField has correct array length
+  // Check if the given DFSpherical has correct array length
   for (auto it = affected_species.begin(); it != affected_species.end(); ++it) {
     if (functional_derivative->at(*it).size() != grid_count) {
       std::cerr << "FunctionalFMTSpherical::calc_derivative(): \"";
-      std::cerr << "Error: Supplied DataField has incorrect array size.\"";
+      std::cerr << "Error: Supplied DFSpherical has incorrect array size.\"";
       std::cerr << std::endl;
       exit(1);
     }
@@ -226,11 +227,11 @@ void FunctionalFMTSpherical::calc_derivative(
 // _____________________________________________________________________________
 void FunctionalFMTSpherical::calc_derivative_no_warnings(
     std::vector<DFSpherical<double>>* functional_derivative) {
-  // Check if the given DataField has correct array length
+  // Check if the given DFSpherical has correct array length
   for (auto it = affected_species.begin(); it != affected_species.end(); ++it) {
     if (functional_derivative->at(*it).size() != grid_count) {
       std::cerr << "FunctionalFMTSpherical::calc_derivative(): \"";
-      std::cerr << "Error: Supplied DataField has incorrect array size.\"";
+      std::cerr << "Error: Supplied DFSpherical has incorrect array size.\"";
       std::cerr << std::endl;
       exit(1);
     }
@@ -248,22 +249,24 @@ void FunctionalFMTSpherical::calc_bulk_derivative(
     std::vector<double>* bulk_derivative) {
   // Auxiliary variables
   double diameter{0.}, diameter2{0.}, diameter3{0.};
-  // Set all weighted densities to 0
-  scalar_weighted_dens_real->zeros();
   // Calculate the fluid weighted densities and save them to the first position
+  for (auto it = scalar_weighted_dens_real.begin();
+      it != scalar_weighted_dens_real.end(); ++it) {
+    it->at(0) = 0.;
+  }
   for (size_t i = 0; i != species_count; ++i) {
     // Define auxiliary values
     diameter = diameters.at(i);
     diameter2 = diameter * diameter;
     diameter3 = diameter2 * diameter;
     // All non-scalar weighted densities are 0 the others are obviously constant
-    scalar_weighted_dens_real->at(0, 0) +=
+    scalar_weighted_dens_real.at(0).at(0) +=
         bulk_densities.at(i) * diameter3 * M_PI / 6.0;
-    scalar_weighted_dens_real->at(1, 0) +=
+    scalar_weighted_dens_real.at(1).at(0) +=
         bulk_densities.at(i) * diameter2 * M_PI;
-    scalar_weighted_dens_real->at(2, 0) +=
+    scalar_weighted_dens_real.at(2).at(0) +=
         bulk_densities.at(i) * diameter / 2.0;
-    scalar_weighted_dens_real->at(3, 0) += bulk_densities.at(i);
+    scalar_weighted_dens_real.at(3).at(0) += bulk_densities.at(i);
   }
   // Evaluate the partial derivatives at the first position
   calc_local_partial_derivatives(0);
@@ -277,27 +280,27 @@ void FunctionalFMTSpherical::calc_bulk_derivative(
     diameter3 = diameter2 * diameter;
     // Calculate the derivatives of the excess free energy functional w.r.t. the
     // weighted densities.
-    bulk_derivative->at(*it) = scalar_partial_derivative_real->at(0, 0) *
+    bulk_derivative->at(*it) = scalar_partial_derivative_real.at(0).at(0) *
         diameter3 * M_PI / 6.0;
-    bulk_derivative->at(*it) += scalar_partial_derivative_real->at(1, 0) *
+    bulk_derivative->at(*it) += scalar_partial_derivative_real.at(1).at(0) *
         diameter2 * M_PI;
-    bulk_derivative->at(*it) += scalar_partial_derivative_real->at(2, 0) *
+    bulk_derivative->at(*it) += scalar_partial_derivative_real.at(2).at(0) *
         diameter / 2.0;
-    bulk_derivative->at(*it) += scalar_partial_derivative_real->at(3, 0);
+    bulk_derivative->at(*it) += scalar_partial_derivative_real.at(3).at(0);
   }
 }
 // _____________________________________________________________________________
 double FunctionalFMTSpherical::calc_energy() {
   double integral{0.};
-  DataField<double> free_energy_density(1, grid_count);
+  DFSpherical<double> free_energy_density(grid_count);
   // Calculate the weighted densities for the current density profile
   calc_weighted_densities();
   check_weighted_densities();
   // Store free energy density
   for (size_t i = 0; i < grid_count; ++i) {
-    free_energy_density.at(0, i) = calc_local_energy_density(i);
+    free_energy_density.at(i) = calc_local_energy_density(i);
   }
-  integral = radial_integration(free_energy_density.array(0), grid_count, dr);
+  integral = radial_integration(free_energy_density.array(), grid_count, dr);
   return integral;
 }
 // _____________________________________________________________________________
@@ -319,44 +322,44 @@ void FunctionalFMTSpherical::calc_weighted_densities() {
   for (size_t i = 0; i != 4; ++i) {  // TODO(Moritz): make number static
     backward_plans.push_back(
         fftw_plan_r2r_1d(grid_count,
-            scalar_weighted_dens_four->array(i) + 1,
-            scalar_weighted_dens_four->array(i) + 1,
+            scalar_weighted_dens_four.at(i).array() + 1,
+            scalar_weighted_dens_four.at(i).array() + 1,
             FFTW_RODFT00, flags_destroy));
   }
   backward_plans.push_back(
       fftw_plan_r2r_1d(grid_count,
-          vector_weighted_dens_four->array(0) + 1,
-          vector_weighted_dens_four->array(0) + 1,
+          vector_weighted_dens_four.at(0).array() + 1,
+          vector_weighted_dens_four.at(0).array() + 1,
           FFTW_RODFT00, flags_destroy));
   backward_plans.push_back(
       fftw_plan_r2r_1d(grid_count + 1,
-          vector_weighted_dens_four->array(1),
-          vector_weighted_dens_four->array(1),
+          vector_weighted_dens_four.at(1).array(),
+          vector_weighted_dens_four.at(1).array(),
           FFTW_REDFT00, flags_destroy));
   backward_plans.push_back(
       fftw_plan_r2r_1d(grid_count,
-          vector_weighted_dens_four->array(2) + 1,
-          vector_weighted_dens_four->array(2) + 1,
+          vector_weighted_dens_four.at(2).array() + 1,
+          vector_weighted_dens_four.at(2).array() + 1,
           FFTW_RODFT00, flags_destroy));
   backward_plans.push_back(
       fftw_plan_r2r_1d(grid_count + 1,
-          vector_weighted_dens_four->array(3),
-          vector_weighted_dens_four->array(3),
+          vector_weighted_dens_four.at(3).array(),
+          vector_weighted_dens_four.at(3).array(),
           FFTW_REDFT00, flags_destroy));
   backward_plans.push_back(
       fftw_plan_r2r_1d(grid_count,
-          tensor_weighted_dens_four->array(0) + 1,
-          tensor_weighted_dens_four->array(0) + 1,
+          tensor_weighted_dens_four.at(0).array() + 1,
+          tensor_weighted_dens_four.at(0).array() + 1,
           FFTW_RODFT00, flags_destroy));
   backward_plans.push_back(
       fftw_plan_r2r_1d(grid_count + 1,
-          tensor_weighted_dens_four->array(1),
-          tensor_weighted_dens_four->array(1),
+          tensor_weighted_dens_four.at(1).array(),
+          tensor_weighted_dens_four.at(1).array(),
           FFTW_REDFT00, flags_destroy));
   backward_plans.push_back(
       fftw_plan_r2r_1d(grid_count,
-          tensor_weighted_dens_four->array(2) + 1,
-          tensor_weighted_dens_four->array(2) + 1,
+          tensor_weighted_dens_four.at(2).array() + 1,
+          tensor_weighted_dens_four.at(2).array() + 1,
           FFTW_RODFT00, flags_destroy));
   // Creating plans clears the input array hence we need to update it
   update_density_times_r();
@@ -377,48 +380,54 @@ void FunctionalFMTSpherical::calc_weighted_densities() {
     }
   }
   // Convolution of density profiles with weights
-  scalar_weighted_dens_four->zeros();
-  vector_weighted_dens_four->zeros();
-  tensor_weighted_dens_four->zeros();
+  for (size_t i = 0; i < scalar_weighted_dens_four.size(); ++i) {
+    scalar_weighted_dens_four.at(i).set_all_elements_to(0.);
+  }
+  for (size_t i = 0; i < vector_weighted_dens_four.size(); ++i) {
+    vector_weighted_dens_four.at(i).set_all_elements_to(0.);
+  }
+  for (size_t i = 0; i < tensor_weighted_dens_four.size(); ++i) {
+    tensor_weighted_dens_four.at(i).set_all_elements_to(0.);
+  }
   for (size_t i = 1; i != grid_count+1; ++i) {
     kr = dkr * static_cast<double>(i);
     krkr = kr * kr;
     for (size_t j = 0; j != species_count; ++j) {
       // Scalar weighted density n_3
-      scalar_weighted_dens_four->at(0, i) += density_profiles_four.at(j).at(i) *
-          kr * weights_four.at(j).at(0, i) * norm_sin;
+      scalar_weighted_dens_four.at(0).at(i) += density_profiles_four.at(j).at(i) *
+          kr * weights_four.at(j).at(0).at(i) * norm_sin;
       // Scalar weighted density n_2
-      scalar_weighted_dens_four->at(1, i) += density_profiles_four.at(j).at(i) *
-          kr * weights_four.at(j).at(1, i) * norm_sin;
+      scalar_weighted_dens_four.at(1).at(i) += density_profiles_four.at(j).at(i) *
+          kr * weights_four.at(j).at(1).at(i) * norm_sin;
       // Scalar weighted density n_1
-      scalar_weighted_dens_four->at(2, i) += density_profiles_four.at(j).at(i) *
-          kr * weights_four.at(j).at(1, i) / (2. * M_PI * diameters.at(j)) *
+      scalar_weighted_dens_four.at(2).at(i) += density_profiles_four.at(j).at(i) *
+          kr * weights_four.at(j).at(1).at(i) / (2. * M_PI * diameters.at(j)) *
           norm_sin;
       // Scalar weighted density n_0
-      scalar_weighted_dens_four->at(3, i) += density_profiles_four.at(j).at(i) *
-          kr * weights_four.at(j).at(1, i) / (M_PI * pow(diameters.at(j), 2)) *
+      scalar_weighted_dens_four.at(3).at(i) += density_profiles_four.at(j).at(i) *
+          kr * weights_four.at(j).at(1).at(i) / (M_PI * pow(diameters.at(j), 2)) *
           norm_sin;
       // Vectorial weighted density n_2 z-component in rotated system
       // The radial FT of the weight w2 transforms it into the scalar FT w3
-      vector_weighted_dens_four->at(0, i) += density_profiles_four.at(j).at(i) *
-          kr * weights_four.at(j).at(0, i) * norm_sin;  // sine transform
-      vector_weighted_dens_four->at(1, i) += density_profiles_four.at(j).at(i) *
-          krkr * weights_four.at(j).at(0, i) * norm_cos;  // cosine transform
+      vector_weighted_dens_four.at(0).at(i) += density_profiles_four.at(j).at(i) *
+          kr * weights_four.at(j).at(0).at(i) * norm_sin;  // sine transform
+      vector_weighted_dens_four.at(1).at(i) += density_profiles_four.at(j).at(i) *
+          krkr * weights_four.at(j).at(0).at(i) * norm_cos;  // cosine transform
       // Vectorial weighted density n_1 z-component in rotated system
-      vector_weighted_dens_four->at(2, i) += density_profiles_four.at(j).at(i) *
-          kr * weights_four.at(j).at(0, i) * norm_sin /
+      vector_weighted_dens_four.at(2).at(i) += density_profiles_four.at(j).at(i) *
+          kr * weights_four.at(j).at(0).at(i) * norm_sin /
           (2. * M_PI * diameters.at(j));  // sine transform
-      vector_weighted_dens_four->at(3, i) += density_profiles_four.at(j).at(i) *
-          krkr * weights_four.at(j).at(0, i) * norm_cos /
+      vector_weighted_dens_four.at(3).at(i) += density_profiles_four.at(j).at(i) *
+          krkr * weights_four.at(j).at(0).at(i) * norm_cos /
           (2. * M_PI * diameters.at(j));  // cosine transform
       // Tensorial weighted density n_m2: the diagonal elements only contain
       // these three terms; all off-diagonal elements are zero
-      tensor_weighted_dens_four->at(0, i) += density_profiles_four.at(j).at(i) *
-          weights_four.at(j).at(2, i) * norm_sin / kr;  // sin/kr
-      tensor_weighted_dens_four->at(1, i) += density_profiles_four.at(j).at(i) *
-          weights_four.at(j).at(2, i) * norm_cos;  // cos
-      tensor_weighted_dens_four->at(2, i) += density_profiles_four.at(j).at(i) *
-          weights_four.at(j).at(2, i) * kr * norm_sin;  // sin*kr
+      tensor_weighted_dens_four.at(0).at(i) += density_profiles_four.at(j).at(i) *
+          weights_four.at(j).at(2).at(i) * norm_sin / kr;  // sin/kr
+      tensor_weighted_dens_four.at(1).at(i) += density_profiles_four.at(j).at(i) *
+          weights_four.at(j).at(2).at(i) * norm_cos;  // cos
+      tensor_weighted_dens_four.at(2).at(i) += density_profiles_four.at(j).at(i) *
+          weights_four.at(j).at(2).at(i) * kr * norm_sin;  // sin*kr
     }
   }
   // Sine and cosine transforms
@@ -426,43 +435,49 @@ void FunctionalFMTSpherical::calc_weighted_densities() {
     fftw_execute(*it);
   }
   // Normalize
-  *(scalar_weighted_dens_four) *= 4. * M_PI;
-  *(vector_weighted_dens_four) *= 4. * M_PI;
-  *(tensor_weighted_dens_four) *= 4. * M_PI;
-  *(scalar_weighted_dens_four) *= 1. / pow(2. * M_PI, 3);
-  *(vector_weighted_dens_four) *= 1. / pow(2. * M_PI, 3);
-  *(tensor_weighted_dens_four) *= 1. / pow(2. * M_PI, 3);
+  for (size_t i = 0; i < scalar_weighted_dens_four.size(); ++i) {
+    scalar_weighted_dens_four.at(i) *= 4. * M_PI;
+    scalar_weighted_dens_four.at(i) *= 1. / pow(2. * M_PI, 3);
+  }
+  for (size_t i = 0; i < vector_weighted_dens_four.size(); ++i) {
+    vector_weighted_dens_four.at(i) *= 4. * M_PI;
+    vector_weighted_dens_four.at(i) *= 1. / pow(2. * M_PI, 3);
+  }
+  for (size_t i = 0; i < tensor_weighted_dens_four.size(); ++i) {
+    tensor_weighted_dens_four.at(i) *= 4. * M_PI;
+    tensor_weighted_dens_four.at(i) *= 1. / pow(2. * M_PI, 3);
+  }
   // Assemble the terms correctly to obtain the weighted densities
   for (size_t i = 0; i != grid_count; ++i) {
     r = dr * static_cast<double>(i+1);
     rr = r * r;
     rrr = rr * r;
-    scalar_weighted_dens_real->at(0, i) =
-        scalar_weighted_dens_four->at(0, i+1) / r;
-    scalar_weighted_dens_real->at(1, i) =
-        scalar_weighted_dens_four->at(1, i+1) / r;
-    scalar_weighted_dens_real->at(2, i) =
-        scalar_weighted_dens_four->at(2, i+1) / r;
-    scalar_weighted_dens_real->at(3, i) =
-        scalar_weighted_dens_four->at(3, i+1) / r;
-    vector_weighted_dens_real->at(0, i) =
-        vector_weighted_dens_four->at(0, i+1) / rr -
-        vector_weighted_dens_four->at(1, i+1) / r;
-    vector_weighted_dens_real->at(1, i) =
-        vector_weighted_dens_four->at(2, i+1) / rr -
-        vector_weighted_dens_four->at(3, i+1) / r;
-    tensor_weighted_dens_real->at(0, i) =
-        tensor_weighted_dens_four->at(0, i+1) / rrr -
-        tensor_weighted_dens_four->at(1, i+1) / rr -
-        tensor_weighted_dens_four->at(2, i+1) / (3. * r);
-    tensor_weighted_dens_real->at(1, i) =
-        2. * tensor_weighted_dens_four->at(1, i+1) / rr +
-        2. * tensor_weighted_dens_four->at(2, i+1) / (3. * r) -
-        2. * tensor_weighted_dens_four->at(0, i+1) / rrr;
+    scalar_weighted_dens_real.at(0).at(i) =
+        scalar_weighted_dens_four.at(0).at(i+1) / r;
+    scalar_weighted_dens_real.at(1).at(i) =
+        scalar_weighted_dens_four.at(1).at(i+1) / r;
+    scalar_weighted_dens_real.at(2).at(i) =
+        scalar_weighted_dens_four.at(2).at(i+1) / r;
+    scalar_weighted_dens_real.at(3).at(i) =
+        scalar_weighted_dens_four.at(3).at(i+1) / r;
+    vector_weighted_dens_real.at(0).at(i) =
+        vector_weighted_dens_four.at(0).at(i+1) / rr -
+        vector_weighted_dens_four.at(1).at(i+1) / r;
+    vector_weighted_dens_real.at(1).at(i) =
+        vector_weighted_dens_four.at(2).at(i+1) / rr -
+        vector_weighted_dens_four.at(3).at(i+1) / r;
+    tensor_weighted_dens_real.at(0).at(i) =
+        tensor_weighted_dens_four.at(0).at(i+1) / rrr -
+        tensor_weighted_dens_four.at(1).at(i+1) / rr -
+        tensor_weighted_dens_four.at(2).at(i+1) / (3. * r);
+    tensor_weighted_dens_real.at(1).at(i) =
+        2. * tensor_weighted_dens_four.at(1).at(i+1) / rr +
+        2. * tensor_weighted_dens_four.at(2).at(i+1) / (3. * r) -
+        2. * tensor_weighted_dens_four.at(0).at(i+1) / rrr;
   }
   // The convolution may have numerical problems at the outermost part.
   // One way of avoiding this is by using an outer external potential
-  // forcing the density profile to vanish (i.e. sperical capacitor).
+  // forcing the density profile to vanish (i.e. spherical capacitor).
 }
 // _____________________________________________________________________________
 void FunctionalFMTSpherical::check_weighted_densities() {
@@ -474,20 +489,20 @@ void FunctionalFMTSpherical::check_weighted_densities() {
   // we can check if the weighted densities are in the legal range.
   for (size_t i = 0; i < grid_count; ++i) {
     // Check scalar weighted densities for values smaller 0
-    if (scalar_weighted_dens_real->at(0, i) < 0.) {
+    if (scalar_weighted_dens_real.at(0).at(i) < 0.) {
       ++n3smaller0_counter;
-      scalar_weighted_dens_real->at(0, i) = 0.;
+      scalar_weighted_dens_real.at(0).at(i) = 0.;
     }
-    if (scalar_weighted_dens_real->at(1, i) < 0.) {
+    if (scalar_weighted_dens_real.at(1).at(i) < 0.) {
       ++n2smaller0_counter;
-      scalar_weighted_dens_real->at(1, i) = 0.;
-      scalar_weighted_dens_real->at(2, i) = 0.;
-      scalar_weighted_dens_real->at(3, i) = 0.;
+      scalar_weighted_dens_real.at(1).at(i) = 0.;
+      scalar_weighted_dens_real.at(2).at(i) = 0.;
+      scalar_weighted_dens_real.at(3).at(i) = 0.;
     }
     // Check if n3 is bigger than 1
-    if (scalar_weighted_dens_real->at(0, i) > 1.) {
+    if (scalar_weighted_dens_real.at(0).at(i) > 1.) {
       ++n3bigger1_counter;
-      scalar_weighted_dens_real->at(0, i) = 1.;
+      scalar_weighted_dens_real.at(0).at(i) = 1.;
     }
   }
   // Show warning
@@ -539,23 +554,23 @@ void FunctionalFMTSpherical::calc_local_partial_derivatives(size_t i) {
   // Auxiliary constants
   double oneO24pi;
   // Calculate auxiliary weight functions ("M"=minus, "O"=over)
-  n3 = scalar_weighted_dens_real->at(0, i);  // n3
+  n3 = scalar_weighted_dens_real.at(0).at(i);  // n3
   n3n3 = n3 * n3;
   n3n3n3 = n3n3 * n3;
   oneMn3 = 1. - n3;
   oneOoneMn3 = 1. / oneMn3;
   oneOn3 = 1. / n3;
   oneOn3n3 = 1. / n3n3;
-  n2 = scalar_weighted_dens_real->at(1, i);  // n2
+  n2 = scalar_weighted_dens_real.at(1).at(i);  // n2
   n2n2 = n2 * n2;
-  n1 = scalar_weighted_dens_real->at(2, i);  // n1
-  n0 = scalar_weighted_dens_real->at(3, i);  // n0
-  nvec2 = vector_weighted_dens_real->at(0, i);  // nvec2
+  n1 = scalar_weighted_dens_real.at(2).at(i);  // n1
+  n0 = scalar_weighted_dens_real.at(3).at(i);  // n0
+  nvec2 = vector_weighted_dens_real.at(0).at(i);  // nvec2
   nvec2nvec2 = nvec2 * nvec2;
-  nvec1 = vector_weighted_dens_real->at(1, i);  // nvec1
-  ntensorm2first = tensor_weighted_dens_real->at(0, i);  // tensor
+  nvec1 = vector_weighted_dens_real.at(1).at(i);  // nvec1
+  ntensorm2first = tensor_weighted_dens_real.at(0).at(i);  // tensor
   ntensorm2second = ntensorm2first;
-  ntensorm2third = tensor_weighted_dens_real->at(1, i);  // tensor
+  ntensorm2third = tensor_weighted_dens_real.at(1).at(i);  // tensor
   trace3 = ntensorm2first * ntensorm2first * ntensorm2first +
       ntensorm2second * ntensorm2second * ntensorm2second  +
       ntensorm2third * ntensorm2third * ntensorm2third;
@@ -605,20 +620,20 @@ void FunctionalFMTSpherical::calc_local_partial_derivatives(size_t i) {
       oneO24pi * oneOoneMn3 * oneOoneMn3;  // times direction tensor
   // Sum partial derivatives \sum_{i=1}^3\partial\Phi_i/\partial n_k
   // Scalar n3
-  scalar_partial_derivative_real->at(0, i) = dPhi1dn3 + dPhi2dn3 + dPhi3dn3;
+  scalar_partial_derivative_real.at(0).at(i) = dPhi1dn3 + dPhi2dn3 + dPhi3dn3;
   // Scalar n2
-  scalar_partial_derivative_real->at(1, i) = dPhi2dn2 + dPhi3dn2;
+  scalar_partial_derivative_real.at(1).at(i) = dPhi2dn2 + dPhi3dn2;
   // Scalar n1
-  scalar_partial_derivative_real->at(2, i) = dPhi2dn1;
+  scalar_partial_derivative_real.at(2).at(i) = dPhi2dn1;
   // Scalar n0
-  scalar_partial_derivative_real->at(3, i) = dPhi1dn0;
+  scalar_partial_derivative_real.at(3).at(i) = dPhi1dn0;
   // Vector n2
-  vector_partial_derivative_real->at(0, i) = dPhi2dnvec2 + dPhi3dnvec2;
+  vector_partial_derivative_real.at(0).at(i) = dPhi2dnvec2 + dPhi3dnvec2;
   // Vector n1
-  vector_partial_derivative_real->at(1, i) = dPhi2dnvec1;
+  vector_partial_derivative_real.at(1).at(i) = dPhi2dnvec1;
   // Tensor nm2 (first and second diagonal element are the same)
-  tensor_partial_derivative_real->at(0, i) = dPhi3dnmat2first;
-  tensor_partial_derivative_real->at(1, i) = dPhi3dnmat2third;
+  tensor_partial_derivative_real.at(0).at(i) = dPhi3dnmat2first;
+  tensor_partial_derivative_real.at(1).at(i) = dPhi3dnmat2third;
 }
 // _____________________________________________________________________________
 void FunctionalFMTSpherical::calc_weighted_partial_derivatives(
@@ -632,49 +647,49 @@ void FunctionalFMTSpherical::calc_weighted_partial_derivatives(
   for (size_t i = 0; i != 4; ++i) {  // TODO(Moritz): make number static
     forward_plans.push_back(
         fftw_plan_r2r_1d(grid_count,
-            scalar_derivative_terms_four->array(i) + 1,
-            scalar_derivative_terms_four->array(i) + 1,
+            scalar_derivative_terms_four.at(i).array() + 1,
+            scalar_derivative_terms_four.at(i).array() + 1,
             FFTW_RODFT00, flags_destroy));
   }
   forward_plans.push_back(
       fftw_plan_r2r_1d(grid_count,
-          vector_derivative_terms_four->array(0) + 1,
-          vector_derivative_terms_four->array(0) + 1,
+          vector_derivative_terms_four.at(0).array() + 1,
+          vector_derivative_terms_four.at(0).array() + 1,
           FFTW_RODFT00, flags_destroy));
   forward_plans.push_back(
       fftw_plan_r2r_1d(grid_count + 1,
-          vector_derivative_terms_four->array(1),
-          vector_derivative_terms_four->array(1),
+          vector_derivative_terms_four.at(1).array(),
+          vector_derivative_terms_four.at(1).array(),
           FFTW_REDFT00, flags_destroy));
   forward_plans.push_back(
       fftw_plan_r2r_1d(grid_count,
-          vector_derivative_terms_four->array(2) + 1,
-          vector_derivative_terms_four->array(2) + 1,
+          vector_derivative_terms_four.at(2).array() + 1,
+          vector_derivative_terms_four.at(2).array() + 1,
           FFTW_RODFT00, flags_destroy));
   forward_plans.push_back(
       fftw_plan_r2r_1d(grid_count + 1,
-          vector_derivative_terms_four->array(3),
-          vector_derivative_terms_four->array(3),
+          vector_derivative_terms_four.at(3).array(),
+          vector_derivative_terms_four.at(3).array(),
           FFTW_REDFT00, flags_destroy));
   forward_plans.push_back(
       fftw_plan_r2r_1d(grid_count,
-          tensor_derivative_terms_four->array(0) + 1,
-          tensor_derivative_terms_four->array(0) + 1,
+          tensor_derivative_terms_four.at(0).array() + 1,
+          tensor_derivative_terms_four.at(0).array() + 1,
           FFTW_RODFT00, flags_destroy));
   forward_plans.push_back(
       fftw_plan_r2r_1d(grid_count,
-          tensor_derivative_terms_four->array(1) + 1,
-          tensor_derivative_terms_four->array(1) + 1,
+          tensor_derivative_terms_four.at(1).array() + 1,
+          tensor_derivative_terms_four.at(1).array() + 1,
           FFTW_RODFT00, flags_destroy));
   forward_plans.push_back(
       fftw_plan_r2r_1d(grid_count + 1,
-          tensor_derivative_terms_four->array(2),
-          tensor_derivative_terms_four->array(2),
+          tensor_derivative_terms_four.at(2).array(),
+          tensor_derivative_terms_four.at(2).array(),
           FFTW_REDFT00, flags_destroy));
   forward_plans.push_back(
       fftw_plan_r2r_1d(grid_count,
-          tensor_derivative_terms_four->array(3) + 1,
-          tensor_derivative_terms_four->array(3) + 1,
+          tensor_derivative_terms_four.at(3).array() + 1,
+          tensor_derivative_terms_four.at(3).array() + 1,
           FFTW_RODFT00, flags_destroy));
   for (auto it = affected_species.begin(); it != affected_species.end(); ++it) {
     backward_plans.push_back(
@@ -687,89 +702,93 @@ void FunctionalFMTSpherical::calc_weighted_partial_derivatives(
   // The vectorial and tensorial derivatives need again a special transform.
   // The dummy arrays dfdnrs_terms and dfdns_terms are used.
   for (size_t i = 0; i != 4; ++i) {
-    scalar_derivative_terms_four->at(i, 0) = 0.;
-    vector_derivative_terms_four->at(i, 0) = 0.;
-    tensor_derivative_terms_four->at(i, 0) = 0.;
+    scalar_derivative_terms_four.at(i).at(0) = 0.;
+    vector_derivative_terms_four.at(i).at(0) = 0.;
+    tensor_derivative_terms_four.at(i).at(0) = 0.;
   }
   for (size_t i = 1; i < grid_count + 1; ++i) {
     r = static_cast<double>(i) * dr;
     // Partial derivatives of scalar weighted densities
-    scalar_derivative_terms_four->at(0, i) =
-        scalar_partial_derivative_real->at(0, i-1) * r;  // sin*r of n3
-    scalar_derivative_terms_four->at(1, i) =
-        scalar_partial_derivative_real->at(1, i-1) * r;  // sin*r of n2
-    scalar_derivative_terms_four->at(2, i) =
-        scalar_partial_derivative_real->at(2, i-1) * r;  // sin*r of n1
-    scalar_derivative_terms_four->at(3, i) =
-        scalar_partial_derivative_real->at(3, i-1) * r;  // sin*r of n0
+    scalar_derivative_terms_four.at(0).at(i) =
+        scalar_partial_derivative_real.at(0).at(i-1) * r;  // sin*r of n3
+    scalar_derivative_terms_four.at(1).at(i) =
+        scalar_partial_derivative_real.at(1).at(i-1) * r;  // sin*r of n2
+    scalar_derivative_terms_four.at(2).at(i) =
+        scalar_partial_derivative_real.at(2).at(i-1) * r;  // sin*r of n1
+    scalar_derivative_terms_four.at(3).at(i) =
+        scalar_partial_derivative_real.at(3).at(i-1) * r;  // sin*r of n0
     // Partial derivatives of vector weighted densities
-    vector_derivative_terms_four->at(0, i) =
-        vector_partial_derivative_real->at(0, i-1);  // sin of nvec2
-    vector_derivative_terms_four->at(1, i) =
-        vector_partial_derivative_real->at(0, i-1) * r;  // cos*r of nvec2
-    vector_derivative_terms_four->at(2, i) =
-        vector_partial_derivative_real->at(1, i-1);  // sin of nvec1
-    vector_derivative_terms_four->at(3, i) =
-        vector_partial_derivative_real->at(1, i-1) * r;  // cos*r of nvec1
+    vector_derivative_terms_four.at(0).at(i) =
+        vector_partial_derivative_real.at(0).at(i-1);  // sin of nvec2
+    vector_derivative_terms_four.at(1).at(i) =
+        vector_partial_derivative_real.at(0).at(i-1) * r;  // cos*r of nvec2
+    vector_derivative_terms_four.at(2).at(i) =
+        vector_partial_derivative_real.at(1).at(i-1);  // sin of nvec1
+    vector_derivative_terms_four.at(3).at(i) =
+        vector_partial_derivative_real.at(1).at(i-1) * r;  // cos*r of nvec1
     // Partial derivatives of tensor weighted densities
-    tensor_derivative_terms_four->at(0, i) =
-        tensor_partial_derivative_real->at(0, i-1) * r;
-    tensor_derivative_terms_four->at(1, i) =
-        (tensor_partial_derivative_real->at(1, i-1) -
-        tensor_partial_derivative_real->at(0, i-1)) / r;
-    tensor_derivative_terms_four->at(2, i) =
-        (tensor_partial_derivative_real->at(1, i-1) -
-        tensor_partial_derivative_real->at(0, i-1));
-    tensor_derivative_terms_four->at(3, i) =
-        (tensor_partial_derivative_real->at(1, i-1) -
-        tensor_partial_derivative_real->at(0, i-1)) * r;
+    tensor_derivative_terms_four.at(0).at(i) =
+        tensor_partial_derivative_real.at(0).at(i-1) * r;
+    tensor_derivative_terms_four.at(1).at(i) =
+        (tensor_partial_derivative_real.at(1).at(i-1) -
+        tensor_partial_derivative_real.at(0).at(i-1)) / r;
+    tensor_derivative_terms_four.at(2).at(i) =
+        (tensor_partial_derivative_real.at(1).at(i-1) -
+        tensor_partial_derivative_real.at(0).at(i-1));
+    tensor_derivative_terms_four.at(3).at(i) =
+        (tensor_partial_derivative_real.at(1).at(i-1) -
+        tensor_partial_derivative_real.at(0).at(i-1)) * r;
   }
   for (auto it = forward_plans.begin(); it != forward_plans.end(); ++it) {
     fftw_execute(*it);
   }
   // Just to be safe
   for (size_t i = 0; i != 4; ++i) {
-    scalar_derivative_terms_four->at(i, 0) = 0.;
-    vector_derivative_terms_four->at(i, 0) = 0.;
-    tensor_derivative_terms_four->at(i, 0) = 0.;
+    scalar_derivative_terms_four.at(i).at(0) = 0.;
+    vector_derivative_terms_four.at(i).at(0) = 0.;
+    tensor_derivative_terms_four.at(i).at(0) = 0.;
   }
   // Normalize
   for (size_t i = 1; i != grid_count+1; ++i) {
     kr = dkr * static_cast<double>(i);
     krkr = kr * kr;
     for (size_t j = 0; j != 4; ++j) {
-      scalar_derivative_terms_four->at(j, i) *= 4. * M_PI * norm_sin / kr;
+      scalar_derivative_terms_four.at(j).at(i) *= 4. * M_PI * norm_sin / kr;
     }
-    vector_derivative_terms_four->at(0, i) *= 4. * M_PI * norm_sin / krkr;
-    vector_derivative_terms_four->at(1, i) *= 4. * M_PI * norm_cos / kr;
-    vector_derivative_terms_four->at(2, i) *= 4. * M_PI * norm_sin / krkr;
-    vector_derivative_terms_four->at(3, i) *= 4. * M_PI * norm_cos / kr;
-    tensor_derivative_terms_four->at(0, i) *= 4. * M_PI * norm_sin / kr;
-    tensor_derivative_terms_four->at(1, i) *= 4. * M_PI * norm_sin /(krkr * kr);
-    tensor_derivative_terms_four->at(2, i) *= 4. * M_PI * norm_cos / krkr;
-    tensor_derivative_terms_four->at(3, i) *= 4. * M_PI * norm_sin / kr;
+    vector_derivative_terms_four.at(0).at(i) *= 4. * M_PI * norm_sin / krkr;
+    vector_derivative_terms_four.at(1).at(i) *= 4. * M_PI * norm_cos / kr;
+    vector_derivative_terms_four.at(2).at(i) *= 4. * M_PI * norm_sin / krkr;
+    vector_derivative_terms_four.at(3).at(i) *= 4. * M_PI * norm_cos / kr;
+    tensor_derivative_terms_four.at(0).at(i) *= 4. * M_PI * norm_sin / kr;
+    tensor_derivative_terms_four.at(1).at(i) *= 4. * M_PI * norm_sin /(krkr * kr);
+    tensor_derivative_terms_four.at(2).at(i) *= 4. * M_PI * norm_cos / krkr;
+    tensor_derivative_terms_four.at(3).at(i) *= 4. * M_PI * norm_sin / kr;
   }
   // Merge terms
   for (size_t i = 0; i < grid_count; ++i) {
-    scalar_derivative_four->at(0, i) = scalar_derivative_terms_four->at(0, i+1);
-    scalar_derivative_four->at(1, i) = scalar_derivative_terms_four->at(1, i+1);
-    scalar_derivative_four->at(2, i) = scalar_derivative_terms_four->at(2, i+1);
-    scalar_derivative_four->at(3, i) = scalar_derivative_terms_four->at(3, i+1);
-    vector_derivative_four->at(0, i) =
-        vector_derivative_terms_four->at(1, i+1) -
-        vector_derivative_terms_four->at(0, i+1);  // nvec2
-    vector_derivative_four->at(1, i) =
-        vector_derivative_terms_four->at(3, i+1) -
-        vector_derivative_terms_four->at(2, i+1);  // nvec1
-    tensor_derivative_four->at(0, i) =
-        tensor_derivative_terms_four->at(0, i+1) +
-        tensor_derivative_terms_four->at(1, i+1) -
-        tensor_derivative_terms_four->at(2, i+1);  // 1st and 2nd el. of tensor
-    tensor_derivative_four->at(1, i) =
-        tensor_derivative_terms_four->at(0, i+1) -
-        2. * tensor_derivative_terms_four->at(1, i+1) +
-        2. * tensor_derivative_terms_four->at(2, i+1) +
-        tensor_derivative_terms_four->at(3, i+1);  // 3rd el. of tensor
+    scalar_derivative_four.at(0).at(i) =
+        scalar_derivative_terms_four.at(0).at(i+1);
+    scalar_derivative_four.at(1).at(i) =
+        scalar_derivative_terms_four.at(1).at(i+1);
+    scalar_derivative_four.at(2).at(i) =
+        scalar_derivative_terms_four.at(2).at(i+1);
+    scalar_derivative_four.at(3).at(i) =
+        scalar_derivative_terms_four.at(3).at(i+1);
+    vector_derivative_four.at(0).at(i) =
+        vector_derivative_terms_four.at(1).at(i+1) -
+        vector_derivative_terms_four.at(0).at(i+1);  // nvec2
+    vector_derivative_four.at(1).at(i) =
+        vector_derivative_terms_four.at(3).at(i+1) -
+        vector_derivative_terms_four.at(2).at(i+1);  // nvec1
+    tensor_derivative_four.at(0).at(i) =
+        tensor_derivative_terms_four.at(0).at(i+1) +
+        tensor_derivative_terms_four.at(1).at(i+1) -
+        tensor_derivative_terms_four.at(2).at(i+1);  // 1st and 2nd el. of tensor
+    tensor_derivative_four.at(1).at(i) =
+        tensor_derivative_terms_four.at(0).at(i+1) -
+        2. * tensor_derivative_terms_four.at(1).at(i+1) +
+        2. * tensor_derivative_terms_four.at(2).at(i+1) +
+        tensor_derivative_terms_four.at(3).at(i+1);  // 3rd el. of tensor
   }
   size_t spec_i{0};
   for (auto it = affected_species.begin(); it != affected_species.end(); ++it) {
@@ -778,35 +797,39 @@ void FunctionalFMTSpherical::calc_weighted_partial_derivatives(
     for (size_t j = 0; j != grid_count; ++j) {
       kr = dkr * static_cast<double>(j + 1);
       // Scalar
-      functional_derivative->at(*it).at(j) += scalar_derivative_four->at(0, j) *
-          kr * weights_four.at(spec_i).at(0, j+1);
+      functional_derivative->at(*it).at(j) +=
+          scalar_derivative_four.at(0).at(j) *
+          kr * weights_four.at(spec_i).at(0).at(j+1);
           // hardcoded sign (sym.:positive)
-      functional_derivative->at(*it).at(j) += scalar_derivative_four->at(1, j) *
-          kr * weights_four.at(spec_i).at(1, j+1);
+      functional_derivative->at(*it).at(j) +=
+          scalar_derivative_four.at(1).at(j) *
+          kr * weights_four.at(spec_i).at(1).at(j+1);
           // hardcoded sign (sym.:positive)
-      functional_derivative->at(*it).at(j) += scalar_derivative_four->at(2, j) *
-          kr * weights_four.at(spec_i).at(1, j+1) /
+      functional_derivative->at(*it).at(j) +=
+          scalar_derivative_four.at(2).at(j) *
+          kr * weights_four.at(spec_i).at(1).at(j+1) /
           (2. * M_PI * diameters.at(spec_i));
           // hardcoded sign (sym.:positive)
-      functional_derivative->at(*it).at(j) += scalar_derivative_four->at(3, j) *
-          kr * weights_four.at(spec_i).at(1, j+1) /
+      functional_derivative->at(*it).at(j) +=
+          scalar_derivative_four.at(3).at(j) *
+          kr * weights_four.at(spec_i).at(1).at(j+1) /
           (M_PI * diameters.at(spec_i) * diameters.at(spec_i));
           // hardcoded sign (sym.:positive)
       // Vector
       functional_derivative->at(*it).at(j) +=
-          -vector_derivative_four->at(0, j) *
-          kr * kr * weights_four.at(spec_i).at(0, j+1);
+          -vector_derivative_four.at(0).at(j) *
+          kr * kr * weights_four.at(spec_i).at(0).at(j+1);
           // hardcoded sign (asym.:negative)
       functional_derivative->at(*it).at(j) +=
-          -vector_derivative_four->at(1, j) *
-          kr * kr * weights_four.at(spec_i).at(0, j+1) /
+          -vector_derivative_four.at(1).at(j) *
+          kr * kr * weights_four.at(spec_i).at(0).at(j+1) /
           (2. * M_PI * diameters.at(spec_i));
           // hardcoded sign (asym.:negative)
       // Tensor
       functional_derivative->at(*it).at(j) += (2. / 3.) *
-          (tensor_derivative_four->at(1, j) -
-          tensor_derivative_four->at(0, j)) * kr *
-          weights_four.at(spec_i).at(2, j+1);  // hardcoded sign (sym.:positive)
+          (tensor_derivative_four.at(1).at(j) -
+          tensor_derivative_four.at(0).at(j)) * kr *
+          weights_four.at(spec_i).at(2).at(j+1);  // hardcoded sign (sym.:positive)  // NOLINT
     }
   }
   // Back transform
@@ -841,15 +864,15 @@ double FunctionalFMTSpherical::calc_local_energy_density(size_t position) {
   double ntensorm2second;
   double ntensorm2third;
   // Assign values to the weighted densities
-  n3 = scalar_weighted_dens_real->at(0, position);
-  n2 = scalar_weighted_dens_real->at(1, position);
-  n1 = scalar_weighted_dens_real->at(2, position);
-  n0 = scalar_weighted_dens_real->at(3, position);
-  nvec2 = vector_weighted_dens_real->at(0, position);
-  nvec1 = vector_weighted_dens_real->at(1, position);
-  ntensorm2first = tensor_weighted_dens_real->at(0, position);
-  ntensorm2second = tensor_weighted_dens_real->at(0, position);
-  ntensorm2third = tensor_weighted_dens_real->at(1, position);
+  n3 = scalar_weighted_dens_real.at(0).at(position);
+  n2 = scalar_weighted_dens_real.at(1).at(position);
+  n1 = scalar_weighted_dens_real.at(2).at(position);
+  n0 = scalar_weighted_dens_real.at(3).at(position);
+  nvec2 = vector_weighted_dens_real.at(0).at(position);
+  nvec1 = vector_weighted_dens_real.at(1).at(position);
+  ntensorm2first = tensor_weighted_dens_real.at(0).at(position);
+  ntensorm2second = tensor_weighted_dens_real.at(0).at(position);
+  ntensorm2third = tensor_weighted_dens_real.at(1).at(position);
   // Calculate auxiliary variables
   n3n3 = n3 * n3;
   n3n3n3 = n3 * n3 * n3;

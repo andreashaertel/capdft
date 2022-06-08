@@ -36,6 +36,7 @@ class DFSpherical {
    *  DFSpherical.
    *
    */
+  DFSpherical();
   explicit DFSpherical(size_t array_size);
   explicit DFSpherical(const Properties& properties);
   DFSpherical(const DFSpherical<T>& other);

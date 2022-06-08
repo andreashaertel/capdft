@@ -60,7 +60,7 @@ int main(int argc, char** args) {
 // _____________________________________________________________________________
   /* To show the values in these containers, a print() function is available.
    * Every DF* class provides the operators =,+,-,*,/,+=,-=,*=,/= and the math
-   * functions exp() and log_natural().
+   * functions exp(), log_natural(), abs() and max().
    */
 // _____________________________________________________________________________
   DFSpherical<double> result(my_data_frame1);
