@@ -301,8 +301,6 @@ double FunctionalFMTSpherical::calc_energy() {
   return integral;
 }
 // _____________________________________________________________________________
-// _____________________________________________________________________________
-// _____________________________________________________________________________
 void FunctionalFMTSpherical::calc_weighted_densities() {
   // TODO(Moritz): speed enhancement by not using "at" and by saving transforms
   // TODO(Moritz): speed enhancement by avoiding some transforms

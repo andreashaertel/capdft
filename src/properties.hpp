@@ -130,7 +130,7 @@ class Properties {
      *  \return the text "The adressed property does not exist.".
      */
     virtual const char* what(void) const throw() {
-      return "The adressed property does not exist.";
+      return "The requested property does not exist.";
     }
   }
   /** \brief Exception MissingPropertyException missing_property_error.

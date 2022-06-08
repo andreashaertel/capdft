@@ -28,11 +28,23 @@
  */
 class FunctionalFMTSpherical {
  public:
-  /** \brief Constructors
+  /** \brief Standard Constructor
    *
    */
   FunctionalFMTSpherical();
+  /** \brief Automated Constructor
+   *
+   * This constructor chooses the particle species that are interacting via this
+   * functional by checking if the hard sphere diameter exists.
+   *
+   */
   explicit FunctionalFMTSpherical(System<DFSpherical<double>>* system);
+  /** \brief Manual Constructor
+   *
+   * This constructor chooses the particle species that are supplied from the
+   * affected_species vector.
+   *
+   */
   FunctionalFMTSpherical(System<DFSpherical<double>>* system,
       const std::vector<size_t>& affected_species);
   /** \brief Destructor
