@@ -32,7 +32,7 @@ class Properties {
    */
   // TODO(Andreas): Keine gute idee, wenn System ein template ist.
   //                Warum nicht die update-Funktion public machen?
-  //friend class System;
+  // friend class System;
  public:
   /** \brief Constructors
    *

@@ -14,8 +14,7 @@ ODIR = obj/
 SDIR = src/
 # All files from the normal repository that are used in this example ###########
 REPOSDIR = ../../src/
-REPOFILE = properties
-REPOFILE += df_spherical
+REPOFILE += data_frame
 # Get host name ################################################################
 HOST = $(shell hostname)
 # Offsets for binaries and objects #############################################

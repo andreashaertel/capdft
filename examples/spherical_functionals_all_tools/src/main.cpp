@@ -32,8 +32,6 @@ int main(int argc, char** args) {
    * We will define three particle species.
    * Two of them will interact via this functional. The other species has no
    * diameter and will be ignored.
-   * Which means, that having no diameter is not the same as having a diameter
-   * of 0.
    *
    * In general programs should obtain their parameters via the command line
    * or a parameter file (e.g. via the ParameterHandler).

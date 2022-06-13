@@ -11,9 +11,10 @@
  */
 // _____________________________________________________________________________
 // Includes
-#include <vector>
 #include <fftw3.h>
-#include "df_spherical.hpp"  // NOLINT
+#include <vector>
+#include "data_frame.hpp"  // NOLINT
+#include "functional.hpp"  // NOLINT
 #include "properties.hpp"  // NOLINT
 #include "system.hpp"  // NOLINT
 // Class forward declarations
@@ -23,9 +24,10 @@
  *  
  *  This class contains the tools to calculate functional and functional
  *  derivative values.
+ *  It is derived from the abstract Functional base class.
  *
  */
-class FunctionalFMTSpherical {
+class FunctionalFMTSpherical : public Functional {
  public:
   /** \brief Standard Constructor
    *
@@ -37,14 +39,14 @@ class FunctionalFMTSpherical {
    * functional by checking if the hard sphere diameter exists.
    *
    */
-  explicit FunctionalFMTSpherical(System<DFSpherical<double>>* system);
+  explicit FunctionalFMTSpherical(const System<DataFrame<1, double>>& system);  // TODO(Moritz): remove System
   /** \brief Manual Constructor
    *
    * This constructor chooses the particle species that are supplied from the
    * affected_species vector.
    *
    */
-  FunctionalFMTSpherical(System<DFSpherical<double>>* system,
+  FunctionalFMTSpherical(const System<DataFrame<1, double>>& system,
       const std::vector<size_t>& affected_species);
   /** \brief Destructor
    *
@@ -53,23 +55,23 @@ class FunctionalFMTSpherical {
   /** \brief Calculate the functional derivatives
    *
    *  This function calculates the functional derivatives and updates the
-   *  supplied DFSpherical.
+   *  supplied DataFrame.
    *
    *  It uses the functions:
    *  calc_weighted_densities(),
    *  check_weighted_densities(),
    *  calc_partial_derivatives() (which uses calc_local_partial_derivatives())
    */
-  void calc_derivative(
-      std::vector<DFSpherical<double>>* functional_derivative);
+  virtual void calc_derivative(
+      std::vector<DataFrame<1, double>>* functional_derivative);
   void calc_derivative_no_warnings(
-      std::vector<DFSpherical<double>>* functional_derivative);
+      std::vector<DataFrame<1, double>>* functional_derivative);
   /** \brief Calculate bulk derivatives
    *
    * 
    *
    */
-  void calc_bulk_derivative(std::vector<double>* bulk_derivative);
+  virtual void calc_bulk_derivative(std::vector<double>* bulk_derivative);
   /** \brief Calculate the (excess free) energy value of this functional
    *
    *  Calculate the energy value of this functional, which corresponds to the
@@ -78,7 +80,7 @@ class FunctionalFMTSpherical {
    *
    *  \return Returns the functional energy value
    */
-  double calc_energy();
+  virtual double calc_energy();
 
  private:
   /** \brief System length (radius of the sperical geometry)
@@ -127,7 +129,7 @@ class FunctionalFMTSpherical {
   /** \brief Pointer to density profiles
    *
    */
-  std::vector<DFSpherical<double>>* density_profiles_pointer;
+  const std::vector<DataFrame<1, double>>* density_profiles_pointer;
   /** \brief Density profiles times the radial position
    *  
    *  The sine transform of fftw does not require the point r=0, because it is
@@ -136,14 +138,14 @@ class FunctionalFMTSpherical {
    *  transform starts at the second element.
    *
    */
-  std::vector<DFSpherical<double>> density_profiles_times_r;
+  std::vector<DataFrame<1, double>> density_profiles_times_r;
   /** \brief Fourier transformed density profile
    *
    *  Since it is the sine transformed density_profiles_times_r it also contains
    *  arrays of length grid_count+1.
    *
    */
-  std::vector<DFSpherical<double>> density_profiles_four;
+  std::vector<DataFrame<1, double>> density_profiles_four;
   /** \brief Weighted densities
    *
    * There are three weighted density types: scalar, vectorial, tensorial.
@@ -154,19 +156,19 @@ class FunctionalFMTSpherical {
    * the tensorial weighted density.
    *
    */
-  std::vector<DFSpherical<double>> scalar_weighted_dens_real;
-  std::vector<DFSpherical<double>> vector_weighted_dens_real;
-  std::vector<DFSpherical<double>> tensor_weighted_dens_real;
-  std::vector<DFSpherical<double>> scalar_weighted_dens_four;
-  std::vector<DFSpherical<double>> vector_weighted_dens_four;
-  std::vector<DFSpherical<double>> tensor_weighted_dens_four;
+  std::vector<DataFrame<1, double>> scalar_weighted_dens_real;
+  std::vector<DataFrame<1, double>> vector_weighted_dens_real;
+  std::vector<DataFrame<1, double>> tensor_weighted_dens_real;
+  std::vector<DataFrame<1, double>> scalar_weighted_dens_four;
+  std::vector<DataFrame<1, double>> vector_weighted_dens_four;
+  std::vector<DataFrame<1, double>> tensor_weighted_dens_four;
   /** \brief Weight functions
    *
    *  In the radially symmetric case we only need a few weight functions.
    *  Every vector element contains all weight function of another species.
    *
    */
-  std::vector<std::vector<DFSpherical<double>>> weights_four;
+  std::vector<std::vector<DataFrame<1, double>>> weights_four;
   /** \brief Partial derivatives of the free energy density w.r.t. the
    *  weighted densities
    *
@@ -178,24 +180,24 @@ class FunctionalFMTSpherical {
    * the tensorial partial derivative.
    *
    */
-  std::vector<DFSpherical<double>> scalar_partial_derivative_real;
-  std::vector<DFSpherical<double>> vector_partial_derivative_real;
-  std::vector<DFSpherical<double>> tensor_partial_derivative_real;
-  std::vector<DFSpherical<double>> scalar_partial_derivative_four;
-  std::vector<DFSpherical<double>> vector_partial_derivative_four;
-  std::vector<DFSpherical<double>> tensor_partial_derivative_four;
+  std::vector<DataFrame<1, double>> scalar_partial_derivative_real;
+  std::vector<DataFrame<1, double>> vector_partial_derivative_real;
+  std::vector<DataFrame<1, double>> tensor_partial_derivative_real;
+  std::vector<DataFrame<1, double>> scalar_partial_derivative_four;
+  std::vector<DataFrame<1, double>> vector_partial_derivative_four;
+  std::vector<DataFrame<1, double>> tensor_partial_derivative_four;
   /** \brief Terms of the free energy density w.r.t. the weighted densities
    *
    * They are used as dummy for the convolution of the partial derivatives with
    * the corresponding weight functions.
    *
    */
-  std::vector<DFSpherical<double>> scalar_derivative_terms_four;
-  std::vector<DFSpherical<double>> vector_derivative_terms_four;
-  std::vector<DFSpherical<double>> tensor_derivative_terms_four;
-  std::vector<DFSpherical<double>> scalar_derivative_four;
-  std::vector<DFSpherical<double>> vector_derivative_four;
-  std::vector<DFSpherical<double>> tensor_derivative_four;
+  std::vector<DataFrame<1, double>> scalar_derivative_terms_four;
+  std::vector<DataFrame<1, double>> vector_derivative_terms_four;
+  std::vector<DataFrame<1, double>> tensor_derivative_terms_four;
+  std::vector<DataFrame<1, double>> scalar_derivative_four;
+  std::vector<DataFrame<1, double>> vector_derivative_four;
+  std::vector<DataFrame<1, double>> tensor_derivative_four;
   /** \brief Flags for the sine and cosine transforms
    *
    *  The first one preserves the input, while the second one might destroy it.
@@ -225,7 +227,7 @@ class FunctionalFMTSpherical {
    *
    */
   void calc_weighted_partial_derivatives(
-      std::vector<DFSpherical<double>>* functional_derivative);
+      std::vector<DataFrame<1, double>>* functional_derivative);
   /** \brief Calculate the energy density
    *  
    *  \param The index of the position of which the energy density value is
@@ -238,11 +240,11 @@ class FunctionalFMTSpherical {
   /** \brief From the system object extract the system properties
    *
    */
-  void extract_system_properties(System<DFSpherical<double>>* sys);
+  void extract_system_properties(const System<DataFrame<1, double>>& sys);
   /** \brief From the system object extract the species properties
    *
    */
-  void extract_species_properties(System<DFSpherical<double>>* sys);
+  void extract_species_properties(const System<DataFrame<1, double>>& sys);
   /** \brief Initialize all data frame vectors
    *
    */
