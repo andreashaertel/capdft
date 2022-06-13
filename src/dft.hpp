@@ -12,9 +12,10 @@
  */
 #include <vector>
 #include <map>
-#include "data_field.hpp"  // NOLINT
 #include "properties.hpp"  // NOLINT
 #include "system.hpp"  // NOLINT
+#include "data_frame.hpp"  // NOLINT
+#include "functional_fmt_spherical.hpp"  // NOLINT
 /** \brief Class that holds the system and all functionals and provides DFT 
  *         methods
  *
@@ -31,11 +32,10 @@ class Dft {
    *  \param system The system on which the Dft class shall work. 
    *
    *  The physical system must be provided during declaration and cannot be 
-   *  changed at any later time. 
+   *  changed at any later time.  // TODO(Andreas): Das ist falsch. Man ändert die Fugazitäten.  // NOLINT
    *
    */
-  // TODO(Andreas): input as reference(&), output as pointers(*) (from Moritz)
-  explicit Dft(System* system);
+  explicit Dft(System<DataFrame<double>>* system);
   /** \brief Destructor
    *
    */
@@ -55,8 +55,7 @@ class Dft {
    *  \return Index of the functional that has been add. 
    *
    */
-  template <typename AnyFunctional>
-  size_t add_excess_functional();
+  void add_excess_functional();
   /** \brief Remove a functional according to its index. 
    * 
    *  Removes the specified functional from the DFT framework. 
@@ -67,7 +66,7 @@ class Dft {
    *  \return Indicates whether a functional has been removed or not. 
    *
    */
-  bool remove_excess_functional(size_t index);
+  void remove_excess_functional(size_t index);
   /** \brief Sets the fugacity of each species in the system according to the 
    *         specified bulk densities. 
    *
@@ -143,12 +142,14 @@ class Dft {
   double calculate_gc_energy();
 
  private:
-  /** \brief Physical system holding properties and density DataFields. */
-  System* system;
-  /** \brief Functionals that have been add. */
-  std::map<size_t, Functional*> functional;
-  /** \brief Functional index of the last add functional, initial value is 0. */
-  size_t functional_index;
+  /** \brief Object that contains all physical properties of the system
+   *
+   */
+  System<DataFrame<double>>* system;
+  /** \brief Container holding all functionals that have benn added
+   *
+   */
+  std::vector<FunctionalFMTSpherical> functionals;
 
  protected:
 };

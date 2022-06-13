@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2021 Moritz Bültmann <moritz.bueltmann@gmx.de>
 // SPDX-License-Identifier: LGPL-3.0-or-later
-/** \file examples/spherical_functional/src/main.cpp
+/** \file examples/spherical_functional_no_tools/src/main.cpp
  *  \brief Main file of the example of the spherical functionals.
  *  
  *  This main file contains examples to show how the FunctionalFMTSpherical
@@ -14,8 +14,6 @@
 #include <iostream>
 #include <vector>
 #include "../../../src/data_field.hpp"
-#include "../../../src/properties.hpp"
-#include "../../../src/system.hpp"
 #include "../../../src/functional.hpp"
 #include "../../../src/functional_fmt_spherical.hpp"
 // _____________________________________________________________________________
@@ -24,16 +22,10 @@ int main(int argc, char** args) {
 // _____________________________________________________________________________
   // Set the desired system properties
   /* We start by defining the necessary geometric and physical properties.
-   * The general properties of a system are put into one Properties conainer.
-   * The properties of every species are put in separate Properties container.
-   * The containers containing the species properties are encapsulated by an
-   * std::vector.
    *
    * We will define three particle species.
    * Two of them will interact via this functional. The other species has no
    * diameter and will be ignored.
-   * Which means, that having no diameter is not the same as having a diameter
-   * of 0.
    *
    * In general programs should obtain their parameters via the command line
    * or a parameter file (e.g. via the ParameterHandler).
@@ -43,51 +35,7 @@ int main(int argc, char** args) {
   size_t grid_count = static_cast<size_t>(1e4+.5) + 1;  // equals = 10,001
   double system_length = 19.821782178217823;  // external pot. between two bins
   double bjerrum_length = 1.;  // not really needed
-  // Create objects of Properties class
-  Properties properties;
-  Properties system_properties;
-  std::vector<Properties> species_properties;
-  // Put the system properties into a Properties container
-  system_properties.add_property<double>("length", system_length);
-  system_properties.add_property<double>("bjerrum length", bjerrum_length);
-  system_properties.add_property<size_t>("grid count", grid_count);
-  // First species
-  properties.add_property<double>("diameter", 1.);
-  properties.add_property<double>("bulk density", .1);
-  properties.add_property<double>("valency", -1.);  // not really needed
-  species_properties.push_back(properties);
-  properties.clear();
-  // Second species
-  properties.add_property<double>("bulk density", .2);
-  properties.add_property<double>("valency", +1.);  // not really needed
-  species_properties.push_back(properties);
-  properties.clear();
-  // Third species
-  properties.add_property<double>("diameter", 1.);
-  properties.add_property<double>("bulk density", .3);
-  species_properties.push_back(properties);
-  properties.clear();
-// _____________________________________________________________________________
-  /* All the supplied data is now brought together in the System class.
-   * The system class creates a density profile (DataField) from the given
-   * information and does not allow modifictation of the properties.
-   * The System object is then used as input for our functional.
-   * In general the functional only copies the parameters it requires to
-   * calculate the quantities of interest.
-   * It also detects which species interact via this functional and calculates
-   * the relevant quantities exclusively for them.
-   */
-// _____________________________________________________________________________
-  System<DFSpherical<double>> my_system(system_properties, species_properties);
-  // Obtain the density profile pointer for modification purposes (e.g. Picard)
-  std::vector<DFSpherical<double>>* density_profiles =
-      my_system.get_density_profiles_pointer();
-  // Create an FMT Functional object. Either specify the species
-  std::vector<size_t> affected_species{0, 2};  // selected species 0 and 2
-  FunctionalFMTSpherical my_fmt_functional(&my_system, affected_species);
-  // or let the constructor decide which species can interact via this
-  // functional
-  // FunctionalFMTSpherical my_fmt_functional(&my_system);
+  // TODO(Moritz): species properties without tools
 // _____________________________________________________________________________
   // Picard iteration setup
   /* Now that we processed all the necessary parameters, it is time to set up
@@ -108,6 +56,7 @@ int main(int argc, char** args) {
    * Moreover the functional derivative values for the bulk case are required.
    */
 // _____________________________________________________________________________
+  // TODO(Moritz): make the picard iterations work without any tools
   double maximum_deviation{std::numeric_limits<double>::max()};
   double target_deviation{1.0e-6};
   double r{0.};

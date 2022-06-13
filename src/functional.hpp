@@ -10,11 +10,11 @@
  *
  */
 #include <vector>
-#include "data_field.hpp"  // NOLINT
+#include "data_frame.hpp"  // NOLINT
 // _____________________________________________________________________________
-/** \brief Functional is a template class
+/** \brief Functional is an abstract class
  *
- *  Functional is an abstract template class that defines the interfaces for all
+ *  Functional is an abstract class that defines the interfaces for all
  *  explicit functional implementations. 
  *  Accordingly, every excess free energy functional is a child class of 
  *  Functional and must implement the purely virtual functions. 
@@ -36,7 +36,8 @@ class Functional {
    *         of the DataField must correspond to the respective functional 
    *         implementation. 
    */
-  virtual void calc_derivative(DataField<double>* functional_derivative) = 0;
+  virtual void calc_derivative(
+      std::vector<DataFrame<1, double>>* functional_derivative) = 0;
   /** \brief Calculate bulk derivatives
    *
    *  The function calculates the bulk derivatives and stores results in the 

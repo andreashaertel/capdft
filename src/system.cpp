@@ -4,10 +4,10 @@
 #include "system.hpp"  // NOLINT
 #include <stdexcept>
 // Class type declarations
-template class System<DFSpherical<double>>;
+template class System<DataFrame<1, double>>;
 // _____________________________________________________________________________
 template <typename T>  // Template for different data frames DF*
- System<T>::System() {
+System<T>::System() {
   //
 }
 // _____________________________________________________________________________
@@ -22,7 +22,7 @@ System<T>::System(
   system_properties.get_property("grid count", &grid_count);
   // From the system properties create the density Profile
   for (size_t i = 0; i < species_properties.size(); i++) {
-    density_profiles.push_back(T(system_properties));
+    density_profiles.push_back(T(grid_count));
   }
   set_bulk_densities();
 }
@@ -42,7 +42,7 @@ const std::vector<Properties>& System<T>::get_species_properties() const {
 }
 // _____________________________________________________________________________
 template <typename T>  // Template for different data frames DF*
-std::vector<T>* System<T>::get_density_profiles_pointer() {
+const std::vector<T>* System<T>::get_density_profiles_pointer() const {
   return &density_profiles;
 }
 // _____________________________________________________________________________
@@ -82,7 +82,7 @@ void System<T>::set_bulk_densities() {
 }
 // _____________________________________________________________________________
 template <typename T>  // Template for different data frames DF*
-void System<T>::set_fugacities(std::vector<double>& fugacities) {
+void System<T>::set_fugacities(const std::vector<double>& fugacities) {
   // TODO(Andreas): input-variablen -> Referenzen
   // TODO(Andreas): output-variablen -> Pointer
   // Check for correct size of fugacities in comparison to the number of
@@ -96,8 +96,8 @@ void System<T>::set_fugacities(std::vector<double>& fugacities) {
   // AH, 24.02.2022
   //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   // Iterate through all species and update the fugacities
-  //std::vector<double>::iterator it2 = fugacities.begin();
-  //for (std::vector<Properties>::iterator it = species_properties.begin();
+  // std::vector<double>::iterator it2 = fugacities.begin();
+  // for (std::vector<Properties>::iterator it = species_properties.begin();
   //      it != species_properties.end(); ++it) {
   //  it->update_property<double>("fugacity", *it2);
   //  ++it2;

@@ -7,8 +7,6 @@
  *
  */
 #include <vector>
-#include "data_field.hpp"  // NOLINT
-#include "df_spherical.hpp"  // NOLINT
 #include "data_frame.hpp"  // NOLINT
 #include "properties.hpp"  // NOLINT
 /** \brief Template Container class that contains all system Properties and
@@ -54,11 +52,11 @@ class System {
    *  \param fugacities Vector of fugacities for all species. 
    *
    */
-  void set_fugacities(std::vector<double>& fugacities);
+  void set_fugacities(const std::vector<double>& fugacities);
   /** \brief Obtain pointer of the density_profiles
    *
    */
-  std::vector<T>* get_density_profiles_pointer();
+  const std::vector<T>* get_density_profiles_pointer() const;
   /** \brief Get current density profiles by reference. 
    *
    *  The density profiles are constant and cannot be changed. In order to 
