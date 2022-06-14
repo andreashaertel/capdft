@@ -33,13 +33,6 @@ class FunctionalFMTSpherical : public Functional {
    *
    */
   FunctionalFMTSpherical();
-  /** \brief Automated Constructor
-   *
-   * This constructor chooses the particle species that are interacting via this
-   * functional by checking if the hard sphere diameter exists.
-   *
-   */
-  explicit FunctionalFMTSpherical(const System<DataFrame<1, double>>& system);  // TODO(Moritz): remove System
   /** \brief Manual Constructor
    *
    * This constructor chooses the particle species that are supplied from the
@@ -48,6 +41,22 @@ class FunctionalFMTSpherical : public Functional {
    */
   FunctionalFMTSpherical(const System<DataFrame<1, double>>& system,
       const std::vector<size_t>& affected_species);
+  FunctionalFMTSpherical(
+      const std::vector<DataFrame<1, double>>* density_profiles,
+      const std::vector<Properties>& species_properties,
+      const Properties& system_properties,
+      const std::vector<size_t>& affected_species);
+  /** \brief Automated Constructor
+   *
+   * This constructor chooses the particle species that are interacting via this
+   * functional by checking if the hard sphere diameter exists.
+   *
+   */
+  explicit FunctionalFMTSpherical(const System<DataFrame<1, double>>& system);  // TODO(Moritz): remove System
+  FunctionalFMTSpherical(
+      const std::vector<DataFrame<1, double>>* density_profiles,
+      const std::vector<Properties>& species_properties,
+      const Properties& system_properties);
   /** \brief Destructor
    *
    */
@@ -241,10 +250,13 @@ class FunctionalFMTSpherical : public Functional {
    *
    */
   void extract_system_properties(const System<DataFrame<1, double>>& sys);
+  void extract_system_properties(const Properties& system_properties);
   /** \brief From the system object extract the species properties
    *
    */
   void extract_species_properties(const System<DataFrame<1, double>>& sys);
+  void extract_species_properties(
+      const std::vector<Properties>& species_properties);
   /** \brief Initialize all data frame vectors
    *
    */

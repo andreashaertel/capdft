@@ -13,9 +13,8 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
-#include "../../../src/data_field.hpp"
+#include "../../../src/data_frame.hpp"
 #include "../../../src/properties.hpp"
-#include "../../../src/system.hpp"
 #include "../../../src/functional.hpp"
 #include "../../../src/functional_fmt_spherical.hpp"
 // _____________________________________________________________________________
@@ -66,26 +65,26 @@ int main(int argc, char** args) {
   species_properties.push_back(properties);
   properties.clear();
 // _____________________________________________________________________________
-  /* All the supplied data is now brought together in the System class.
-   * The system class creates a density profile (DataField) from the given
-   * information and does not allow modifictation of the properties.
-   * The System object is then used as input for our functional.
-   * In general the functional only copies the parameters it requires to
-   * calculate the quantities of interest.
-   * It also detects which species interact via this functional and calculates
-   * the relevant quantities exclusively for them.
+  /* The functional objects are created. As input they require the Properties of
+   * the system and the std::vector<Properties> from the species. Moreover
+   * the pointer of the density profiles needs to be passed on, as well as a
+   * std::vector<size_t> with the species number,
+   * that are affected by the functional.
    */
 // _____________________________________________________________________________
-  System<DFSpherical<double>> my_system(system_properties, species_properties);
-  // Obtain the density profile pointer for modification purposes (e.g. Picard)
-  std::vector<DFSpherical<double>>* density_profiles =
-      my_system.get_density_profiles_pointer();
+  // Create density profiles
+  std::vector<DataFrame<1, double>> density_profiles(0);
+  for (size_t i = 0; i < species_properties.size(); ++i) {
+    density_profiles.push_back(DataFrame<1, double>(grid_count));
+  }
   // Create an FMT Functional object. Either specify the species
   std::vector<size_t> affected_species{0, 2};  // selected species 0 and 2
-  FunctionalFMTSpherical my_fmt_functional(&my_system, affected_species);
+  FunctionalFMTSpherical my_fmt_functional(&density_profiles,
+      species_properties, system_properties, affected_species);
   // or let the constructor decide which species can interact via this
   // functional
-  // FunctionalFMTSpherical my_fmt_functional(&my_system);
+  // FunctionalFMTSpherical my_fmt_functional(&density_profiles,
+  //     species_properties, system_properties);
 // _____________________________________________________________________________
   // Picard iteration setup
   /* Now that we processed all the necessary parameters, it is time to set up
@@ -106,6 +105,7 @@ int main(int argc, char** args) {
    * Moreover the functional derivative values for the bulk case are required.
    */
 // _____________________________________________________________________________
+  std::vector<double> maximum_deviations(0);
   double maximum_deviation{std::numeric_limits<double>::max()};
   double target_deviation{1.0e-6};
   double r{0.};
@@ -114,14 +114,14 @@ int main(int argc, char** args) {
   double bulk_density{0.};
   double mixing{2.0e-1};
   size_t step{0};
-  DFSpherical<double> proposed_density(system_properties);
-  DFSpherical<double> deviations(system_properties);
+  DataFrame<1, double> proposed_density(grid_count);
+  DataFrame<1, double> deviations(grid_count);
   std::vector<double> bulk_derivatives(species_properties.size());
-  std::vector<DFSpherical<double>> fmt_derivatives;
-  std::vector<DFSpherical<double>> exp_ext_potential;
+  std::vector<DataFrame<1, double>> fmt_derivatives;
+  std::vector<DataFrame<1, double>> exp_ext_potential;
   for (size_t i = 0; i != species_properties.size(); ++i) {
-    fmt_derivatives.push_back(DFSpherical<double>(system_properties));
-    exp_ext_potential.push_back(DFSpherical<double>(system_properties));
+    fmt_derivatives.push_back(DataFrame<1, double>(grid_count));
+    exp_ext_potential.push_back(DataFrame<1, double>(grid_count));
   }
   // Set external (hard) potential
   for (auto it = affected_species.begin(); it != affected_species.end(); ++it) {
@@ -140,7 +140,7 @@ int main(int argc, char** args) {
   }
   // Initial guess for the density profiles
   for (auto it = affected_species.begin(); it != affected_species.end(); ++it) {
-    density_profiles->at(*it) = density_profiles->at(*it) *
+    density_profiles.at(*it) = density_profiles.at(*it) *
         exp_ext_potential.at(*it);
   }
   // Get the bulk derivatives
@@ -170,12 +170,16 @@ int main(int argc, char** args) {
       proposed_density = bulk_density * exp_ext_potential.at(*it) *
           exp(bulk_derivatives.at(*it)) * exp(-1. * fmt_derivatives.at(*it));
       // Mix the new solution with the old one
-      density_profiles->at(*it) = density_profiles->at(*it) * (1. - mixing) +
+      density_profiles.at(*it) = density_profiles.at(*it) * (1. - mixing) +
           mixing * proposed_density;
       // Calculate how much the new density deviates from the old one at most
-      deviations = abs(density_profiles->at(*it) - proposed_density);
-      maximum_deviation = max(deviations);
+      deviations = abs(density_profiles.at(*it) - proposed_density);
+      maximum_deviations.push_back(max(deviations));
     }
+    // Determine the largest deviation ovaer all species
+    maximum_deviation = *std::max_element(
+        maximum_deviations.begin(), maximum_deviations.end());
+    maximum_deviations.clear();
     // Print the deviation and the number of iteration steps taken
     std::cout << "Picard iteration step " << step;
     std::cout << ". Deviation: " << maximum_deviation << std::endl;
@@ -194,7 +198,7 @@ int main(int argc, char** args) {
     r = dr * static_cast<double>(i+1);
     out_stream << r << " ";
     for (size_t j = 0; j < species_properties.size(); ++j) {
-      out_stream << density_profiles->at(j).at(i) << " ";
+      out_stream << density_profiles.at(j).at(i) << " ";
     }
     out_stream << std::endl;
   }

@@ -5,7 +5,7 @@
 #include "data_frame.hpp"  // NOLINT
 #include "functional_fmt_spherical.hpp"  // NOLINT
 // _____________________________________________________________________________
-Dft::Dft(System<DataFrame<double>>* system)  // is not solely input variable
+Dft::Dft(System<DataFrame<1, double>>* system)  // is not solely input variable
   : system(system) {
   // TODO(Andreas): add a functional_ideal object
 }
@@ -73,7 +73,7 @@ double Dft::iterate_densities() {
   // Follow the Euler equation to calculate new density profiles:
   //  rho(r) = z_nu * e^(c^(1)(r; [rho_old])-beta v(r))
   // Mixing: rho_new(r) = a * rho_new + (1.0-a) * rho_old
-  double mixing_factor = 0.05;
+  // double mixing_factor = 0.05;
   // TODO(Andreas):
   // copy construct functional derivatives AND c1 AND new densities
   //                                                    from density profiles.
