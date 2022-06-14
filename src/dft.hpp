@@ -35,7 +35,7 @@ class Dft {
    *  changed at any later time.  // TODO(Andreas): Das ist falsch. Man ändert die Fugazitäten.  // NOLINT
    *
    */
-  explicit Dft(System<DataFrame<double>>* system);
+  explicit Dft(System<DataFrame<1, double>>* system);
   /** \brief Destructor
    *
    */
@@ -145,7 +145,7 @@ class Dft {
   /** \brief Object that contains all physical properties of the system
    *
    */
-  System<DataFrame<double>>* system;
+  System<DataFrame<1, double>>* system;
   /** \brief Container holding all functionals that have benn added
    *
    */
