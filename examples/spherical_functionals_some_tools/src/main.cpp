@@ -126,7 +126,6 @@ int main(int argc, char** args) {
   // Set external (hard) potential
   for (auto it = affected_species.begin(); it != affected_species.end(); ++it) {
     species_properties.at(*it).get_property("diameter", &diameter);
-    species_properties.at(*it).get_property("bulk density", &bulk_density);
     for (size_t j = 0; j != grid_count; ++j) {
       r = dr * static_cast<double>(j + 1);
       if (r < diameter) {
@@ -139,9 +138,10 @@ int main(int argc, char** args) {
     }
   }
   // Initial guess for the density profiles
-  for (auto it = affected_species.begin(); it != affected_species.end(); ++it) {
-    density_profiles.at(*it) = density_profiles.at(*it) *
-        exp_ext_potential.at(*it);
+  for (size_t i = 0; i < species_properties.size(); ++i) {
+    species_properties.at(i).get_property("bulk density", &bulk_density);
+    density_profiles.at(i).set_all_elements_to(bulk_density);
+    density_profiles.at(i) *= exp_ext_potential.at(i);
   }
   // Get the bulk derivatives
   my_fmt_functional.calc_bulk_derivative(&bulk_derivatives);

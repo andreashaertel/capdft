@@ -15,7 +15,6 @@
 #include <vector>
 #include "../../../src/data_frame.hpp"
 #include "../../../src/properties.hpp"
-#include "../../../src/system.hpp"
 #include "../../../src/functional.hpp"
 #include "../../../src/functional_fmt_spherical.hpp"
 #include "../../../src/iterator.hpp"
@@ -89,12 +88,41 @@ int main(int argc, char** args) {
   //     species_properties, system_properties);
 // _____________________________________________________________________________
   // Picard iterations
-  // TODO(Moritz): text
+  /* For the Picard iterations the Iterator class is used. For that we define
+   * the external potential, add our functional "my_fmt_functional" to the
+   * functional list and use the run() function to carry out the Picard
+   * iterations. In this case we use two spherical hard walls as external
+   * potential.
+   */
 // _____________________________________________________________________________
+  // Create external potential DataFrames
+  double diameter{0.}, bulk_density{0.}, r{0.};
+  double dr{system_length / static_cast<double>(grid_count)};
   std::vector<DataFrame<1, double>> exp_ext_potential;
   for (size_t i = 0; i != species_properties.size(); ++i) {
     exp_ext_potential.push_back(DataFrame<1, double>(grid_count));
   }
+  // Set external (hard) potential
+  for (auto it = affected_species.begin(); it != affected_species.end(); ++it) {
+    species_properties.at(*it).get_property("diameter", &diameter);
+    for (size_t j = 0; j != grid_count; ++j) {
+      r = dr * static_cast<double>(j + 1);
+      if (r < diameter) {
+        exp_ext_potential.at(*it).at(j) = 0.;
+      } else if (system_length - r < 1.5 * diameter) {
+        exp_ext_potential.at(*it).at(j) = 0.;
+      } else {
+        exp_ext_potential.at(*it).at(j) = 1.;
+      }
+    }
+  }
+  // Initial guess for the density profiles
+  for (size_t i = 0; i < species_properties.size(); ++i) {
+    species_properties.at(i).get_property("bulk density", &bulk_density);
+    density_profiles.at(i).set_all_elements_to(bulk_density);
+    density_profiles.at(i) *= exp_ext_potential.at(i);
+  }
+  // Create iterator and run iterations
   Iterator my_iterator(&density_profiles, exp_ext_potential,
       species_properties);
   my_iterator.add_excess_functional(my_fmt_functional);
@@ -107,8 +135,6 @@ int main(int argc, char** args) {
    */
 // _____________________________________________________________________________
   // Write density profile to file
-  double r{0.};
-  double dr{system_length / static_cast<double>(grid_count)};
   std::fstream out_stream;
   out_stream.open("spherical_profile.dat", std::ios::out);
   for (size_t i = 0; i < grid_count; ++i) {
