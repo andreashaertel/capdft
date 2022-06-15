@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: 2022 Andreas Härtel <http://andreashaertel.anno1982.de/>
+// SPDX-FileCopyrightText: 2022 Moritz Bültmann <moritz.bueltmann@gmx.de>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #ifndef SRC_ITERATOR_HPP_
 #define SRC_ITERATOR_HPP_
-/** \file src/dft.hpp
+/** \file src/iterator.hpp
  *  \brief This file contains the declarations of the Iterator class
  *
  *  The class holds the system and all functionals defined on the system. 
@@ -70,6 +71,10 @@ class Iterator {
    *
    */
   void remove_excess_functional(size_t index);
+  /** \brief Remove all functionals
+   *
+   */
+  void clear_functionals();
   /** \brief Iterates the system densities according to the set iteration 
    *         method. 
    *
@@ -77,6 +82,15 @@ class Iterator {
    *
    */
   double run();
+  /** \brief Calculate the excess free energy.
+   *
+   *  The grand canonical energy of the system is calculated for its current
+   *  state without further iteration. 
+   *
+   *  \return The grand canonical energy in kT per system volume.
+   *
+   */
+  double calculate_excess_free_energy();
   /** \brief Calculate the grand canonical energy of the system. 
    *
    *  The grand canonical energy of the system is calculated for its current

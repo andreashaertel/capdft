@@ -14,8 +14,11 @@ ODIR = obj/
 SDIR = src/
 # All files from the normal repository that are used in this example ###########
 REPOSDIR = ../../src/
-REPOFILE = properties
+REPOFILE =
+REPOFILE += convergence_criterion
+REPOFILE += convergence_criterion_max_dev
 REPOFILE += data_frame
+REPOFILE += properties
 REPOFILE += system
 REPOFILE += functional
 REPOFILE += functional_fmt_spherical
