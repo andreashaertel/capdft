@@ -38,8 +38,8 @@ void Iterator::remove_excess_functional(size_t index) {
 }
 // _____________________________________________________________________________
 double Iterator::run() {
-  DataFrame<1, double> proposed_density;
-  DataFrame<1, double> deviations;
+  DataFrame<1, double> proposed_density(density_profiles->at(0).size());
+  DataFrame<1, double> deviations(density_profiles->at(0).size());
   std::vector<double> maximum_deviations(0);
   double maximum_deviation{std::numeric_limits<double>::max()};
   double target_deviation{1.0e-6};
