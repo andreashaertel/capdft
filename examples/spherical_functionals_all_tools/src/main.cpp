@@ -13,11 +13,12 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
+#include "../../../src/convergence_criterion.hpp"
 #include "../../../src/data_frame.hpp"
-#include "../../../src/properties.hpp"
 #include "../../../src/functional.hpp"
 #include "../../../src/functional_fmt_spherical.hpp"
 #include "../../../src/iterator.hpp"
+#include "../../../src/properties.hpp"
 // _____________________________________________________________________________
 // Main function
 int main(int argc, char** args) {
