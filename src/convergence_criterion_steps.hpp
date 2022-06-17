@@ -1,8 +1,8 @@
 // SPDX-FileCopyrightText: 2022 Moritz Bültmann <moritz.bueltmann@gmx.de>
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#ifndef SRC_CONVERGENCE_CRITERION_MAX_DEV_HPP_
-#define SRC_CONVERGENCE_CRITERION_MAX_DEV_HPP_
-/** \file src/convergence_criterion_max_dev.hpp
+#ifndef SRC_CONVERGENCE_CRITERION_STEPS_HPP_
+#define SRC_CONVERGENCE_CRITERION_STEPS_HPP_
+/** \file src/convergence_criterion_steps.hpp
  *  \brief This file contains the declarations of the ConvergenceCriterion class
  *
  */
@@ -14,25 +14,24 @@
  *         density profiles.
  *
  */
-class ConvergenceCriterionMaxDev : public ConvergenceCriterion {
+class ConvergenceCriterionSteps : public ConvergenceCriterion {
  public:
   /** \brief Constructor
    *
    */
-  ConvergenceCriterionMaxDev(
+  ConvergenceCriterionSteps(
       const std::vector<DataFrame<1, double>>& old_profile, 
       const std::vector<DataFrame<1, double>>& new_profile,
-      const double& target_deviation);
+      const int& steps);
   /** \brief Destructor
    *
    */
-  virtual ~ConvergenceCriterionMaxDev() {};
-  /** \brief Check if the criterion is fulfilled (fulfilled = true)
+  virtual ~ConvergenceCriterionSteps() {};
+  /** \brief Check if the step criterion is fulfilled (fulfilled = true)
    *
-   *  Calculates the largest difference between old and new (proposed)
-   *  density profiles and checks if it is smaller than the target_deviation.
+   *  Keeps track of the number of steps (number of time check() was called).
    *
-   *  \param Uses a pointer to return the current_deviation.
+   *  \param Uses a pointer to return the number of remaining steps
    *
    */
   virtual bool check(double* current_deviation);
@@ -57,5 +56,11 @@ class ConvergenceCriterionMaxDev : public ConvergenceCriterion {
   // *
   // */
   //int threshold_int;
+
+ private:
+  /** \brief Number of steps, i.e. number of times check()
+   *
+   */
+  int step_count;
 };
-#endif  // SRC_CONVERGENCE_CRITERION_MAX_DEV_HPP_
+#endif  // SRC_CONVERGENCE_CRITERION_STEPS_HPP_

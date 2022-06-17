@@ -7,7 +7,6 @@
  *
  */
 #include <vector>
-#include <string>
 #include "data_frame.hpp"  // NOLINT
 /** \brief This class defines convergence criteria based on the old and the new
  *         density profiles.
@@ -15,22 +14,11 @@
  */
 class ConvergenceCriterion {
  public:
-  /** \brief Constructor for floating point thresholds
+  /** \brief Constructor
    *
    */
-  ConvergenceCriterion(
-      const std::vector<DataFrame<1, double>>& old_profile, 
-      const std::vector<DataFrame<1, double>>& new_profile,
-      const double& threshold);
-  /** \brief Constructor for integer thresholds
-   *
-   *  This constructor is used, when counting steps etc.
-   *
-   */
-  ConvergenceCriterion(
-      const std::vector<DataFrame<1, double>>& old_profile, 
-      const std::vector<DataFrame<1, double>>& new_profile,
-      const int& threshold_int);
+  ConvergenceCriterion(const std::vector<DataFrame<1, double>>& old_profile, 
+      const std::vector<DataFrame<1, double>>& new_profile, double threshold);
   /** \brief Destructor
    *
    */
@@ -45,11 +33,7 @@ class ConvergenceCriterion {
    *  \param The threshold determines, when the convergence criterion is reached
    *         given the old and the new density profiles.
    */
-  virtual bool check(double* progress) = 0;
-  /** \brief Return name of the criterion
-   *
-   */
-  virtual std::string name() = 0;
+  virtual bool check(double* progress, double threshold) = 0;
   /** \brief Pointer to the old density profile
    *
    */
@@ -58,13 +42,6 @@ class ConvergenceCriterion {
    *
    */
   const std::vector<DataFrame<1, double>>& new_profile;
-  /** \brief Threshold value used in the check function (floating point)
-   *
-   */
-  double threshold;
-  /** \brief Threshold value used in the check function (integer)
-   *
-   */
-  int threshold_int;
+  /** \brief Threshold value used in the check function
 };
 #endif  // SRC_CONVERGENCE_CRITERION_HPP_

@@ -5,6 +5,7 @@
 #include <cmath>
 #include "data_frame.hpp"  // NOLINT
 #include "convergence_criterion_max_dev.hpp"  // NOLINT
+#include "convergence_criterion_steps.hpp"  // NOLINT
 // _____________________________________________________________________________
 Iterator::Iterator(
     std::vector<DataFrame<1, double>>* density_profiles,
@@ -13,9 +14,16 @@ Iterator::Iterator(
   : density_profiles(density_profiles),
     exp_external_potentials(&exp_external_potentials),
     species_properties(&species_properties) {
+  size_t grid_count = density_profiles->at(0).size();
+  size_t species_count = density_profiles->size();
+  proposed_densities = std::vector(species_count,
+      DataFrame<1, double>(grid_count));
+  add_convergence_criterion<ConvergenceCriterionMaxDev>(1.0e-6);
+  add_convergence_criterion<ConvergenceCriterionSteps>(200);
 }
 // _____________________________________________________________________________
 Iterator::~Iterator() {
+  clear_convergence_criteria();
 }
 // _____________________________________________________________________________
 void Iterator::add_excess_functional(Functional& functional) {
@@ -45,25 +53,18 @@ void Iterator::clear_functionals() {
   bulk_derivatives.clear();
 }
 // _____________________________________________________________________________
-double Iterator::run() {
-  double maximum_deviation{0.};
-  double target_deviation{1.0e-6};
+void Iterator::run() {
   double mixing{.05};
   double bulk_density{0.};
   size_t steps{0};
   size_t species_count{species_properties->size()};
-  size_t grid_count{density_profiles->at(0).size()};
   std::vector<double> maximum_deviations(0);
-  std::vector<DataFrame<1, double>> proposed_densities(
-      species_count, DataFrame<1, double>(grid_count));
-  ConvergenceCriterionMaxDev my_criterion(
-      *density_profiles, proposed_densities); // TODO(Moritz): implement with abstract class
   // Calculate bulk derivatives
   for (size_t i = 0; i < excess_functionals.size(); ++i) {
     excess_functionals.at(i)->calc_bulk_derivative(&bulk_derivatives.at(i));
   }
   // Iterator loop
-  while (!my_criterion.check(&maximum_deviation, target_deviation)) {
+  while (!check_convergence_criteria()) {
     ++steps;
     // Calculate the functional derivatives.
     for (size_t i = 0; i < excess_functionals.size(); ++i) {
@@ -82,11 +83,7 @@ double Iterator::run() {
       density_profiles->at(i) = density_profiles->at(i) * (1. - mixing) +
           mixing * proposed_densities.at(i);
     }
-    // Print the deviation and the number of iteration steps taken
-    std::cout << "Picard iteration step " << steps;
-    std::cout << ". Deviation: " << maximum_deviation << std::endl;
   }
-  return maximum_deviation;
 }
 // _____________________________________________________________________________
 double Iterator::calculate_excess_free_energy() {
@@ -106,5 +103,37 @@ double Iterator::calculate_gc_energy() {
   // Calculate external and chemical potential term
   // TODO(Moritz):
   return energy;
+}
+// _____________________________________________________________________________
+template <typename T>
+void Iterator::add_convergence_criterion(double threshold) {
+  ConvergenceCriterion* criterion = new T(*density_profiles, proposed_densities,
+      threshold);
+  convergence_criteria.push_back(criterion);
+}
+template <typename T>
+void Iterator::add_convergence_criterion(int threshold_int) {
+  ConvergenceCriterion* criterion = new T(*density_profiles, proposed_densities,
+      threshold_int);
+  convergence_criteria.push_back(criterion);
+}
+// _____________________________________________________________________________
+void Iterator::clear_convergence_criteria() {
+  for (auto criterion : convergence_criteria) {
+    delete(criterion);
+  }
+  convergence_criteria.clear();
+}
+// _____________________________________________________________________________
+bool Iterator::check_convergence_criteria() {
+  bool converged{false};
+  double progress{0.};
+  std::cout << "Iterator::check_convergence_criteria(): \"";
+  for (auto criterion : convergence_criteria) {
+    converged = (converged || criterion->check(&progress));
+    std::cout << criterion->name() << ": " << progress << "; ";
+  }
+  std::cout << "\"" << std::endl;
+  return converged;
 }
 // _____________________________________________________________________________

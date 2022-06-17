@@ -17,6 +17,7 @@ REPOSDIR = ../../src/
 REPOFILE =
 REPOFILE += convergence_criterion
 REPOFILE += convergence_criterion_max_dev
+REPOFILE += convergence_criterion_steps
 REPOFILE += data_frame
 REPOFILE += properties
 REPOFILE += system

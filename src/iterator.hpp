@@ -13,6 +13,7 @@
  */
 #include <vector>
 #include <map>
+#include "convergence_criterion.hpp"
 #include "data_frame.hpp"  // NOLINT
 #include "functional.hpp" // NOLINT
 #include "properties.hpp"  // NOLINT
@@ -78,10 +79,8 @@ class Iterator {
   /** \brief Iterates the system densities according to the set iteration 
    *         method. 
    *
-   *  \return Returns the deviation between the new and old density profiles. 
-   *
    */
-  double run();
+  void run();
   /** \brief Calculate the excess free energy.
    *
    *  The grand canonical energy of the system is calculated for its current
@@ -100,16 +99,36 @@ class Iterator {
    *
    */
   double calculate_gc_energy();
+  /** \brief Add a convergence criterion
+   *
+   *  The standard criterion (ConvergenceCriterionMaxDev) is added when a new
+   *  Iterator is created.
+   *
+   */
+   template <typename T>
+   void add_convergence_criterion(double threshold);
+   template <typename T>
+   void add_convergence_criterion(int threshold_int);
+   /** \brief Clear convergence criteria
+    *
+    *  If run() is executed without a ConvergenceCriterion, it will run forever.
+    *
+    */
+   void clear_convergence_criteria();
 
  private:
   /** \brief Density profiles
    *
    */
   std::vector<DataFrame<1, double>>* density_profiles;
+  /** \brief Proposed density profiles by Picard iteration
+   *
+   */
+  std::vector<DataFrame<1, double>> proposed_densities;
   /** \brief External potentials
    *
    */
-  const std::vector<DataFrame<1, double>>* exp_external_potentials;  // TODO(Moritz): maybe not pointer? // NOLINT
+  const std::vector<DataFrame<1, double>>* exp_external_potentials;
   /** \brief Species properties pointer
    *
    *  Species properties are required for the "bulk density" property.
@@ -120,6 +139,10 @@ class Iterator {
    *
    */
   std::vector<Functional*> excess_functionals;
+  /** \brief Container holding all convergence criteria to be checked
+   *
+   */
+  std::vector<ConvergenceCriterion*> convergence_criteria;
   /** \brief Functional derivatives
    *
    */
@@ -128,6 +151,10 @@ class Iterator {
    *
    */
   std::vector<std::vector<double>> bulk_derivatives;
+  /** \brief Check all convergence criteria and return true if one is fulfilled
+   *
+   */
+  bool check_convergence_criteria();
 
  protected:
 };
