@@ -5,15 +5,17 @@
  *
  */
 #include "convergence_criterion_max_dev.hpp"  // NOLINT
+#include <string>
 // _____________________________________________________________________________
 ConvergenceCriterionMaxDev::ConvergenceCriterionMaxDev(
     const std::vector<DataFrame<1, double>>& old_profile, 
-    const std::vector<DataFrame<1, double>>& new_profile)
-  : ConvergenceCriterion(old_profile, new_profile) {
+    const std::vector<DataFrame<1, double>>& new_profile,
+    const double& target_deviation)
+  : ConvergenceCriterion(old_profile, new_profile, target_deviation) {
 }
 // _____________________________________________________________________________
 bool ConvergenceCriterionMaxDev::check(
-    double* max_deviation, double target_deviation) {
+    double* max_deviation) {
   std::vector<double> max_deviations(0);
   // Calculate maximum deviations per species
   for (size_t i = 0; i < old_profile.size(); ++i) {
@@ -24,5 +26,10 @@ bool ConvergenceCriterionMaxDev::check(
   // Find the largest deviation among species
   *max_deviation = *std::max_element(
       max_deviations.begin(), max_deviations.end());
-  return (*max_deviation < target_deviation);
+  return (*max_deviation < threshold);
 }
+// _____________________________________________________________________________
+std::string ConvergenceCriterionMaxDev::name() {
+  return "maximum deviation";
+}
+// _____________________________________________________________________________

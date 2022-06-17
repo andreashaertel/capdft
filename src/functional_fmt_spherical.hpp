@@ -73,7 +73,7 @@ class FunctionalFMTSpherical : public Functional {
    */
   virtual void calc_derivative(
       std::vector<DataFrame<1, double>>* functional_derivative);
-  void calc_derivative_no_warnings(
+  void calc_derivative_warnings(
       std::vector<DataFrame<1, double>>* functional_derivative);
   /** \brief Calculate bulk derivatives
    *

@@ -301,8 +301,6 @@ void FunctionalFMTSpherical::calc_derivative(
   }
   // Calculate the weighted densities
   calc_weighted_densities();
-  // Check whether there are unphysical values in the  weighted densities
-  check_weighted_densities();
   // From the weighted densities calculate the partial derivatives of the
   // excess free energy
   calc_partial_derivatives();
@@ -310,7 +308,7 @@ void FunctionalFMTSpherical::calc_derivative(
   calc_weighted_partial_derivatives(functional_derivative);
 }
 // _____________________________________________________________________________
-void FunctionalFMTSpherical::calc_derivative_no_warnings(
+void FunctionalFMTSpherical::calc_derivative_warnings(
     std::vector<DataFrame<1, double>>* functional_derivative) {
   // Check if the given DataFrame has correct array length
   for (auto it = affected_species.begin(); it != affected_species.end(); ++it) {
@@ -323,6 +321,8 @@ void FunctionalFMTSpherical::calc_derivative_no_warnings(
   }
   // Calculate the weighted densities
   calc_weighted_densities();
+  // Check whether there are unphysical values in the  weighted densities
+  check_weighted_densities();
   // From the weighted densities calculate the partial derivatives of the
   // excess free energy
   calc_partial_derivatives();
