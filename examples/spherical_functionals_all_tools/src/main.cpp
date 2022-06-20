@@ -126,7 +126,7 @@ int main(int argc, char** args) {
   // Create iterator and run iterations
   Iterator my_iterator(&density_profiles, exp_ext_potential,
       species_properties);
-  my_iterator.add_excess_functional(my_fmt_functional);
+  my_iterator.add_excess_functional(&my_fmt_functional);
   my_iterator.run();
 // _____________________________________________________________________________
   /* All done!

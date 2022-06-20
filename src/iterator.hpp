@@ -13,7 +13,7 @@
  */
 #include <vector>
 #include <map>
-#include "convergence_criterion.hpp"
+#include "convergence_criterion.hpp"  // NOLINT
 #include "data_frame.hpp"  // NOLINT
 #include "functional.hpp" // NOLINT
 #include "properties.hpp"  // NOLINT
@@ -60,7 +60,7 @@ class Iterator {
    *  my_iterator.add_excess_functional(my_functional);
    *
    */
-  void add_excess_functional(Functional& functional);
+  void add_excess_functional(Functional* functional);
   /** \brief Remove a functional according to its index. 
    * 
    *  Removes the specified functional from the DFT framework. 
@@ -105,16 +105,16 @@ class Iterator {
    *  Iterator is created.
    *
    */
-   template <typename T>
-   void add_convergence_criterion(double threshold);
-   template <typename T>
-   void add_convergence_criterion(int threshold_int);
-   /** \brief Clear convergence criteria
-    *
-    *  If run() is executed without a ConvergenceCriterion, it will run forever.
-    *
-    */
-   void clear_convergence_criteria();
+  template <typename T>
+  void add_convergence_criterion(double threshold);
+  template <typename T>
+  void add_convergence_criterion(int threshold_int);
+  /** \brief Clear convergence criteria
+   *
+   *  If run() is executed without a ConvergenceCriterion, it will run forever.
+   *
+   */
+  void clear_convergence_criteria();
 
  private:
   /** \brief Density profiles

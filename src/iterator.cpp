@@ -26,10 +26,10 @@ Iterator::~Iterator() {
   clear_convergence_criteria();
 }
 // _____________________________________________________________________________
-void Iterator::add_excess_functional(Functional& functional) {
+void Iterator::add_excess_functional(Functional* functional) {
   size_t species_count{species_properties->size()};
   size_t index{0};
-  excess_functionals.push_back(&functional);
+  excess_functionals.push_back(functional);
   // For every functional and every species a DataFrame is created
   bulk_derivatives.push_back(std::vector<double>(0));
   functional_derivatives.push_back(std::vector<DataFrame<1, double>>(0));

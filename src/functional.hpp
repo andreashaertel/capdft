@@ -26,7 +26,7 @@ class Functional {
   /** Destructor
    *
    */
-  virtual ~Functional() {};
+  virtual ~Functional() {}
   /** \brief Calculate the functional derivatives
    *
    *  This function calculates the functional derivatives and stores the result
