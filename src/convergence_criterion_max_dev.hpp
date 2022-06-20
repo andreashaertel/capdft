@@ -6,7 +6,7 @@
  *  \brief This file contains the declarations of the ConvergenceCriterion class
  *
  */
-#include "convergence_criterion.hpp"
+#include "convergence_criterion.hpp"  // NOLINT
 #include <vector>
 #include <string>
 #include "data_frame.hpp"  // NOLINT
@@ -20,13 +20,13 @@ class ConvergenceCriterionMaxDev : public ConvergenceCriterion {
    *
    */
   ConvergenceCriterionMaxDev(
-      const std::vector<DataFrame<1, double>>& old_profile, 
+      const std::vector<DataFrame<1, double>>& old_profile,
       const std::vector<DataFrame<1, double>>& new_profile,
       const double& target_deviation);
   /** \brief Destructor
    *
    */
-  virtual ~ConvergenceCriterionMaxDev() {};
+  virtual ~ConvergenceCriterionMaxDev();
   /** \brief Check if the criterion is fulfilled (fulfilled = true)
    *
    *  Calculates the largest difference between old and new (proposed)
@@ -41,21 +41,21 @@ class ConvergenceCriterionMaxDev : public ConvergenceCriterion {
    */
   virtual std::string name();
   // The following section is found in the base class
-  ///** \brief Pointer to the old density profile
-  // *
-  // */
-  //const std::vector<DataFrame<1, double>>& old_profile;
-  ///** \brief Pointer to the proposed density profile
-  // *
-  // */
-  //const std::vector<DataFrame<1, double>>& new_profile;
-  ///** \brief Threshold value used in the check function
-  // *
-  // */
-  //double threshold;
-  ///** \brief Threshold value used in the check function (integer)
-  // *
-  // */
-  //int threshold_int;
+  // /** \brief Pointer to the old density profile
+  //  *
+  //  */
+  // const std::vector<DataFrame<1, double>>& old_profile;
+  // /** \brief Pointer to the proposed density profile
+  //  *
+  //  */
+  // const std::vector<DataFrame<1, double>>& new_profile;
+  // /** \brief Threshold value used in the check function
+  //  *
+  //  */
+  // double threshold;
+  // /** \brief Threshold value used in the check function (integer)
+  //  *
+  //  */
+  // int threshold_int;
 };
 #endif  // SRC_CONVERGENCE_CRITERION_MAX_DEV_HPP_

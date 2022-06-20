@@ -5,13 +5,17 @@
  *
  */
 #include "convergence_criterion_max_dev.hpp"  // NOLINT
+#include <algorithm>
 #include <string>
 // _____________________________________________________________________________
 ConvergenceCriterionMaxDev::ConvergenceCriterionMaxDev(
-    const std::vector<DataFrame<1, double>>& old_profile, 
+    const std::vector<DataFrame<1, double>>& old_profile,
     const std::vector<DataFrame<1, double>>& new_profile,
     const double& target_deviation)
   : ConvergenceCriterion(old_profile, new_profile, target_deviation) {
+}
+// _____________________________________________________________________________
+ConvergenceCriterionMaxDev::~ConvergenceCriterionMaxDev() {
 }
 // _____________________________________________________________________________
 bool ConvergenceCriterionMaxDev::check(

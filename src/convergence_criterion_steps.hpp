@@ -6,7 +6,7 @@
  *  \brief This file contains the declarations of the ConvergenceCriterion class
  *
  */
-#include "convergence_criterion.hpp"
+#include "convergence_criterion.hpp"  // NOLINT
 #include <vector>
 #include <string>
 #include "data_frame.hpp"  // NOLINT
@@ -20,13 +20,13 @@ class ConvergenceCriterionSteps : public ConvergenceCriterion {
    *
    */
   ConvergenceCriterionSteps(
-      const std::vector<DataFrame<1, double>>& old_profile, 
+      const std::vector<DataFrame<1, double>>& old_profile,
       const std::vector<DataFrame<1, double>>& new_profile,
       const int& steps);
   /** \brief Destructor
    *
    */
-  virtual ~ConvergenceCriterionSteps() {};
+  virtual ~ConvergenceCriterionSteps();
   /** \brief Check if the step criterion is fulfilled (fulfilled = true)
    *
    *  Keeps track of the number of steps (number of time check() was called).
@@ -40,22 +40,22 @@ class ConvergenceCriterionSteps : public ConvergenceCriterion {
    */
   virtual std::string name();
   // The following section is found in the base class
-  ///** \brief Pointer to the old density profile
-  // *
-  // */
-  //const std::vector<DataFrame<1, double>>& old_profile;
-  ///** \brief Pointer to the proposed density profile
-  // *
-  // */
-  //const std::vector<DataFrame<1, double>>& new_profile;
-  ///** \brief Threshold value used in the check function
-  // *
-  // */
-  //double threshold;
-  ///** \brief Threshold value used in the check function (integer)
-  // *
-  // */
-  //int threshold_int;
+  // /** \brief Pointer to the old density profile
+  //  *
+  //  */
+  // const std::vector<DataFrame<1, double>>& old_profile;
+  // /** \brief Pointer to the proposed density profile
+  //  *
+  //  */
+  // const std::vector<DataFrame<1, double>>& new_profile;
+  // /** \brief Threshold value used in the check function
+  //  *
+  //  */
+  // double threshold;
+  // /** \brief Threshold value used in the check function (integer)
+  //  *
+  //  */
+  // int threshold_int;
 
  private:
   /** \brief Number of steps, i.e. number of times check()

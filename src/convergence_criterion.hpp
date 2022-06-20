@@ -19,7 +19,7 @@ class ConvergenceCriterion {
    *
    */
   ConvergenceCriterion(
-      const std::vector<DataFrame<1, double>>& old_profile, 
+      const std::vector<DataFrame<1, double>>& old_profile,
       const std::vector<DataFrame<1, double>>& new_profile,
       const double& threshold);
   /** \brief Constructor for integer thresholds
@@ -28,13 +28,13 @@ class ConvergenceCriterion {
    *
    */
   ConvergenceCriterion(
-      const std::vector<DataFrame<1, double>>& old_profile, 
+      const std::vector<DataFrame<1, double>>& old_profile,
       const std::vector<DataFrame<1, double>>& new_profile,
       const int& threshold_int);
   /** \brief Destructor
    *
    */
-  virtual ~ConvergenceCriterion() {};
+  virtual ~ConvergenceCriterion() {}
   /** \brief Check if the criterion is fulfilled (fulfilled = true)
    *
    *  The implementation of the criterion should go here.

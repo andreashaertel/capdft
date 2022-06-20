@@ -52,7 +52,7 @@ class FunctionalFMTSpherical : public Functional {
    * functional by checking if the hard sphere diameter exists.
    *
    */
-  explicit FunctionalFMTSpherical(const System<DataFrame<1, double>>& system);  // TODO(Moritz): remove System
+  explicit FunctionalFMTSpherical(const System<DataFrame<1, double>>& system);  // TODO(Moritz): remove System  // NOLINT
   FunctionalFMTSpherical(
       const std::vector<DataFrame<1, double>>* density_profiles,
       const std::vector<Properties>& species_properties,

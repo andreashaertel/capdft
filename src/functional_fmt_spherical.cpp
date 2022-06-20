@@ -207,9 +207,12 @@ void FunctionalFMTSpherical::initialize_all_data_frames() {
   }
   for (size_t i = 0; i < 4; ++i) {
     scalar_partial_derivative_real.push_back(DataFrame<1, double>(grid_count));
-    scalar_partial_derivative_four.push_back(DataFrame<1, double>(grid_count+1));
-    vector_partial_derivative_four.push_back(DataFrame<1, double>(grid_count+1));
-    tensor_partial_derivative_four.push_back(DataFrame<1, double>(grid_count+1));
+    scalar_partial_derivative_four.push_back(
+        DataFrame<1, double>(grid_count+1));
+    vector_partial_derivative_four.push_back(
+        DataFrame<1, double>(grid_count+1));
+    tensor_partial_derivative_four.push_back(
+        DataFrame<1, double>(grid_count+1));
   }
   // Initialize derivative terms
   for (size_t i = 0; i < 2; ++i) {

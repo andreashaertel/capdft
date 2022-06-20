@@ -8,7 +8,7 @@
 #include <string>
 // _____________________________________________________________________________
 ConvergenceCriterion::ConvergenceCriterion(
-    const std::vector<DataFrame<1, double>>& old_profile, 
+    const std::vector<DataFrame<1, double>>& old_profile,
     const std::vector<DataFrame<1, double>>& new_profile,
     const double& threshold)
   : old_profile(old_profile),
@@ -18,7 +18,7 @@ ConvergenceCriterion::ConvergenceCriterion(
 }
 // _____________________________________________________________________________
 ConvergenceCriterion::ConvergenceCriterion(
-    const std::vector<DataFrame<1, double>>& old_profile, 
+    const std::vector<DataFrame<1, double>>& old_profile,
     const std::vector<DataFrame<1, double>>& new_profile,
     const int& threshold_int)
   : old_profile(old_profile),

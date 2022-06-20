@@ -8,10 +8,13 @@
 #include <string>
 // _____________________________________________________________________________
 ConvergenceCriterionSteps::ConvergenceCriterionSteps(
-    const std::vector<DataFrame<1, double>>& old_profile, 
+    const std::vector<DataFrame<1, double>>& old_profile,
     const std::vector<DataFrame<1, double>>& new_profile,
     const int& steps)
   : ConvergenceCriterion(old_profile, new_profile, steps) {
+}
+// _____________________________________________________________________________
+ConvergenceCriterionSteps::~ConvergenceCriterionSteps() {
 }
 // _____________________________________________________________________________
 bool ConvergenceCriterionSteps::check(double* max_deviation) {
