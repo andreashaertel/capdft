@@ -19,11 +19,13 @@ REPOFILE += convergence_criterion
 REPOFILE += convergence_criterion_max_dev
 REPOFILE += convergence_criterion_steps
 REPOFILE += data_frame
-REPOFILE += properties
-REPOFILE += system
 REPOFILE += functional
 REPOFILE += functional_fmt_spherical
+REPOFILE += functional_es_mf_spherical
 REPOFILE += iterator
+REPOFILE += properties
+REPOFILE += radial_poisson_solver
+REPOFILE += system
 # Get host name ################################################################
 HOST = $(shell hostname)
 # Offsets for binaries and objects #############################################
