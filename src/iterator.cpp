@@ -37,7 +37,7 @@ void Iterator::add_excess_functional(Functional* functional) {
   for (size_t i = 0; i < species_count; ++i) {
     bulk_derivatives.at(index).push_back(0.);
     functional_derivatives.at(index).push_back(DataFrame<1, double>(
-        density_profiles->at(0)));  // copy constructor
+        density_profiles->at(0).size()));
   }
 }
 // _____________________________________________________________________________

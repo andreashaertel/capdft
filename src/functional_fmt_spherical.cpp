@@ -16,7 +16,7 @@ FunctionalFMTSpherical::FunctionalFMTSpherical(
     const System<DataFrame<1, double>>& system,
     const std::vector<size_t>& affected_species)
   : affected_species(affected_species) {
-  // Clear all std::vectors
+  // Clear all std::vectors  // TODO(Moritz): remove
   diameters.clear();
   bulk_densities.clear();
   // Get system properties
@@ -34,10 +34,6 @@ FunctionalFMTSpherical::FunctionalFMTSpherical(
 FunctionalFMTSpherical::FunctionalFMTSpherical(
     const System<DataFrame<1, double>>& system)
   : FunctionalFMTSpherical(system, std::vector<size_t>(0)) {
-}
-// _____________________________________________________________________________
-FunctionalFMTSpherical::~FunctionalFMTSpherical() {
-  //
 }
 // _____________________________________________________________________________
 FunctionalFMTSpherical::FunctionalFMTSpherical(
@@ -68,6 +64,10 @@ FunctionalFMTSpherical::FunctionalFMTSpherical(
   : FunctionalFMTSpherical(
       density_profiles, species_properties, system_properties,
       std::vector<size_t>(0)) {
+}
+// _____________________________________________________________________________
+FunctionalFMTSpherical::~FunctionalFMTSpherical() {
+  //
 }
 // _____________________________________________________________________________
 void FunctionalFMTSpherical::extract_system_properties(

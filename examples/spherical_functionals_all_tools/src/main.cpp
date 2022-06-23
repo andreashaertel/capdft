@@ -3,8 +3,7 @@
 /** \file examples/spherical_functional/src/main.cpp
  *  \brief Main file of the example of the spherical functionals.
  *  
- *  This main file contains examples to show how the FunctionalFMTSpherical
- *  class works.
+ *  This main file contains examples to show how Functional classes work.
  *
  */
 // _____________________________________________________________________________
@@ -17,6 +16,7 @@
 #include "../../../src/data_frame.hpp"
 #include "../../../src/functional.hpp"
 #include "../../../src/functional_fmt_spherical.hpp"
+#include "../../../src/functional_es_mf_spherical.hpp"
 #include "../../../src/iterator.hpp"
 #include "../../../src/properties.hpp"
 // _____________________________________________________________________________
@@ -37,11 +37,16 @@ int main(int argc, char** args) {
    * In general programs should obtain their parameters via the command line
    * or a parameter file (e.g. via the ParameterHandler).
    * However, for this example we hard-coded the numbers to reduce complexity.
+   *
+   * Note, that the system_length is chosen such that the external potential
+   * step lies exactly between two bins.
    */
 // _____________________________________________________________________________
   size_t grid_count = static_cast<size_t>(1e4+.5) + 1;  // equals = 10,001
-  double system_length = 19.821782178217823;  // external pot. between two bins
-  double bjerrum_length = 1.;  // not really needed
+  double ext_potential_charge = 1.;
+  double system_length = 19.821782178217823;  // in nm
+  double bjerrum_length = 1.;  // in nm
+  double temperature = 300.;  // in K
   // Create objects of Properties class
   Properties properties;
   Properties system_properties;
@@ -49,21 +54,22 @@ int main(int argc, char** args) {
   // Put the system properties into a Properties container
   system_properties.add_property<double>("length", system_length);
   system_properties.add_property<double>("bjerrum length", bjerrum_length);
+  system_properties.add_property<double>("temperature", temperature);
   system_properties.add_property<size_t>("grid count", grid_count);
   // First species
   properties.add_property<double>("diameter", 1.);
   properties.add_property<double>("bulk density", .1);
-  properties.add_property<double>("valency", -1.);  // not really needed
+  properties.add_property<double>("valency", -1.);
   species_properties.push_back(properties);
   properties.clear();
   // Second species
   properties.add_property<double>("bulk density", .2);
-  properties.add_property<double>("valency", +1.);  // not really needed
   species_properties.push_back(properties);
   properties.clear();
   // Third species
   properties.add_property<double>("diameter", 1.);
-  properties.add_property<double>("bulk density", .3);
+  properties.add_property<double>("bulk density", .1);
+  properties.add_property<double>("valency", +1.);
   species_properties.push_back(properties);
   properties.clear();
 // _____________________________________________________________________________
@@ -79,14 +85,15 @@ int main(int argc, char** args) {
   for (size_t i = 0; i < species_properties.size(); ++i) {
     density_profiles.push_back(DataFrame<1, double>(grid_count));
   }
-  // Create an FMT Functional object. Either specify the species
-  std::vector<size_t> affected_species{0, 2};  // selected species 0 and 2
+  // Create an FMT Functional object. For this we specify the
+  // species which are interacting via this functional in affected_species.
+  std::vector<size_t> affected_species_fmt{0, 2};  // selected species 0 and 2
   FunctionalFMTSpherical my_fmt_functional(&density_profiles,
-      species_properties, system_properties, affected_species);
-  // or let the constructor decide which species can interact via this
-  // functional
-  // FunctionalFMTSpherical my_fmt_functional(&density_profiles,
-  //     species_properties, system_properties);
+      species_properties, system_properties, affected_species_fmt);
+  // Create an ES functional object.
+  std::vector<size_t> affected_species_es{0, 2};  // selected species 0 and 2
+  FunctionalESMFSpherical my_es_functional(&density_profiles,
+      species_properties, system_properties, affected_species_es);
 // _____________________________________________________________________________
   // Picard iterations
   /* For the Picard iterations the Iterator class is used. For that we define
@@ -97,23 +104,24 @@ int main(int argc, char** args) {
    */
 // _____________________________________________________________________________
   // Create external potential DataFrames
-  double diameter{0.}, bulk_density{0.}, r{0.};
+  double diameter{0.}, valency{0.}, bulk_density{0.}, r{0.};
   double dr{system_length / static_cast<double>(grid_count)};
-  std::vector<DataFrame<1, double>> exp_ext_potential;
-  for (size_t i = 0; i != species_properties.size(); ++i) {
-    exp_ext_potential.push_back(DataFrame<1, double>(grid_count));
+  std::vector<DataFrame<1, double>> exp_ext_potential(
+      species_properties.size(), DataFrame<1, double>(grid_count));
+  for (auto& potential : exp_ext_potential) {
+    potential.set_all_elements_to(1.);
   }
-  // Set external (hard) potential
-  for (auto it = affected_species.begin(); it != affected_species.end(); ++it) {
-    species_properties.at(*it).get_property("diameter", &diameter);
+  // Set external hard potential
+  for (auto& species : affected_species_fmt) {
+    species_properties.at(species).get_property("diameter", &diameter);
     for (size_t j = 0; j != grid_count; ++j) {
       r = dr * static_cast<double>(j + 1);
       if (r < diameter) {
-        exp_ext_potential.at(*it).at(j) = 0.;
+        exp_ext_potential.at(species).at(j) = 0.;
       } else if (system_length - r < 1.5 * diameter) {
-        exp_ext_potential.at(*it).at(j) = 0.;
+        exp_ext_potential.at(species).at(j) = 0.;
       } else {
-        exp_ext_potential.at(*it).at(j) = 1.;
+        exp_ext_potential.at(species).at(j) = 1.;
       }
     }
   }
@@ -123,10 +131,22 @@ int main(int argc, char** args) {
     density_profiles.at(i).set_all_elements_to(bulk_density);
     density_profiles.at(i) *= exp_ext_potential.at(i);
   }
+  // Set external electrostatic potential
+  for (auto& species : affected_species_es) {
+    species_properties.at(species).get_property("valency", &valency);
+    species_properties.at(species).get_property("diameter", &diameter);
+    for (size_t j = 0; j != grid_count; ++j) {
+      r = dr * static_cast<double>(j + 1);
+      if (r < diameter) { continue; }  // prevents divergences in the walls
+      exp_ext_potential.at(species).at(j) *= 
+          exp(-bjerrum_length * ext_potential_charge * valency / r);
+    }
+  }
   // Create iterator and run iterations
   Iterator my_iterator(&density_profiles, exp_ext_potential,
       species_properties);
   my_iterator.add_excess_functional(&my_fmt_functional);
+  //my_iterator.add_excess_functional(&my_es_functional);
   my_iterator.run();
 // _____________________________________________________________________________
   /* All done!
@@ -151,6 +171,9 @@ int main(int argc, char** args) {
   double energy;
   energy = my_fmt_functional.calc_energy();
   std::cout << "Excess free energy of FMT functional: ";
+  std::cout << energy << std::endl;
+  energy = my_es_functional.calc_energy();
+  std::cout << "Excess free energy of mean-field electrostatic functional: ";
   std::cout << energy << std::endl;
   return 0;
 }
