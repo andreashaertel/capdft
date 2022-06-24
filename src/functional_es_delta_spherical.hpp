@@ -1,13 +1,11 @@
 // SPDX-FileCopyrightText: 2022 Moritz Bültmann <moritz.bueltmann@gmx.de>
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#ifndef SRC_FUNCTIONAL_ES_MF_SPHERICAL_HPP_
-#define SRC_FUNCTIONAL_ES_MF_SPHERICAL_HPP_
-/** \file functional_es_mf_spherical.hpp
- *  \brief Header file for the FunctionalESMFSpherical class.
+#ifndef SRC_FUNCTIONAL_ES_DELTA_SPHERICAL_HPP_
+#define SRC_FUNCTIONAL_ES_DELTA_SPHERICAL_HPP_
+/** \file functional_es_delta_spherical.hpp
+ *  \brief Header file for the FunctionalESDeltaSpherical class.
  *
- *  The file contains the class declarations of the FunctionalESMFSpherical
- *  class.
- *
+ *  The file contains the declarations of the FunctionalESDeltaSpherical class.
  */
 // Includes
 #include "functional.hpp"  // NOLINT
@@ -15,33 +13,33 @@
 #include "data_frame.hpp"  // NOLINT
 #include "properties.hpp"  // NOLINT
 #include "radial_poisson_solver.hpp"  // NOLINT
-/** \brief This class calculates the elctrostatic mean field functional.
+/** \brief This class calculates the electrostatic interactions via the delta
+ *         functional.
  *  
- *  This class contains the tools to calculate functional and functional
- *  derivative values for point charges in the mean field approximation.
- *
+ *  The theory for this functional was published in
+ *  [M. Bültmann and A. Härtel 2022 J. Phys.: Condens. Matter 34 235101].
  */
-class FunctionalESMFSpherical : public Functional {
+class FunctionalESDeltaSpherical : public Functional {
  public:
   /** \brief Standard Constructor
    */
-  FunctionalESMFSpherical();
+  FunctionalESDeltaSpherical();
   /** \brief Manual Constructor
    */
-  FunctionalESMFSpherical(
+  FunctionalESDeltaSpherical(
       std::vector<DataFrame<1, double>>* density_profiles,
       const std::vector<Properties>& species_properties,
       const Properties& system_properties,
       std::vector<size_t> affected_species);
   /** \brief Automated Constructor
    */
-  FunctionalESMFSpherical(
+  FunctionalESDeltaSpherical(
       std::vector<DataFrame<1, double>>* density_profiles,
       const std::vector<Properties>& species_properties,
       const Properties& system_properties);
   /** \brief Destructor
    */
-  ~FunctionalESMFSpherical();
+  ~FunctionalESDeltaSpherical();
   /** \brief Calculate the functional derivatives
    *
    *  This function calculates the functional derivatives and updates the
@@ -98,30 +96,42 @@ class FunctionalESMFSpherical : public Functional {
    *  To be more general, valencies must be given as "double".
    */
   std::vector<double> valencies;
+  /** \brief Hard-sphere diameters
+   */
+  std::vector<double> diameters;
   /** \brief Bulk densities
    */
   std::vector<double> bulk_densities;
   /** \brief Pointer to density profiles
    */
   std::vector<DataFrame<1, double>>* density_profiles_pointer;
-  /** \brief Total charge density profile
+  /** \brief Charge density profile for every species
    */
-  DataFrame<1, double> charge_density_profile;
+  std::vector<DataFrame<1, double>> charge_density_profiles;
   /** \brief Right hand side of the Poisson equation
    */
   DataFrame<1, double> poisson_rhs;
   /** \brief Electrostatic potential (numerical solution of Poisson equation)
+   *         for each species.
    */
-  DataFrame<1, double> potential;
+  std::vector<DataFrame<1, double>> potentials;
+  /** \brief Fourier transformed delta weight functions
+   */
+  std::vector<std::vector<DataFrame<1, double>>> weights_delta;
+  /** \brief Weighted densities (delta-functions)
+   */
+  std::vector<std::vector<DataFrame<1, double>>> weighted_densities;
   /** \brief Poisson solver
    *
    *  This object contains the matrix representation of the numerical Poisson
    *  equation.
    */
   RadialPoissonSolver* poisson_solver;
-  /** \brief Functional derivatives */
+  /** \brief Functional derivatives
+   */
   double** functional_derivative;
-  /** \brief Extract the system Properties required for this functional */
+  /** \brief Extract the system Properties required for this functional
+   */
   void extract_system_properties(const Properties& system_properties);
   /** \brief From two of the three electrical properties, the third on can be
    *         calculated.
@@ -132,19 +142,32 @@ class FunctionalESMFSpherical : public Functional {
    */
   void extract_species_properties(
       const std::vector<Properties>& species_properties);
-  /** \brief Allocate memory for all DataFrame objects */
+  /** \brief Allocate memory for all DataFrame objects
+   */
   void initialize_all_data_frames();
-  /** \brief Initialize the RadialPoissonSolver object */
+  /** \brief Initialize the RadialPoissonSolver object
+   */
   void initialize_poisson_solver();
+  /** \brief Initialize Fourier transformed weight functions
+   */
+  void initialize_weights();
   /** \brief Calculate the net charge density profile and the rhs of the Poisson
    *         equation.
    */
   void calc_charge_densities();
-  /** \brief From the charge densities calculate the electrostatic potential */
+  /** \brief Calculate the net charge density profile and the rhs of the Poisson
+   *         equation.
+   *
+   *  See equation (32a).
+   */
+  void calc_weighted_densities();
+  /** \brief From the charge densities calculate the electrostatic potential
+   */
   void calc_potential();
-  /** \brief Integration over charge densities to obtain net charge */
+  /** \brief Integration over charge densities to obtain net charge
+   */
   double calc_net_charge();
 
  protected:
 };
-#endif  // SRC_FUNCTIONAL_ES_MF_SPHERICAL_HPP_
+#endif  // SRC_FUNCTIONAL_ES_DELTA_SPHERICAL_HPP_

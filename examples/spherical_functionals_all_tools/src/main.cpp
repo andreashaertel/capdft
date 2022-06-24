@@ -17,6 +17,7 @@
 #include "../../../src/functional.hpp"
 #include "../../../src/functional_fmt_spherical.hpp"
 #include "../../../src/functional_es_mf_spherical.hpp"
+#include "../../../src/functional_es_delta_spherical.hpp"
 #include "../../../src/iterator.hpp"
 #include "../../../src/properties.hpp"
 // _____________________________________________________________________________
@@ -63,7 +64,7 @@ int main(int argc, char** args) {
   species_properties.push_back(properties);
   properties.clear();
   // Second species
-  properties.add_property<double>("bulk density", .2);
+  properties.add_property<double>("bulk density", .05);
   species_properties.push_back(properties);
   properties.clear();
   // Third species
@@ -92,7 +93,9 @@ int main(int argc, char** args) {
       species_properties, system_properties, affected_species_fmt);
   // Create an ES functional object.
   std::vector<size_t> affected_species_es{0, 2};  // selected species 0 and 2
-  FunctionalESMFSpherical my_es_functional(&density_profiles,
+  //FunctionalESMFSpherical my_es_functional(&density_profiles,
+  //    species_properties, system_properties, affected_species_es);
+  FunctionalESDeltaSpherical my_es_functional(&density_profiles,
       species_properties, system_properties, affected_species_es);
 // _____________________________________________________________________________
   // Picard iterations
@@ -138,7 +141,7 @@ int main(int argc, char** args) {
     for (size_t j = 0; j != grid_count; ++j) {
       r = dr * static_cast<double>(j + 1);
       if (r < diameter) { continue; }  // prevents divergences in the walls
-      exp_ext_potential.at(species).at(j) *= 
+      exp_ext_potential.at(species).at(j) *=
           exp(-bjerrum_length * ext_potential_charge * valency / r);
     }
   }
@@ -146,7 +149,7 @@ int main(int argc, char** args) {
   Iterator my_iterator(&density_profiles, exp_ext_potential,
       species_properties);
   my_iterator.add_excess_functional(&my_fmt_functional);
-  //my_iterator.add_excess_functional(&my_es_functional);
+  my_iterator.add_excess_functional(&my_es_functional);
   my_iterator.run();
 // _____________________________________________________________________________
   /* All done!

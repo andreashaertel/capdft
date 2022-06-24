@@ -19,7 +19,7 @@ Iterator::Iterator(
   proposed_densities = std::vector(species_count,
       DataFrame<1, double>(grid_count));
   add_convergence_criterion<ConvergenceCriterionMaxDev>(1.0e-6);
-  add_convergence_criterion<ConvergenceCriterionSteps>(200);
+  add_convergence_criterion<ConvergenceCriterionSteps>(2e3);
 }
 // _____________________________________________________________________________
 Iterator::~Iterator() {
@@ -54,7 +54,7 @@ void Iterator::clear_functionals() {
 }
 // _____________________________________________________________________________
 void Iterator::run() {
-  double mixing{.05};
+  double mixing{.005};
   double bulk_density{0.};
   size_t steps{0};
   size_t species_count{species_properties->size()};
@@ -130,7 +130,7 @@ bool Iterator::check_convergence_criteria() {
   double progress{0.};
   std::cout << "Iterator::check_convergence_criteria(): \"";
   for (auto criterion : convergence_criteria) {
-    converged = (converged || criterion->check(&progress));
+    converged = (converged | criterion->check(&progress));
     std::cout << criterion->name() << ": " << progress << "; ";
   }
   std::cout << "\"" << std::endl;

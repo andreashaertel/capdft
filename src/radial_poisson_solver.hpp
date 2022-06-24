@@ -1,15 +1,14 @@
 // SPDX-FileCopyrightText: 2022 Moritz Bültmann <moritz.bueltmann@gmx.de>
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#ifndef _RADIAL_POISSON_SOLVER_H_
-#define _RADIAL_POISSON_SOLVER_H_
+#ifndef SRC_RADIAL_POISSON_SOLVER_HPP_
+#define SRC_RADIAL_POISSON_SOLVER_HPP_
 /** \file radial_poisson_solver.hpp
  *  \brief Header file for the RadialPoissonSolver class.
  *
  *  The file contains the declarations of the RadialPoissonSolver class.
- *
  */
 // Includes
-
+#include <cstddef>
 // Flag definition for boundary conditions
 enum BoundaryFlag {
   NEUMANN_NEUMANN = 0,
@@ -121,4 +120,4 @@ class RadialPoissonSolver {
   void set_boundary_values_laplace_radial(double leftBoundaryValue,
       double rightBoundaryValue, double* rhs);
 };
-#endif  // _RADIAL_POISSON_SOLVER_H_
+#endif  // SRC_RADIAL_POISSON_SOLVER_HPP_

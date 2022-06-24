@@ -22,6 +22,7 @@ REPOFILE += data_frame
 REPOFILE += functional
 REPOFILE += functional_fmt_spherical
 REPOFILE += functional_es_mf_spherical
+REPOFILE += functional_es_delta_spherical
 REPOFILE += iterator
 REPOFILE += properties
 REPOFILE += radial_poisson_solver
