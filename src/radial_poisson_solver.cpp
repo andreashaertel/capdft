@@ -4,11 +4,10 @@
  *  \brief Source file for the RadialPoissonSolver class.
  *
  *  The file contains the definitions of the RadialPoissonSolver class.
- *
  */
+#include "radial_poisson_solver.hpp"  // NOLINT
 #include <iostream>
 #include <vector>
-#include "radial_poisson_solver.hpp"
 // _____________________________________________________________________________
 RadialPoissonSolver::RadialPoissonSolver() {
   //
@@ -152,8 +151,7 @@ void RadialPoissonSolver::solve(
   size_t index;
   // Set the boundary values
   set_boundary_values_laplace_radial(
-      leftBoundaryValue, rightBoundaryValue, rhs
-  );
+      leftBoundaryValue, rightBoundaryValue, rhs);
   // Solving algorithm for tridiagonal matrices:
   // One starts by eliminating solution[0] by subtracting the first from the
   // second line. One ends up with the same situation and does the whole thing
@@ -169,7 +167,7 @@ void RadialPoissonSolver::solve(
   solution[0] = rhs[0] / diagTemp;
   for (size_t i = 1; i < dim; ++i) {
     work.at(i) = upper[i-1] / diagTemp;
-    diagTemp = diag[i] - lower[i] * work.at(i); // subtraction of the two lines 
+    diagTemp = diag[i] - lower[i] * work.at(i);  // subtraction of the two lines
     if (diagTemp == 0.) {
       std::cerr << "solve(): \"ERROR: Algorithm failed in row ";
       std::cerr << i << "!\"" << std::endl;
