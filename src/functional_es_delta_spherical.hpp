@@ -51,13 +51,14 @@ class FunctionalESDeltaSpherical : public Functional {
   virtual void calc_derivative(
       std::vector<DataFrame<1, double>>* functional_derivative);
   /** \brief Calculate bulk derivatives
-   *
    */
   virtual void calc_bulk_derivative(std::vector<double>* bulk_derivative);
   /** \brief Calculate the energy value of this functional
    *
-   *  Calculate the energy value of this functional, which approaches the excess
-   *  free energy contribution of the hard sphere interactions.
+   *  Calculate the excess free energy of the delta electrostatic
+   *  Functional. For that, one only multiplies the electrostatic potentials of
+   *  the weighted densities with the charge densities and integrates the result
+   *  over the entire space.
    *
    *  \return Returns the functional energy value
    */

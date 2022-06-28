@@ -58,8 +58,9 @@ class FunctionalESMFSpherical : public Functional {
   virtual void calc_bulk_derivative(std::vector<double>* bulk_derivative);
   /** \brief Calculate the energy value of this functional
    *
-   *  Calculate the energy value of this functional, which approaches the excess
-   *  free energy contribution of the hard sphere interactions.
+   *  Calculate the excess free energy of the mean-field electrostatic
+   *  Functional. For that, one only multiplies the electrostatic potential with
+   *  the total charge density and integrates the result over the entire space.
    *
    *  \return Returns the functional energy value
    */

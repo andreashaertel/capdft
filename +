@@ -339,9 +339,9 @@ double FunctionalESDeltaSpherical::calc_energy() {
   double r{0.};
   calc_charge_densities();
   calc_weighted_densities();
-  calc_potentials();
+  calc_potential();
   for (size_t i = 0; i < species_count; ++i) {
-    integrand += potentials.at(i) * charge_density_profiles.at(i);
+    integrand = potential * charge_density_profile;
   }
   // Trapezoidal integral rule, spherical integral
   r = static_cast<double>(0 + 1) * dr;
