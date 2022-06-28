@@ -123,6 +123,7 @@ void FunctionalESDeltaSpherical::extract_species_properties(
       affected_species.end());
   // If no affected species were specified, find them automatically
   double valency{0.};
+  double bulk_density{0.};
   double diameter{0.};
   if (affected_species.empty()) {
     for (auto& properties : species_properties) {
@@ -137,8 +138,10 @@ void FunctionalESDeltaSpherical::extract_species_properties(
   // Get valencies and diameters
   for (auto& species : affected_species) {
     species_properties.at(species).get_property("valency", &valency);
+    species_properties.at(species).get_property("bulk density", &bulk_density);
     species_properties.at(species).get_property("diameter", &diameter);
     valencies.push_back(valency);
+    bulk_densities.push_back(bulk_density);
     diameters.push_back(diameter);
   }
   // Count species that interact via the electrostatic forces
@@ -295,7 +298,6 @@ void FunctionalESDeltaSpherical::calc_weighted_densities() {
       weighted_densities.at(0).at(j).at(i) /= pow(2. * M_PI, 3);
     }
   }
-  // Free memory  // TODO(Moritz): necessary?
   for (auto& plan : plans_forward) { fftw_destroy_plan(plan); }
   for (auto& plan : plans_backward) { fftw_destroy_plan(plan); }
 }
@@ -319,8 +321,16 @@ void FunctionalESDeltaSpherical::calc_derivative(
 // _____________________________________________________________________________
 void FunctionalESDeltaSpherical::calc_bulk_derivative(
     std::vector<double>* bulk_derivative) {
-  // The bulk values of this functional's derivative are always zero
+  size_t index{0};
   std::fill(bulk_derivative->begin(), bulk_derivative->end(), 0.);
+  for (size_t i = 0; i < species_count; ++i) {
+    index = affected_species.at(i);
+    for (size_t j = 0; j < species_count; ++j) {
+      bulk_derivative->at(index) += valencies.at(j) * bulk_densities.at(j) *
+          pow(.5 * (diameters.at(i) + diameters.at(j)), 2);
+    }
+    bulk_derivative->at(index) *= -M_PI * valencies.at(i) * bjerrum / 6.;
+  }
 }
 // _____________________________________________________________________________
 double FunctionalESDeltaSpherical::calc_energy() {

@@ -577,6 +577,8 @@ void FunctionalFMTSpherical::calc_weighted_densities() {
   // The convolution may have numerical problems at the outermost part.
   // One way of avoiding this is by using an outer external potential
   // forcing the density profile to vanish (i.e. spherical capacitor).
+  for (auto& plan : forward_plans) { fftw_destroy_plan(plan); }
+  for (auto& plan : backward_plans) { fftw_destroy_plan(plan); }
 }
 // _____________________________________________________________________________
 void FunctionalFMTSpherical::check_weighted_densities() {
@@ -948,6 +950,8 @@ void FunctionalFMTSpherical::calc_weighted_partial_derivatives(
     // 3D FT Backtransform normalization
     functional_derivative->at(*it) *= 1. / pow(2. * M_PI, 3);
   }
+  for (auto& plan : forward_plans) { fftw_destroy_plan(plan); }
+  for (auto& plan : backward_plans) { fftw_destroy_plan(plan); }
 }
 // _____________________________________________________________________________
 double FunctionalFMTSpherical::calc_local_energy_density(size_t position) {
