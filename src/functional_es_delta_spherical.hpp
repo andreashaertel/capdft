@@ -108,10 +108,10 @@ class FunctionalESDeltaSpherical : public Functional {
   /** \brief Charge density profile for every species
    */
   std::vector<DataFrame<1, double>> charge_density_profiles;
-  /** \brief Right hand side of the Poisson equation
+  /** \brief Right hand side of the Poisson equation for each species
    */
-  DataFrame<1, double> poisson_rhs;
-  /** \brief Electrostatic potential (numerical solution of Poisson equation)
+  std::vector<DataFrame<1, double>> poisson_rhs;
+  /** \brief Electrostatic potentials (numerical solution of Poisson equation)
    *         for each species.
    */
   std::vector<DataFrame<1, double>> potentials;
@@ -155,6 +155,10 @@ class FunctionalESDeltaSpherical : public Functional {
    *         equation.
    */
   void calc_charge_densities();
+  /** \brief Calculate the right-hand side of the Poisson equation for every
+   *         species.
+   */
+  void calc_poisson_rhs();
   /** \brief Calculate the net charge density profile and the rhs of the Poisson
    *         equation.
    *
@@ -162,11 +166,21 @@ class FunctionalESDeltaSpherical : public Functional {
    */
   void calc_weighted_densities();
   /** \brief From the charge densities calculate the electrostatic potential
+   *
+   *  Unlike the mean-field electrostatic functional, the potential of every
+   *  species is calculated separately. Moreover, this functional uses weighted
+   *  densities instead of the regular charge densities.
+   *  The boundary conditions for the solution of the Poisson equations are:
+   *  - inner one equals 0 (Neumann) due to the radial symmetry
+   *  - outer one equals net charge divided by radial position (Dirichlet)
+   *    due to Gauss' theorem.
+   *  Note, that there is no external charge at the center.
+   *
    */
-  void calc_potential();
-  /** \brief Integration over charge densities to obtain net charge
+  void calc_potentials();
+  /** \brief Integration over weighted charge densities to obtain net charge
    */
-  double calc_net_charge();
+  std::vector<double> calc_charge_weight_dens();
 
  protected:
 };

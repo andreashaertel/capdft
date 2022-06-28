@@ -137,7 +137,7 @@ void FunctionalESDeltaSpherical::extract_species_properties(
   // Get valencies and diameters
   for (auto& species : affected_species) {
     species_properties.at(species).get_property("valency", &valency);
-    species_properties.at(species).get_property("diameter", &valency);
+    species_properties.at(species).get_property("diameter", &diameter);
     valencies.push_back(valency);
     diameters.push_back(diameter);
   }
@@ -150,13 +150,14 @@ void FunctionalESDeltaSpherical::initialize_all_data_frames() {
       DataFrame<1, double>(grid_count));
   potentials = std::vector<DataFrame<1, double>>(species_count,
       DataFrame<1, double>(grid_count));
+  poisson_rhs = std::vector<DataFrame<1, double>>(species_count,
+      DataFrame<1, double>(grid_count));
   weights_delta = std::vector<std::vector<DataFrame<1, double>>>(species_count,
       std::vector<DataFrame<1, double>>(species_count,
           DataFrame<1, double>(grid_count)));
   weighted_densities = std::vector<std::vector<DataFrame<1, double>>>(
       species_count, std::vector<DataFrame<1, double>>(species_count,
           DataFrame<1, double>(grid_count)));
-  // TODO(Moritz): poisson_rhs
 }
 // _____________________________________________________________________________
 void FunctionalESDeltaSpherical::initialize_poisson_solver() {
@@ -184,43 +185,51 @@ void FunctionalESDeltaSpherical::calc_charge_densities() {
     charge_density_profiles.at(i) = valencies.at(i) *
         density_profiles_pointer->at(affected_species.at(i));
   }
-  // TODO(Moritz): poisson_rhs?
 }
 // _____________________________________________________________________________
-void FunctionalESDeltaSpherical::calc_potential() {
+void FunctionalESDeltaSpherical::calc_poisson_rhs() {
+  for (size_t i = 0; i < species_count; ++i) {
+    poisson_rhs.at(i) = -4. * M_PI * bjerrum * weighted_densities.at(0).at(i);
+  }
+}
+// _____________________________________________________________________________
+void FunctionalESDeltaSpherical::calc_potentials() {
   double outer_boundary{0.};
   double inner_boundary{0.};
-  // Calculate the boundary conditions of the Poisson equation.
-  // The inner one equals 0 (Neumann) due to the radial symmetry and the outer
-  // one equals net charge divided by radial position (Dirichlet) due to Gauss'
-  // theorem. Note, that there is no external charge at the center.
-  inner_boundary = 0.;
-  outer_boundary = bjerrum * calc_net_charge() /
-      (dr * static_cast<double>(grid_count+1));
-  // Solve the radial Poisson equation numerically
-  poisson_solver->solve(
-      inner_boundary, outer_boundary, poisson_rhs.array(), potential.array());
+  std::vector<double> total_charges{calc_charge_weight_dens()};
+  for (size_t i = 0; i < species_count; ++i) {
+    inner_boundary = 0.;
+    outer_boundary = bjerrum *  total_charges.at(i) /
+        (dr * static_cast<double>(grid_count+1));
+    // Solve the radial Poisson equation numerically
+    poisson_solver->solve(inner_boundary, outer_boundary,
+        poisson_rhs.at(i).array(), potentials.at(i).array());
+  }
 }
 // _____________________________________________________________________________
-double FunctionalESDeltaSpherical::calc_net_charge() {
+std::vector<double> FunctionalESDeltaSpherical::calc_charge_weight_dens() {
   double integral{0.};
   double r{0.};
-  // Trapezoidal integral rule, spherical integral
-  r = static_cast<double>(0 + 1) * dr;
-  integral += .5 * r * r * charge_density_profile.at(0) * dr;
-  for (size_t i = 1; i < grid_count - 1; ++i) {
-    r = static_cast<double>(i + 1) * dr;
-    integral += r * r * charge_density_profile.at(i) * dr;
+  std::vector<double> integrals(0);
+  for (auto& weighted_density : weighted_densities.at(0)) {
+    integral = 0.;
+    // Trapezoidal integral rule, spherical integral
+    r = static_cast<double>(0 + 1) * dr;
+    integral += .5 * r * r * weighted_density.at(0) * dr;
+    for (size_t i = 1; i < grid_count - 1; ++i) {
+      r = static_cast<double>(i + 1) * dr;
+      integral += r * r * weighted_density.at(i) * dr;
+    }
+    integral += .5 * r * r * dr * weighted_density.at(grid_count - 1);
+    // Spherical symmetry
+    integral *= 4. * M_PI;
+    integrals.push_back(integral);
   }
-  integral += .5 * r * r * dr * charge_density_profile.at(grid_count - 1);
-  // Spherical symmetry
-  integral *= 4. * M_PI;
-  return integral;
+  return integrals;
 }
 // _____________________________________________________________________________
 void FunctionalESDeltaSpherical::calc_weighted_densities() {
   double r = 0.;
-  double kr = 0.;
   // Create fftw plans
   std::vector<fftw_plan> plans_forward;
   std::vector<fftw_plan> plans_backward;
@@ -228,22 +237,25 @@ void FunctionalESDeltaSpherical::calc_weighted_densities() {
     plans_forward.push_back(
         fftw_plan_r2r_1d(
             grid_count, weighted_densities.at(i).at(0).array(),
-            weighted_densities.at(i).at(0).array(), FFTW_RODFT00, FFTW_MEASURE);
+            weighted_densities.at(i).at(0).array(), FFTW_RODFT00,
+            FFTW_MEASURE));
     plans_backward.push_back(
         fftw_plan_r2r_1d(
             grid_count, weighted_densities.at(0).at(i).array(),
-            weighted_densities.at(0).at(i).array(), FFTW_RODFT00, FFTW_MEASURE);
+            weighted_densities.at(0).at(i).array(), FFTW_RODFT00,
+            FFTW_MEASURE));
   }
   // Prepare charge densities for Fourier transform
   for (size_t i = 0; i < grid_count; ++i) {
     r = dr * static_cast<double>(i+1);
     for (size_t j = 0; j < species_count; ++j) {
-      weighted_densities.at(j).at(0).at(i) = r * charge_densities[j][i];
+      weighted_densities.at(j).at(0).at(i) = r *
+          charge_density_profiles.at(j).at(i);
     }
   }
   // Execute Fourier transform
   for (auto& plan : plans_forward) {
-    fftw_execute(&plan);
+    fftw_execute(plan);
   }
   // Prefactors (4\pi: spherical sym.; 1/2: fftw internal factor)
   // we dont divide by the radial wave number kr, because when we do the
@@ -272,7 +284,7 @@ void FunctionalESDeltaSpherical::calc_weighted_densities() {
   }
   // Back transform into real space
   for (auto& plan : plans_backward) {
-    fftw_execute(&plan);
+    fftw_execute(plan);
   }
   // Normalization
   for (size_t i = 0; i < grid_count; ++i) {
@@ -295,12 +307,13 @@ void FunctionalESDeltaSpherical::calc_derivative(
   calc_charge_densities();
   // From the charge densities calculate the weighted densities
   calc_weighted_densities();
+  calc_poisson_rhs();
   // From the charge densities calculate the electrostatic potential
-  calc_potential();
+  calc_potentials();
   // Calculate the derivative from the electrostatic potential
   for (auto it = affected_species.begin(); it != affected_species.end(); ++it) {
     i = it - affected_species.begin();
-    functional_derivative->at(*it) = valencies.at(i) * potential;
+    functional_derivative->at(*it) = valencies.at(i) * potentials.at(i);
   }
 }
 // _____________________________________________________________________________
@@ -313,22 +326,6 @@ void FunctionalESDeltaSpherical::calc_bulk_derivative(
 double FunctionalESDeltaSpherical::calc_energy() {
   DataFrame<1, double> integrand(grid_count);
   double integral{0.};
-  double r{0.};
-  calc_charge_densities();
-  calc_potential();
-  integrand = potential * charge_density_profile;
-  // Trapezoidal integral rule, spherical integral
-  r = static_cast<double>(0 + 1) * dr;
-  integral += .5 * r * r * integrand.at(0) * dr;
-  for (size_t i = 1; i < grid_count - 1; ++i) {
-    r = static_cast<double>(i + 1) * dr;
-    integral += r * r * integrand.at(i) * dr;
-  }
-  integral += .5 * r * r * dr * integrand.at(grid_count - 1);
-  // Spherical symmetry
-  integral *= 4. * M_PI;
-  // 1/2 occuring in the MF functional
-  integral /= 2.;
   return integral;
 }
 // _____________________________________________________________________________

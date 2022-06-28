@@ -77,10 +77,11 @@ class Iterator {
    */
   void clear_functionals();
   /** \brief Iterates the system densities according to the set iteration 
-   *         method. 
+   *         method.
    *
+   *  \param Mixing factor of the Picard iteration scheme.
    */
-  void run();
+  void run(double mixing);
   /** \brief Calculate the excess free energy.
    *
    *  The grand canonical energy of the system is calculated for its current
@@ -106,9 +107,17 @@ class Iterator {
    *
    */
   template <typename T>
-  void add_convergence_criterion(double threshold);
-  template <typename T>
-  void add_convergence_criterion(int threshold_int);
+  void add_convergence_criterion(double threshold) {
+    ConvergenceCriterion* criterion = new T(*density_profiles, proposed_densities,
+        threshold);
+    convergence_criteria.push_back(criterion);
+  }
+  template <typename U>
+  void add_convergence_criterion(int threshold_int) {
+    ConvergenceCriterion* criterion = new U(*density_profiles, proposed_densities,
+        threshold_int);
+    convergence_criteria.push_back(criterion);
+  }
   /** \brief Clear convergence criteria
    *
    *  If run() is executed without a ConvergenceCriterion, it will run forever.

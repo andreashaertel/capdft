@@ -4,6 +4,7 @@
 #include "iterator.hpp"  // NOLINT
 #include <cmath>
 #include "data_frame.hpp"  // NOLINT
+#include "convergence_criterion.hpp"  // NOLINT
 #include "convergence_criterion_max_dev.hpp"  // NOLINT
 #include "convergence_criterion_steps.hpp"  // NOLINT
 // _____________________________________________________________________________
@@ -19,7 +20,7 @@ Iterator::Iterator(
   proposed_densities = std::vector(species_count,
       DataFrame<1, double>(grid_count));
   add_convergence_criterion<ConvergenceCriterionMaxDev>(1.0e-6);
-  add_convergence_criterion<ConvergenceCriterionSteps>(2e3);
+  add_convergence_criterion<ConvergenceCriterionSteps>(1e4);
 }
 // _____________________________________________________________________________
 Iterator::~Iterator() {
@@ -53,8 +54,7 @@ void Iterator::clear_functionals() {
   bulk_derivatives.clear();
 }
 // _____________________________________________________________________________
-void Iterator::run() {
-  double mixing{.005};
+void Iterator::run(double mixing) {
   double bulk_density{0.};
   size_t steps{0};
   size_t species_count{species_properties->size()};
@@ -103,19 +103,6 @@ double Iterator::calculate_gc_energy() {
   // Calculate external and chemical potential term
   // TODO(Moritz):
   return energy;
-}
-// _____________________________________________________________________________
-template <typename T>
-void Iterator::add_convergence_criterion(double threshold) {
-  ConvergenceCriterion* criterion = new T(*density_profiles, proposed_densities,
-      threshold);
-  convergence_criteria.push_back(criterion);
-}
-template <typename T>
-void Iterator::add_convergence_criterion(int threshold_int) {
-  ConvergenceCriterion* criterion = new T(*density_profiles, proposed_densities,
-      threshold_int);
-  convergence_criteria.push_back(criterion);
 }
 // _____________________________________________________________________________
 void Iterator::clear_convergence_criteria() {
