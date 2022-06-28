@@ -13,6 +13,8 @@
 #include <iostream>
 #include <vector>
 #include "../../../src/convergence_criterion.hpp"
+#include "../../../src/convergence_criterion_max_dev.hpp"
+#include "../../../src/convergence_criterion_steps.hpp"
 #include "../../../src/data_frame.hpp"
 #include "../../../src/functional.hpp"
 #include "../../../src/functional_fmt_spherical.hpp"
@@ -47,7 +49,8 @@ int main(int argc, char** args) {
   double ext_potential_charge = 1.;
   double system_length = 19.821782178217823;  // in nm
   double bjerrum_length = 1.;  // in nm
-  double temperature = 300.;  // in K
+  //double temperature = 300.;  // in K
+  double temperature = 293.41;  // in K
   // Create objects of Properties class
   Properties properties;
   Properties system_properties;
@@ -58,8 +61,24 @@ int main(int argc, char** args) {
   system_properties.add_property<double>("temperature", temperature);
   system_properties.add_property<size_t>("grid count", grid_count);
   // First species
-  properties.add_property<double>("diameter", 1.);
-  properties.add_property<double>("bulk density", .1);
+  //properties.add_property<double>("diameter", 1.);
+  //properties.add_property<double>("bulk density", .1);
+  //properties.add_property<double>("valency", -1.);
+  //species_properties.push_back(properties);
+  //properties.clear();
+  //// Second species
+  //properties.add_property<double>("bulk density", .05);
+  //species_properties.push_back(properties);
+  //properties.clear();
+  //// Third species
+  //properties.add_property<double>("diameter", 1.);
+  //properties.add_property<double>("bulk density", .1);
+  //properties.add_property<double>("valency", +1.);
+  //species_properties.push_back(properties);
+  //properties.clear();
+  // First species
+  properties.add_property<double>("diameter", .3);
+  properties.add_property<double>("bulk density", 1.8066);
   properties.add_property<double>("valency", -1.);
   species_properties.push_back(properties);
   properties.clear();
@@ -68,8 +87,8 @@ int main(int argc, char** args) {
   species_properties.push_back(properties);
   properties.clear();
   // Third species
-  properties.add_property<double>("diameter", 1.);
-  properties.add_property<double>("bulk density", .1);
+  properties.add_property<double>("diameter", .3);
+  properties.add_property<double>("bulk density", 1.8066);
   properties.add_property<double>("valency", +1.);
   species_properties.push_back(properties);
   properties.clear();
@@ -150,12 +169,18 @@ int main(int argc, char** args) {
       species_properties);
   my_iterator.add_excess_functional(&my_fmt_functional);
   my_iterator.add_excess_functional(&my_es_functional);
-  my_iterator.run();
+  my_iterator.clear_convergence_criteria();
+  my_iterator.add_convergence_criterion<ConvergenceCriterionMaxDev>(1.0e-5);
+  my_iterator.add_convergence_criterion<ConvergenceCriterionSteps>(int(1e5));
+  my_iterator.run(0.00025);
 // _____________________________________________________________________________
   /* All done!
    * Now we produce some output and view it in gnuplot.
    * We also supplied this example with a pdf that shows the plot in case you do
    * not use gnuplot.
+   *
+   * You can also try to reproduce the density profiles of
+   * [M. Bültmann and A. Härtel 2022 J. Phys.: Condens. Matter 34 235101].
    */
 // _____________________________________________________________________________
   // Write density profile to file
