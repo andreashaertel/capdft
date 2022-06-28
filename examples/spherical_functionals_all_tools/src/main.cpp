@@ -155,7 +155,7 @@ int main(int argc, char** args) {
   my_iterator.clear_convergence_criteria();
   my_iterator.add_convergence_criterion<ConvergenceCriterionMaxDev>(1.0e-4);
   my_iterator.add_convergence_criterion<ConvergenceCriterionSteps>(1e3);
-  my_iterator.run(2e-3);
+  my_iterator.run(5e-3);
 // _____________________________________________________________________________
   /* All done!
    * Now we produce some output and view it in gnuplot.

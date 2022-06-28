@@ -327,7 +327,7 @@ void FunctionalESDeltaSpherical::calc_bulk_derivative(
     index = affected_species.at(i);
     for (size_t j = 0; j < species_count; ++j) {
       bulk_derivative->at(index) += valencies.at(j) * bulk_densities.at(j) *
-          pow(.5 * (diameters.at(i) + diameters.at(j)), 2);
+          pow(diameters.at(i) + diameters.at(j), 2);
     }
     bulk_derivative->at(index) *= -M_PI * valencies.at(i) * bjerrum / 6.;
   }
