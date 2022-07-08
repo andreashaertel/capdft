@@ -60,18 +60,18 @@ int main(int argc, char** args) {
   system_properties.add_property<double>("temperature", temperature);
   system_properties.add_property<size_t>("grid count", grid_count);
   // First species
-  properties.add_property<double>("diameter", 1.);
-  properties.add_property<double>("bulk density", .1);
+  properties.add_property<double>("diameter", .3);
+  properties.add_property<double>("bulk density", 3.);
   properties.add_property<double>("valency", -1.);
   species_properties.push_back(properties);
   properties.clear();
   // Second species
-  properties.add_property<double>("bulk density", .05);
+  properties.add_property<double>("bulk density", 1.5);
   species_properties.push_back(properties);
   properties.clear();
   // Third species
-  properties.add_property<double>("diameter", 1.);
-  properties.add_property<double>("bulk density", .1);
+  properties.add_property<double>("diameter", .3);
+  properties.add_property<double>("bulk density", 3.);
   properties.add_property<double>("valency", +1.);
   species_properties.push_back(properties);
   properties.clear();
@@ -103,9 +103,14 @@ int main(int argc, char** args) {
   // Picard iterations
   /* For the Picard iterations the Iterator class is used. For that we define
    * the external potential, add our functional "my_fmt_functional" to the
-   * functional list and use the run() function to carry out the Picard
+   * functional list and use the run_picard() function to carry out the Picard
    * iterations. In this case we use two spherical hard walls as external
    * potential.
+   *
+   * If you want to save loads of time use the Andersen mixing algorithm
+   * run_andersen() instead of the Picard iterations. They usually are faster
+   * by a factor of 20.
+   *
    */
 // _____________________________________________________________________________
   // Create external potential DataFrames
@@ -153,9 +158,10 @@ int main(int argc, char** args) {
   my_iterator.add_excess_functional(&my_fmt_functional);
   my_iterator.add_excess_functional(&my_es_functional);
   my_iterator.clear_convergence_criteria();
+  my_iterator.add_convergence_criterion<ConvergenceCriterionSteps>(2e3);
   my_iterator.add_convergence_criterion<ConvergenceCriterionMaxDev>(1.0e-4);
-  my_iterator.add_convergence_criterion<ConvergenceCriterionSteps>(1e3);
-  my_iterator.run(5e-3);
+  my_iterator.run_picard(1e-4);
+  //my_iterator.run_andersen(1e-4, 10);
 // _____________________________________________________________________________
   /* All done!
    * Now we produce some output and view it in gnuplot.

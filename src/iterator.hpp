@@ -11,6 +11,8 @@
  *  calculations in the framework of DFT. 
  *
  */
+#include <gsl/gsl_vector.h>
+#include <gsl/gsl_multiroots.h>
 #include <vector>
 #include <map>
 #include "convergence_criterion.hpp"  // NOLINT
@@ -76,12 +78,21 @@ class Iterator {
    *
    */
   void clear_functionals();
-  /** \brief Iterates the system densities according to the set iteration 
+  /** \brief Iterates the system densities according to the Picard iteration
    *         method.
    *
    *  \param Mixing factor of the Picard iteration scheme.
    */
-  void run(double mixing);
+  void run_picard(double mixing);
+  /** \brief Iterates the system densities according to the Andersen mixing
+   *         method.
+             https://doi.org/10.1016/j.fluid.2017.03.023
+   *
+   *  \param Mixing factor of the Picard iteration scheme.
+   *  \param memory is the number of density profiles from the past iterations
+   *         the scheme will remember.
+   */
+  void run_andersen(double mixing, size_t memory);
   /** \brief Calculate the excess free energy.
    *
    *  The grand canonical energy of the system is calculated for its current
@@ -108,19 +119,21 @@ class Iterator {
    */
   template <typename T>
   void add_convergence_criterion(double threshold) {
-    ConvergenceCriterion* criterion = new T(*density_profiles, proposed_densities,
-        threshold);
+    ConvergenceCriterion* criterion = 
+        new T(*density_profiles, proposed_densities, threshold);
     convergence_criteria.push_back(criterion);
   }
   template <typename U>
   void add_convergence_criterion(int threshold_int) {
-    ConvergenceCriterion* criterion = new U(*density_profiles, proposed_densities,
-        threshold_int);
+    ConvergenceCriterion* criterion =
+        new U(*density_profiles, proposed_densities, threshold_int);
     convergence_criteria.push_back(criterion);
   }
   /** \brief Clear convergence criteria
    *
-   *  If run() is executed without a ConvergenceCriterion, it will run forever.
+   *  Clears the convergence criteria. This is especially important when
+   *  overwriting the standard criteria. If run_*() is executed without a
+   *  ConvergenceCriterion, it will run forever.
    *
    */
   void clear_convergence_criteria();
@@ -164,7 +177,33 @@ class Iterator {
    *
    */
   bool check_convergence_criteria();
+  /** \brief Calculates all possible scalar product combinations of a profile
+   *         history
+   *
+   *  \param profile_history is a vector of density profiles from which all
+   *         scalar product combinations are calculated
+   *
+   *  \return A matrix that contains all scalar products.
+   */
+  std::vector<std::vector<double>> calc_scalar_products(
+      std::vector<std::vector<DataFrame<1, double>>>& profile_history);
+  /** \brief Calculates the linear combination of vectors with scalar_products
+   *         that minimizes the 2-norm under the condition that the sum of all
+   *         coefficients equals 1.
+   *
+   *  \param scalar_products is a matrix of all scalar products of the vectors
+   *         which are used in the linear combination.
+   *
+   *  \return Linear combination coefficients
+   */
+  std::vector<double> shortest_linear_combination(
+      std::vector<std::vector<double>>& scalar_products);
 
  protected:
 };
+/** \brief Function that defines the root search problem that arises from the
+ *         Lagrange multiplier formalism in a way that GSL can process it.
+ */
+int anderson_f(const gsl_vector* x, void* params, gsl_vector* f);
+void print_state (size_t iter, gsl_multiroot_fsolver * s, size_t n);
 #endif  // SRC_ITERATOR_HPP_
