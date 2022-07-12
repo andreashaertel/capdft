@@ -18,6 +18,7 @@ REPOFILE =
 REPOFILE += convergence_criterion
 REPOFILE += convergence_criterion_max_dev
 REPOFILE += convergence_criterion_steps
+REPOFILE += convergence_criterion_nan
 REPOFILE += data_frame
 REPOFILE += functional
 REPOFILE += functional_fmt_spherical

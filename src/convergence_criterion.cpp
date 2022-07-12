@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2022 Moritz Bültmann <moritz.bueltmann@gmx.de>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 /** \file src/convergence_criterion.cpp
- *  \brief This file contains the definitions of the ConvergenceCriterion class
- *
+ *  \brief This file contains the definitions of the ConvergenceCriterion class.
  */
 #include "convergence_criterion.hpp"  // NOLINT
 #include <string>

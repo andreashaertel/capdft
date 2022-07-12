@@ -3,28 +3,25 @@
 #ifndef SRC_CONVERGENCE_CRITERION_STEPS_HPP_
 #define SRC_CONVERGENCE_CRITERION_STEPS_HPP_
 /** \file src/convergence_criterion_steps.hpp
- *  \brief This file contains the declarations of the ConvergenceCriterion class
- *
+ *  \brief This file contains the declarations of the ConvergenceCriterionSteps
+ *         class.
  */
 #include "convergence_criterion.hpp"  // NOLINT
 #include <vector>
 #include <string>
 #include "data_frame.hpp"  // NOLINT
-/** \brief This class defines convergence criteria based on the old and the new
- *         density profiles.
- *
+/** \brief This class defines a convergence criterion based on the number of
+ *         iteration steps (i.e. number of times check() was called).
  */
 class ConvergenceCriterionSteps : public ConvergenceCriterion {
  public:
   /** \brief Constructor
-   *
    */
   ConvergenceCriterionSteps(
       const std::vector<DataFrame<1, double>>& old_profile,
       const std::vector<DataFrame<1, double>>& new_profile,
       const int& steps);
   /** \brief Destructor
-   *
    */
   virtual ~ConvergenceCriterionSteps();
   /** \brief Check if the step criterion is fulfilled (fulfilled = true)
@@ -32,28 +29,22 @@ class ConvergenceCriterionSteps : public ConvergenceCriterion {
    *  Keeps track of the number of steps (number of time check() was called).
    *
    *  \param Uses a pointer to return the number of remaining steps
-   *
    */
   virtual bool check(double* current_deviation);
   /** \brief Return name of the criterion
-   *
    */
   virtual std::string name();
   // The following section is found in the base class
   // /** \brief Pointer to the old density profile
-  //  *
   //  */
   // const std::vector<DataFrame<1, double>>& old_profile;
   // /** \brief Pointer to the proposed density profile
-  //  *
   //  */
   // const std::vector<DataFrame<1, double>>& new_profile;
   // /** \brief Threshold value used in the check function
-  //  *
   //  */
   // double threshold;
   // /** \brief Threshold value used in the check function (integer)
-  //  *
   //  */
   // int threshold_int;
 

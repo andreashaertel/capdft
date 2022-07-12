@@ -1,35 +1,37 @@
 // SPDX-FileCopyrightText: 2022 Moritz Bültmann <moritz.bueltmann@gmx.de>
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#ifndef SRC_CONVERGENCE_CRITERION_MAX_DEV_HPP_
-#define SRC_CONVERGENCE_CRITERION_MAX_DEV_HPP_
-/** \file src/convergence_criterion_max_dev.hpp
- *  \brief This file contains the declarations of the ConvergenceCriterionMaxDev
+#ifndef SRC_CONVERGENCE_CRITERION_NAN_HPP_
+#define SRC_CONVERGENCE_CRITERION_NAN_HPP_
+/** \file src/convergence_criterion_nan.hpp
+ *  \brief This file contains the declarations of the ConvergenceCriterionNan
  *         class.
  */
 #include "convergence_criterion.hpp"  // NOLINT
 #include <vector>
 #include <string>
 #include "data_frame.hpp"  // NOLINT
-/** \brief This class defines a convergence criterion based on the largest
- *         occuring deviation between old and new density profiles.
+/** \brief This class defines a convergence criterion based on the number of
+ *         nans in the density profiles.
+ *
+ *  This is usually used to interrupt the iteration process if the iterator
+ *  "exploded".
  */
-class ConvergenceCriterionMaxDev : public ConvergenceCriterion {
+class ConvergenceCriterionNan : public ConvergenceCriterion {
  public:
   /** \brief Constructor
    */
-  ConvergenceCriterionMaxDev(
+  ConvergenceCriterionNan(
       const std::vector<DataFrame<1, double>>& old_profile,
       const std::vector<DataFrame<1, double>>& new_profile,
-      const double& target_deviation);
+      const int& nan_threshold);
   /** \brief Destructor
    */
-  virtual ~ConvergenceCriterionMaxDev();
+  virtual ~ConvergenceCriterionNan();
   /** \brief Check if the criterion is fulfilled (fulfilled = true)
    *
-   *  Calculates the largest difference between old and new (proposed)
-   *  density profiles and checks if it is smaller than the target_deviation.
+   *  Checks for nans.
    *
-   *  \param Uses a pointer to return the current_deviation.
+   *  \param Uses a pointer to return the nan_count.
    */
   virtual bool check(double* current_deviation);
   /** \brief Return name of the criterion
@@ -49,4 +51,4 @@ class ConvergenceCriterionMaxDev : public ConvergenceCriterion {
   //  */
   // int threshold_int;
 };
-#endif  // SRC_CONVERGENCE_CRITERION_MAX_DEV_HPP_
+#endif  // SRC_CONVERGENCE_CRITERION_NAN_HPP_

@@ -15,6 +15,7 @@
 #include "../../../src/convergence_criterion.hpp"
 #include "../../../src/convergence_criterion_max_dev.hpp"
 #include "../../../src/convergence_criterion_steps.hpp"
+#include "../../../src/convergence_criterion_nan.hpp"
 #include "../../../src/data_frame.hpp"
 #include "../../../src/functional.hpp"
 #include "../../../src/functional_fmt_spherical.hpp"
@@ -102,15 +103,24 @@ int main(int argc, char** args) {
 // _____________________________________________________________________________
   // Picard iterations
   /* For the Picard iterations the Iterator class is used. For that we define
-   * the external potential, add our functional "my_fmt_functional" to the
-   * functional list and use the run_picard() function to carry out the Picard
-   * iterations. In this case we use two spherical hard walls as external
-   * potential.
+   * the external potential, add our functionals "my_fmt_functional" and
+   * "my_es_functional" to the functional list and use the run_picard() function
+   * to carry out the Picard iterations. In this case we use two spherical hard
+   * walls as external potential.
    *
    * If you want to save loads of time use the Andersen mixing algorithm
    * run_andersen() instead of the Picard iterations. They usually are faster
    * by a factor of 20.
    *
+   * The convergence criteria are also added to the Iterator. They are added via
+   * a template argument that specifies the type of criterion and a function
+   * argument that specifies the threshold of the specified criterion.
+   *
+   * For example: 
+   * my_iterator.add_convergence_criterion<ConvergenceCriterionMaxDev>(1.0e-4);
+   * This will terminate the iterations after the largest difference
+   * (ConvergenceCriterionMaxDev) of the old density profile and the new one is
+   * smaller than 1.0e-4.
    */
 // _____________________________________________________________________________
   // Create external potential DataFrames
@@ -160,8 +170,9 @@ int main(int argc, char** args) {
   my_iterator.clear_convergence_criteria();
   my_iterator.add_convergence_criterion<ConvergenceCriterionSteps>(2e3);
   my_iterator.add_convergence_criterion<ConvergenceCriterionMaxDev>(1.0e-4);
-  my_iterator.run_picard(1e-4);
-  //my_iterator.run_andersen(1e-4, 10);
+  my_iterator.add_convergence_criterion<ConvergenceCriterionNan>(0);
+  my_iterator.run_picard(1.5e-4);
+  //my_iterator.run_andersen(1.5e-4, 10);
 // _____________________________________________________________________________
   /* All done!
    * Now we produce some output and view it in gnuplot.
