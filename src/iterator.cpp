@@ -10,6 +10,7 @@
 #include "convergence_criterion.hpp"  // NOLINT
 #include "convergence_criterion_max_dev.hpp"  // NOLINT
 #include "convergence_criterion_steps.hpp"  // NOLINT
+#include "convergence_criterion_nan.hpp"  // NOLINT
 // _____________________________________________________________________________
 Iterator::Iterator(
     std::vector<DataFrame<1, double>>* density_profiles,
@@ -24,6 +25,7 @@ Iterator::Iterator(
       DataFrame<1, double>(grid_count));
   add_convergence_criterion<ConvergenceCriterionMaxDev>(1.0e-6);
   add_convergence_criterion<ConvergenceCriterionSteps>(1e4);
+  add_convergence_criterion<ConvergenceCriterionNan>(0);
 }
 // _____________________________________________________________________________
 Iterator::~Iterator() {
