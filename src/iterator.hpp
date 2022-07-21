@@ -92,7 +92,7 @@ class Iterator {
    *  \param memory is the number of density profiles from the past iterations
    *         the scheme will remember.
    */
-  void run_andersen(double mixing, size_t memory);
+  void run_anderson(double mixing, size_t memory);
   /** \brief Calculate the excess free energy.
    *
    *  The grand canonical energy of the system is calculated for its current
@@ -205,5 +205,4 @@ class Iterator {
  *         Lagrange multiplier formalism in a way that GSL can process it.
  */
 int anderson_f(const gsl_vector* x, void* params, gsl_vector* f);
-void print_state (size_t iter, gsl_multiroot_fsolver * s, size_t n);
 #endif  // SRC_ITERATOR_HPP_

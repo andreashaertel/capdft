@@ -90,7 +90,7 @@ void Iterator::run_picard(double mixing) {
   }
 }
 // _____________________________________________________________________________
-void Iterator::run_andersen(double mixing, size_t memory) {
+void Iterator::run_anderson(double mixing, size_t memory) {
   double bulk_density{0.};
   size_t steps{0};
   size_t species_count{species_properties->size()};
@@ -114,7 +114,7 @@ void Iterator::run_andersen(double mixing, size_t memory) {
     for (size_t i = 0; i < excess_functionals.size(); ++i) {
       excess_functionals.at(i)->calc_derivative(&functional_derivatives.at(i));
     }
-    // Picard iteration scheme
+    // Calculate new density proposal via the Picard scheme
     for (size_t i = 0; i < species_count; ++i) {
       species_properties->at(i).get_property("bulk density", &bulk_density);
       // Calculate the right hand side of the update formula of cDFT.
@@ -262,14 +262,4 @@ int anderson_f (const gsl_vector* x, void* params, gsl_vector* f) {
   return GSL_SUCCESS;
 }
 // _____________________________________________________________________________
-void print_state (size_t iter, gsl_multiroot_fsolver * s, size_t n) {
-  std::cout << "iter=" << iter << std::endl;
-  for (size_t i = 0; i < n; ++i) {
-    std::cout << "x[" << i << "]=" << gsl_vector_get(s->x, i) << std::endl;
-  }
-  for (size_t i = 0; i < n; ++i) {
-    std::cout << "f(x[" << i << "])=" << gsl_vector_get(s->f, 0) << std::endl;
-  }
-  std::cout << "**********************************************" << std::endl;
-}
 // _____________________________________________________________________________
