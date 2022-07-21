@@ -393,13 +393,11 @@ double FunctionalFMTSpherical::calc_energy() {
 }
 // _____________________________________________________________________________
 void FunctionalFMTSpherical::calc_weighted_densities() {
-  // TODO(Moritz): speed enhancement by not using "at" and by saving transforms
-  // TODO(Moritz): speed enhancement by avoiding some transforms
   double r{0.}, rr{0.}, rrr{0.};
   double kr{0.}, krkr{0.};
   std::vector<fftw_plan> forward_plans;
   std::vector<fftw_plan> backward_plans;
-  // Specify the plans
+  // Specify the plans (RODFT: sine-transform; REDFT: cosine-transform)
   for (size_t i = 0; i != species_count; ++i) {
     forward_plans.push_back(
         fftw_plan_r2r_1d(grid_count,
@@ -678,7 +676,7 @@ void FunctionalFMTSpherical::calc_local_partial_derivatives(size_t i) {
   // Calculate auxiliary constants
   oneO24pi = 1. / (24. * M_PI);
   // If argument of log is close to one, use Taylor series, because of 1/n3.
-  if (n3 >= 1.0e-6) {
+  if (n3 >= sqrt(std::numeric_limits<double>::epsilon())) {
     phi2 = (5./3.) + (2./3.) * (oneMn3*oneOn3) * log(oneMn3) - (n3/3.);
     phi3 = 2. - (2./3.) *
         (oneOn3 + n3 + (oneMn3 * oneMn3 * oneOn3n3) * log(oneMn3));

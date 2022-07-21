@@ -46,7 +46,7 @@ int main(int argc, char** args) {
    * step lies exactly between two bins.
    */
 // _____________________________________________________________________________
-  size_t grid_count = static_cast<size_t>(1e4+.5) + 1;  // equals = 10,001
+  size_t grid_count = static_cast<size_t>(1e4+.5) + 1;  // equals 10,001
   double ext_potential_charge = 1.;
   double system_length = 19.821782178217823;  // in nm
   double bjerrum_length = 1.;  // in nm
@@ -172,7 +172,7 @@ int main(int argc, char** args) {
   my_iterator.add_convergence_criterion<ConvergenceCriterionMaxDev>(1.0e-4);
   my_iterator.add_convergence_criterion<ConvergenceCriterionNan>(0);
   my_iterator.run_picard(1.5e-4);
-  //my_iterator.run_andersen(1.5e-4, 10);
+  //my_iterator.run_anderson(1.5e-4, 10);
 // _____________________________________________________________________________
   /* All done!
    * Now we produce some output and view it in gnuplot.
