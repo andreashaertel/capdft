@@ -1,9 +1,14 @@
-// SPDX-FileCopyrightText: 2021 Moritz Bültmann <moritz.bueltmann@gmx.de>
+// SPDX-FileCopyrightText: 2019 Moritz Bültmann <moritz.bueltmann@gmx.de>
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#include "properties.hpp"
+#include "properties.hpp"  // NOLINT
 // _____________________________________________________________________________
 Properties::Properties() {
   clear();
+}
+// _____________________________________________________________________________
+Properties::Properties(const Properties& other) {
+  clear();
+  properties = other.properties;
 }
 // _____________________________________________________________________________
 Properties::~Properties() {
@@ -22,4 +27,6 @@ bool Properties::contains_property(const std::string& property_name) const {
     return false;
   }
 }
+// _____________________________________________________________________________
+// Some template functions are implemented in the header.
 // _____________________________________________________________________________
