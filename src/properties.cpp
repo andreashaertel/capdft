@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2021 Moritz Bültmann <moritz.bueltmann@gmx.de>
+// SPDX-FileCopyrightText: 2019 Moritz Bültmann <moritz.bueltmann@gmx.de>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "properties.hpp"  // NOLINT
 // _____________________________________________________________________________
