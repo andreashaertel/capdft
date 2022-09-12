@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2022 Moritz Bültmann <moritz.bueltmann@gmx.de>
+// SPDX-FileCopyrightText: 2019 Moritz Bültmann <moritz.bueltmann@gmx.de>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 /** \file radial_poisson_solver.cpp
  *  \brief Source file for the RadialPoissonSolver class.
