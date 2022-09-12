@@ -5,7 +5,7 @@ BNAME=main
 # Compiler #####################################################################
 CXX=g++
 # Libraries to be linked #######################################################
-LIBS=-lm
+LIBS=-lm -lfftw3
 # Compiler flags ###############################################################
 CXXFLAGS=-pedantic -std=c++2a -O2 -Wall
 # Directories for binaries, objects and sources ################################
@@ -14,9 +14,11 @@ ODIR = obj/
 SDIR = src/
 # All files from the normal repository that are used in this example ###########
 REPOSDIR = ../../src/
-REPOFILE = properties
-REPOFILE += data
-REPOFILE += template_data
+REPOFILE = data_frame
+REPOFILE += properties
+REPOFILE += functional
+REPOFILE += functional_fmt_spherical
+REPOFILE += system
 # Get host name ################################################################
 HOST = $(shell hostname)
 # Offsets for binaries and objects #############################################
@@ -66,8 +68,7 @@ todo:
 # And add ~/.local/bin to PATH variable.
 # Checks all files in the src directory.
 checkstyle:
-	@cpplint $(SOURCE) $(HEADERS)
-	@cpplint $(REPOSOURCE) $(REPOHEADERS)
+	@cpplint $(SOURCE) $(HEADERS) $(REPOSOURCE) $(REPOHEADERS)
 
 clean:
 	rm -f $(OOFF)*.o
