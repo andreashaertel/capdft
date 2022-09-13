@@ -39,7 +39,7 @@ int main(int argc, char** args) {
    * diameter and will be ignored.
    *
    * In general programs should obtain their parameters via the command line
-   * or a parameter file (e.g. via the ParameterHandler).
+   * or a parameter file (e.g. via our ParameterHandler).
    * However, for this example we hard-coded the numbers to reduce complexity.
    *
    * Note, that the system_length is chosen such that the external potential
