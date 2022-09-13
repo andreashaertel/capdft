@@ -5,7 +5,7 @@ BNAME=main
 # Compiler #####################################################################
 CXX=g++
 # Libraries to be linked #######################################################
-LIBS=-lm -lfftw3
+LIBS=-lm -lfftw3 -lgsl -lgslcblas
 # Compiler flags ###############################################################
 CXXFLAGS=-pedantic -std=c++2a -O2 -Wall
 # Directories for binaries, objects and sources ################################
@@ -14,10 +14,19 @@ ODIR = obj/
 SDIR = src/
 # All files from the normal repository that are used in this example ###########
 REPOSDIR = ../../src/
-REPOFILE = data_frame
-REPOFILE += properties
+REPOFILE =
+REPOFILE += convergence_criterion
+REPOFILE += convergence_criterion_max_dev
+REPOFILE += convergence_criterion_steps
+REPOFILE += convergence_criterion_nan
+REPOFILE += data_frame
 REPOFILE += functional
-REPOFILE += functional_fmt_spherical
+REPOFILE += functional_fmt_planar
+#REPOFILE += functional_es_mf_planar
+#REPOFILE += functional_es_delta_planar
+REPOFILE += iterator
+REPOFILE += properties
+#REPOFILE += planar_poisson_solver
 # Get host name ################################################################
 HOST = $(shell hostname)
 # Offsets for binaries and objects #############################################

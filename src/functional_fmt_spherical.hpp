@@ -16,7 +16,6 @@
 #include "data_frame.hpp"  // NOLINT
 #include "functional.hpp"  // NOLINT
 #include "properties.hpp"  // NOLINT
-#include "system.hpp"  // NOLINT
 // Class forward declarations
 // _____________________________________________________________________________
 /** \brief FunctionalFMTSpherical calculates the FMT functional in spherical
@@ -39,8 +38,6 @@ class FunctionalFMTSpherical : public Functional {
    * affected_species vector.
    *
    */
-  FunctionalFMTSpherical(const System<DataFrame<1, double>>& system,
-      const std::vector<size_t>& affected_species);
   FunctionalFMTSpherical(
       const std::vector<DataFrame<1, double>>* density_profiles,
       const std::vector<Properties>& species_properties,
@@ -52,7 +49,6 @@ class FunctionalFMTSpherical : public Functional {
    * functional by checking if the hard sphere diameter exists.
    *
    */
-  explicit FunctionalFMTSpherical(const System<DataFrame<1, double>>& system);  // TODO(Moritz): remove System  // NOLINT
   FunctionalFMTSpherical(
       const std::vector<DataFrame<1, double>>* density_profiles,
       const std::vector<Properties>& species_properties,
@@ -249,12 +245,10 @@ class FunctionalFMTSpherical : public Functional {
   /** \brief From the system object extract the system properties
    *
    */
-  void extract_system_properties(const System<DataFrame<1, double>>& sys);
   void extract_system_properties(const Properties& system_properties);
   /** \brief From the system object extract the species properties
    *
    */
-  void extract_species_properties(const System<DataFrame<1, double>>& sys);
   void extract_species_properties(
       const std::vector<Properties>& species_properties);
   /** \brief Initialize all data frame vectors

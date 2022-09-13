@@ -13,30 +13,6 @@ FunctionalFMTSpherical::FunctionalFMTSpherical() {
 }
 // _____________________________________________________________________________
 FunctionalFMTSpherical::FunctionalFMTSpherical(
-    const System<DataFrame<1, double>>& system,
-    const std::vector<size_t>& affected_species)
-  : affected_species(affected_species) {
-  // Clear all std::vectors  // TODO(Moritz): remove
-  diameters.clear();
-  bulk_densities.clear();
-  // Get system properties
-  extract_system_properties(system);
-  // Get species properties; excludes all species without diameter property
-  extract_species_properties(system);
-  // Initialize the density profile and density profile times radial position
-  density_profiles_pointer = system.get_density_profiles_pointer();
-  initialize_all_data_frames();
-  update_density_times_r();
-  // Calculate weights
-  calc_weights();
-}
-// _____________________________________________________________________________
-FunctionalFMTSpherical::FunctionalFMTSpherical(
-    const System<DataFrame<1, double>>& system)
-  : FunctionalFMTSpherical(system, std::vector<size_t>(0)) {
-}
-// _____________________________________________________________________________
-FunctionalFMTSpherical::FunctionalFMTSpherical(
     const std::vector<DataFrame<1, double>>* density_profiles,
     const std::vector<Properties>& species_properties,
     const Properties& system_properties,
@@ -71,21 +47,6 @@ FunctionalFMTSpherical::~FunctionalFMTSpherical() {
 }
 // _____________________________________________________________________________
 void FunctionalFMTSpherical::extract_system_properties(
-    const System<DataFrame<1, double>>& sys) {
-  Properties properties(sys.get_system_properties());
-  properties.get_property("length", &length);
-  properties.get_property("grid count", &grid_count);
-  // Calculate bin sizes
-  dr = length / static_cast<double>(grid_count);
-  dkr = (2. * M_PI) / (2. * static_cast<double>(grid_count+1) * dr);
-  // Calculate normalization factors for sine and cosine transforms
-  norm_sin =
-      sqrt(M_PI / (2. * static_cast<double>(2 * (grid_count + 1))));
-  norm_cos =
-      sqrt(M_PI / (2. * static_cast<double>(2 * grid_count)));
-}
-// _____________________________________________________________________________
-void FunctionalFMTSpherical::extract_system_properties(
     const Properties& system_properties) {
   system_properties.get_property("length", &length);
   system_properties.get_property("grid count", &grid_count);
@@ -97,47 +58,6 @@ void FunctionalFMTSpherical::extract_system_properties(
       sqrt(M_PI / (2. * static_cast<double>(2 * (grid_count + 1))));
   norm_cos =
       sqrt(M_PI / (2. * static_cast<double>(2 * grid_count)));
-}
-// _____________________________________________________________________________
-void FunctionalFMTSpherical::extract_species_properties(
-    const System<DataFrame<1, double>>& sys) {
-  // Sort the affected species numbers
-  std::sort(affected_species.begin(), affected_species.end());
-  // Remove duplicates
-  affected_species.erase(
-      unique(affected_species.begin(), affected_species.end()),
-      affected_species.end());
-  // If no affected species were specified, find them automatically
-  std::vector<Properties> spec_prop = sys.get_species_properties();
-  double diameter{0.};
-  double bulk_density{0.};
-  if (affected_species.empty()) {
-    for (auto it = spec_prop.begin(); it != spec_prop.end(); ++it) {
-      if (it->get_property("diameter", &diameter)) {  // only species with diam.
-        if (!it->get_property("bulk density", &bulk_density)) {
-          std::cerr << "FunctionalFMTSpherical::extract_species_properties(): ";
-          std::cerr << "\"Error: A species with a diameter but no density ";
-          std::cerr << "was detected.\"" << std::endl;
-          exit(1);
-        }
-        affected_species.push_back(it - spec_prop.begin());
-      }
-    }
-  }
-  // Extract properties
-  for (auto it = affected_species.begin(); it != affected_species.end(); ++it) {
-    if (!spec_prop.at(*it).get_property("diameter", &diameter) ||
-        !spec_prop.at(*it).get_property("bulk density", &bulk_density)) {
-      std::cerr << "FunctionalFMTSpherical::extract_species_properties(): ";
-      std::cerr << "\"Error: One species is missing a required parameter.";
-      std::cerr << std::endl;
-      exit(1);
-    }
-    diameters.push_back(diameter);
-    bulk_densities.push_back(bulk_density);
-  }
-  // Count species that interact via the hard sphere potential
-  species_count = affected_species.size();
 }
 // _____________________________________________________________________________
 void FunctionalFMTSpherical::extract_species_properties(
