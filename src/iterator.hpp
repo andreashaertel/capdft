@@ -19,7 +19,6 @@
 #include "data_frame.hpp"  // NOLINT
 #include "functional.hpp" // NOLINT
 #include "properties.hpp"  // NOLINT
-#include "system.hpp"  // NOLINT
 /** \brief Class that holds the system and all functionals and provides DFT 
  *         methods
  *

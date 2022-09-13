@@ -160,7 +160,7 @@ int main(int argc, char** args) {
     ++step;
     // Calculate the functional derivative; Suppress warnings about unphysical
     // values
-    my_fmt_functional.calc_derivative_no_warnings(&fmt_derivatives);
+    my_fmt_functional.calc_derivative(&fmt_derivatives);
     for (auto it = affected_species.begin(); it != affected_species.end();
         ++it) {
       species_properties.at(*it).get_property("bulk density", &bulk_density);

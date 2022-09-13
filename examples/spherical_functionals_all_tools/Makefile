@@ -27,7 +27,6 @@ REPOFILE += functional_es_delta_spherical
 REPOFILE += iterator
 REPOFILE += properties
 REPOFILE += radial_poisson_solver
-REPOFILE += system
 # Get host name ################################################################
 HOST = $(shell hostname)
 # Offsets for binaries and objects #############################################
