@@ -1,4 +1,5 @@
 # SPDX-FileCopyrightText: 2021 Andreas Härtel <http://andreashaertel.anno1982.de/>
+# SPDX-FileCopyrightText: 2022 Moritz Bültmann <http://andreashaertel.anno1982.de/>
 # SPDX-License-Identifier: LGPL-3.0-or-later
 ################################################################################
 #
@@ -23,33 +24,40 @@ CXXFLAGS = -pedantic -std=c++2a -O2 -Wall -fopenmp $(INCDIRS)
 # Linker flags #################################################################
 LDFLAGS = -fopenmp $(LIBDIRS)
 # Directories for binaries, objects and sources ################################
-IDIR = include/
-BDIR = bin/
-ODIR = obj/
-SDIR = src/
+IDIR = include
+BDIR = bin
+ODIR = obj
+SDIR = src
+# Directories for examples #####################################################
+EXAMPLEDIR = examples
+EXAMPLES = $(wildcard $(EXAMPLEDIR)/*)
+EXAMPLEMAKES = $(patsubst %,%/Makefile,$(EXAMPLES))
 # Get host name ################################################################
 HOST = $(shell hostname)
 # Offsets for binaries and objects #############################################
-BOFF = $(BDIR)$(HOST).
-OOFF = $(ODIR)$(HOST).
-IOFF = $(IDIR)$(HOST).
+BOFF = $(BDIR)/$(HOST).
+OOFF = $(ODIR)/$(HOST).
+IOFF = $(IDIR)/$(HOST).
 # Header files and object files ################################################
-HEADERS = $(wildcard $(SDIR)*.hpp)
-SOURCES = $(wildcard $(SDIR)*.cpp)
-OBJECTS = $(patsubst $(SDIR)%.cpp,$(OOFF)%.o,$(SOURCES))
+HEADERS = $(wildcard $(SDIR)/*.hpp)
+SOURCES = $(wildcard $(SDIR)/*.cpp)
+OBJECTS = $(patsubst $(SDIR)/%.cpp,$(OOFF)%.o,$(SOURCES))
 # System information files #####################################################
 SYSINFO = $(OOFF)systeminfo
 # TARGETS ######################################################################
 
-.PHONY: default all init checkstyle compile info clean
+.PHONY: default all init checkstyle compile info clean examples
 
 default: compile bind
 
-all: checkstyle info compile bind
+all: checkstyle info compile bind examples
 
-# Initialize
+# Initialize repository
 init:
-	@echo " Check for existing directories ... "; mkdir -p obj; mkdir -p include; mkdir -p bin
+	@echo " Check for existing directories ... "
+	mkdir -p obj
+	mkdir -p include
+	mkdir -p bin
 
 # Google C++ style checker:
 # Install cpplint with
@@ -73,48 +81,49 @@ info:
 
 # Cleaning all targets (objects, binaries, and final includes)
 clean:
-	@echo " Cleaning objects ... "; rm -f $(ODIR)*
-	@echo " Cleaning binaries ... "; rm -f $(BDIR)*
-	@echo " Cleaning includes ... "; rm -f $(IDIR)*
+	@echo " Cleaning objects ... "
+	rm -f $(ODIR)*
+	@echo " Cleaning binaries ... "
+	rm -f $(BDIR)*
+	@echo " Cleaning includes ... "
+	rm -f $(IDIR)*
 
-
-################################################################################
-# Binding
-################################################################################
+examples: $(EXAMPLES)
 
 # Syntax: 
 # $<	the first dependency
 # $+	list of all dependencies
 # $^	list of all dependencies; repeating entries are droped
 # $@	name of the target
+
+################################################################################
+# Binding
+################################################################################
 
 # Make header and library and programs
 bind: $(IDIR)$(LIBNAME).hpp $(BDIR)lib$(HOST).$(LIBNAME).a
 
 # Make header
 $(IDIR)$(LIBNAME).hpp: $(HEADERS)
-	@echo " Make header $@ ... "; cat $^ > $@
+	@echo " Make header $@ ... "
+	cat $^ > $@
 
 # Make library
 $(BDIR)lib$(HOST).$(LIBNAME).a: $(OBJECTS)
-	@echo " Binding $@ ... "; ar -rc $@ $^
+	@echo " Binding $@ ... "
+	ar -rc $@ $^
 
 ################################################################################
 # Compiling
 ################################################################################
 
-# Syntax: 
-# $<	the first dependency
-# $+	list of all dependencies
-# $^	list of all dependencies; repeating entries are droped
-# $@	name of the target
-
 # Compile each source file (depending on its header file)
 # 
-# If each source only depends on its own header (no cross linking) than we 
-# can use: 
+# If each source only depends on its own header (no cross linking) then we 
+# can use:
 # $(OOFF)%.o: $(SDIR)%.cpp $(SDIR)%.hpp
-# 	@echo " Compiling $< ... "; $(CXX) $(CXXFLAGS) -c -o $@ $<
+# 	@echo " Compiling $< ... "
+# 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 # However, sometimes we expect to find cross linking. 
 # Then, we have to add an explicit rule. 
 
@@ -122,12 +131,22 @@ $(BDIR)lib$(HOST).$(LIBNAME).a: $(OBJECTS)
 # Explicit rules: 
 
 $(OOFF)parameter_handler.o: $(SDIR)parameter_handler.cpp $(SDIR)parameter_handler.hpp
-	@echo " Compiling $< ... "; $(CXX) $(CXXFLAGS) -c -o $@ $<
+	@echo " Compiling $< ... "
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 #################
 # General rule: 
 
 $(OOFF)%.o: $(SDIR)%.cpp $(SDIR)%.hpp
-	@echo " Compiling $< ... "; $(CXX) $(CXXFLAGS) -c -o $@ $<
+	@echo " Compiling $< ... "
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
+################################################################################
+# Compiling examples
+################################################################################
 
+$(EXAMPLES): FORCE
+	@echo "Compiling example \"$(patsubst $(EXAMPLEDIR)/%,%,$@)\" ..."
+	cd $@ && make
+
+FORCE: ;

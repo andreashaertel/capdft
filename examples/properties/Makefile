@@ -15,8 +15,6 @@ SDIR = src/
 # All files from the normal repository that are used in this example ###########
 REPOSDIR = ../../src/
 REPOFILE = properties
-REPOFILE += data
-REPOFILE += template_data
 # Get host name ################################################################
 HOST = $(shell hostname)
 # Offsets for binaries and objects #############################################
