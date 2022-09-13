@@ -203,5 +203,5 @@ int main(int argc, char** args) {
   //energy = my_es_functional.calc_energy();
   //std::cout << "Excess free energy of mean-field electrostatic functional: ";
   //std::cout << energy << std::endl;
-  //return 0;
+  return 0;
 }
