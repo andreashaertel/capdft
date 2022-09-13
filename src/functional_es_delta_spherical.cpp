@@ -6,8 +6,8 @@
  *  The file contains the definitions of the FunctionalESDeltaSpherical class.
  */
 #include "functional_es_delta_spherical.hpp"  // NOLINT
-#include <cmath>
 #include <fftw3.h>
+#include <cmath>
 #include <algorithm>
 #include <vector>
 #include "data_frame.hpp"  // NOLINT
