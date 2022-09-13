@@ -1,5 +1,5 @@
 // SPDX-FileCopyrightText: 2019 Moritz Bültmann <moritz.bueltmann@gmx.de>
-// SPDX-FileCopyrightText: 2019 Andreas Härtel <http://andreashaertel.anno1982.de/>
+// SPDX-FileCopyrightText: 2019 Andreas Härtel <http://andreashaertel.anno1982.de/>  // NOLINT
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #ifndef SRC_FUNCTIONAL_FMT_PLANAR_HPP_
 #define SRC_FUNCTIONAL_FMT_PLANAR_HPP_

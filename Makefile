@@ -31,7 +31,6 @@ SDIR = src
 # Directories for examples #####################################################
 EXAMPLEDIR = examples
 EXAMPLES = $(wildcard $(EXAMPLEDIR)/*)
-EXAMPLEMAKES = $(patsubst %,%/Makefile,$(EXAMPLES))
 # Get host name ################################################################
 HOST = $(shell hostname)
 # Offsets for binaries and objects #############################################
@@ -65,7 +64,8 @@ init:
 # And add ~/.local/bin to PATH variable.
 # Checks all files in the src directory.
 checkstyle:
-	cpplint src/*
+	cpplint $(shell find . -type f -name "*.cpp")
+	cpplint $(shell find . -type f -name "*.hpp")
 
 # Compile all objects and write system information
 compile: info $(OBJECTS)
@@ -106,12 +106,12 @@ bind: $(IDIR)$(LIBNAME).hpp $(BDIR)lib$(HOST).$(LIBNAME).a
 # Make header
 $(IDIR)$(LIBNAME).hpp: $(HEADERS)
 	@echo " Make header $@ ... "
-	cat $^ > $@
+	@cat $^ > $@
 
 # Make library
 $(BDIR)lib$(HOST).$(LIBNAME).a: $(OBJECTS)
 	@echo " Binding $@ ... "
-	ar -rc $@ $^
+	@ar -rc $@ $^
 
 ################################################################################
 # Compiling
@@ -147,6 +147,6 @@ $(OOFF)%.o: $(SDIR)%.cpp $(SDIR)%.hpp
 
 $(EXAMPLES): FORCE
 	@echo "Compiling example \"$(patsubst $(EXAMPLEDIR)/%,%,$@)\" ..."
-	cd $@ && make
+	@cd $@ && make
 
 FORCE: ;

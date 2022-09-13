@@ -2,9 +2,9 @@
 // SPDX-FileCopyrightText: 2021 Moritz Bültmann <moritz.bueltmann@gmx.de>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #include "iterator.hpp"  // NOLINT
-#include <cmath>
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_multiroots.h>
+#include <cmath>
 #include <limits>
 #include "data_frame.hpp"  // NOLINT
 #include "convergence_criterion.hpp"  // NOLINT
@@ -204,7 +204,8 @@ std::vector<std::vector<double>> Iterator::calc_scalar_products(
       sum = 0.;
       for (size_t k = 0; k < species_count; ++k) {
         for (size_t l = 0; l < grid_count; ++l) {
-          sum += profile_history.at(i).at(k).at(l) * profile_history.at(j).at(k).at(l);
+          sum += profile_history.at(i).at(k).at(l) *
+              profile_history.at(j).at(k).at(l);
         }
       }
       scalar_products.at(i).at(j) = scalar_products.at(j).at(i) = sum;
@@ -227,13 +228,13 @@ std::vector<double> Iterator::shortest_linear_combination(
   }
   // Find the root
   const gsl_multiroot_fsolver_type* T = gsl_multiroot_fsolver_hybrids;
-  //const gsl_multiroot_fsolver_type* T = gsl_multiroot_fsolver_dnewton;
-  gsl_multiroot_fsolver* s = gsl_multiroot_fsolver_alloc (T, param_count);
+  // const gsl_multiroot_fsolver_type* T = gsl_multiroot_fsolver_dnewton;
+  gsl_multiroot_fsolver* s = gsl_multiroot_fsolver_alloc(T, param_count);
   gsl_multiroot_function f = {&anderson_f, param_count, &scalar_products};
-  gsl_multiroot_fsolver_set (s, &f, x);
+  gsl_multiroot_fsolver_set(s, &f, x);
   while ((status == GSL_CONTINUE) && (iter++ < 1000)) {
     status = gsl_multiroot_fsolver_iterate(s);
-    status = gsl_multiroot_test_residual (s->f, 1e-10);
+    status = gsl_multiroot_test_residual(s->f, 1e-10);
   }
   for (size_t i = 0; i < vector_count; ++i) {
     alphas.at(i) = gsl_vector_get(s->x, i);
@@ -241,7 +242,7 @@ std::vector<double> Iterator::shortest_linear_combination(
   return alphas;
 }
 // _____________________________________________________________________________
-int anderson_f (const gsl_vector* x, void* params, gsl_vector* f) {
+int anderson_f(const gsl_vector* x, void* params, gsl_vector* f) {
   std::vector<std::vector<double>> scalar_products =
       *((std::vector<std::vector<double>>*) params);
   size_t vector_count{scalar_products.size()};

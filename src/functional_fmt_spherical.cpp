@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <fstream>
 #include <iostream>
+#include <limits>
 #include "data_frame.hpp"  // NOLINT
 // _____________________________________________________________________________
 FunctionalFMTSpherical::FunctionalFMTSpherical() {
