@@ -849,7 +849,7 @@ class FunctionalESMFSpherical : public Functional {
 };
 #endif  // SRC_FUNCTIONAL_ES_MF_SPHERICAL_HPP_
 // SPDX-FileCopyrightText: 2019 Moritz Bültmann <moritz.bueltmann@gmx.de>
-// SPDX-FileCopyrightText: 2019 Andreas Härtel <http://andreashaertel.anno1982.de/>
+// SPDX-FileCopyrightText: 2019 Andreas Härtel <http://andreashaertel.anno1982.de/>  // NOLINT
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #ifndef SRC_FUNCTIONAL_FMT_PLANAR_HPP_
 #define SRC_FUNCTIONAL_FMT_PLANAR_HPP_
@@ -937,6 +937,39 @@ class FunctionalFMTPlanar {
   virtual double calc_energy();
 
  private:
+  /** \brief System length (radius of the sperical geometry)
+   *
+   */
+  double length;
+  /** \brief Number of grid points
+   *
+   */
+  size_t grid_count;
+  /** \brief Bin sizes in real and Fourier space
+   *
+   */
+  double dz;
+  double dkz;
+  /** \brief Number of species
+   *
+   */
+  size_t species_count;
+  /** \brief Vector that remembers the species, that are affected by this
+   *  functional
+   */
+  std::vector<size_t> affected_species;
+  /** \brief Hard sphere diameters
+   *
+   */
+  std::vector<double> diameters;
+  /** \brief Bulk densities
+   *
+   */
+  std::vector<double> bulk_densities;
+  /** \brief Pointer to density profiles
+   *
+   */
+  const std::vector<DataFrame<1, double>>* density_profiles_pointer;
 
  protected:
 };

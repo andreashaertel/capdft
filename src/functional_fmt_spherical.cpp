@@ -91,7 +91,7 @@ void FunctionalFMTSpherical::extract_species_properties(
     if (!spec_prop.at(*it).get_property("diameter", &diameter) ||
         !spec_prop.at(*it).get_property("bulk density", &bulk_density)) {
       std::cerr << "FunctionalFMTSpherical::extract_species_properties(): ";
-      std::cerr << "\"Error: One species is missing a required parameter.";
+      std::cerr << "\"Error: One species is lacking a required parameter.";
       std::cerr << std::endl;
       exit(1);
     }
@@ -176,8 +176,8 @@ void FunctionalFMTSpherical::update_density_times_r() {
 // _____________________________________________________________________________
 void FunctionalFMTSpherical::calc_weights() {
   // Declare auxiliary variables. R means radius of the hard sphere.
-  // kr is the radial position in Fourier space. Hence, RR is the square of R
-  // and so on.
+  // kr is the radial position in Fourier space.
+  // RR is the square of R, krkr is the square of kr, and so on.
   double kr{0.}, krkr{0.}, krkrkr{0.};
   double R{0.}, RR{0.}, RRR{0.};
   double Rkr{0.};
