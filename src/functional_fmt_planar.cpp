@@ -57,8 +57,6 @@ void FunctionalFMTPlanar::extract_system_properties(
   // Since we only do real-->complex Fourier transforms (or vice versa),
   // we only need half of the Fourier space (see FFTW docs).
   grid_count_fourier = grid_count / 2 + 1;
-  // Calculate normalization factors for Fourier transforms
-  // TODO(Moritz)
 }
 // _____________________________________________________________________________
 void FunctionalFMTPlanar::extract_species_properties(
