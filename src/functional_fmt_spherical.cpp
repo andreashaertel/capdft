@@ -190,7 +190,7 @@ void FunctionalFMTSpherical::calc_weights() {
     weights_four.at(i).at(0).at(0) = 4. * M_PI * RRR / 3.;
     // scalar weight 2 (delta)
     weights_four.at(i).at(1).at(0) = 4. * M_PI * RR;
-    // tensorial
+    // tensorial  // TODO(Moritz): this is equivalent to 0.
     weights_four.at(i).at(2).at(0) =
         weights_four.at(i).at(1).at(0) -
         3. * weights_four.at(i).at(0).at(0) / R;
