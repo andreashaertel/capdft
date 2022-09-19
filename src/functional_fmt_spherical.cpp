@@ -720,7 +720,6 @@ void FunctionalFMTSpherical::calc_weighted_partial_derivatives(
   }
   // Transform the partial derivatives into Fourier space.
   // The vectorial and tensorial derivatives need again a special transform.
-  // The dummy arrays dfdnrs_terms and dfdns_terms are used.
   for (size_t i = 0; i != 4; ++i) {
     scalar_derivative_terms_four.at(i).at(0) = 0.;
     vector_derivative_terms_four.at(i).at(0) = 0.;

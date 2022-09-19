@@ -976,7 +976,7 @@ class FunctionalFMTPlanar : public Functional {
   /** \brief Fourier transformed density profiles
    */
   std::vector<DataFrame<1, fftw_complex>> density_profiles_four;
-  /** \brief Weighted densities  // TODO(Moritz): update text
+  /** \brief Weighted densities
    *
    * There are three weighted density types: scalar, vectorial, tensorial.
    * There are four arrays containing the four scalar weighted densities.
@@ -1010,6 +1010,15 @@ class FunctionalFMTPlanar : public Functional {
   /** \brief Check if unphysical values appear in the weighted densities
    */
   void check_weighted_densities();
+  /** \brief Calculate the partial derivatives of the free energy densities
+   *
+   */
+  void calc_partial_derivatives();
+  /** \brief Calculate the partial derivatives of the free energy densities at
+   *  one position
+   *
+   */
+  void calc_local_partial_derivatives(size_t i);
   /** \brief From the system object extract the system properties
    *
    */
