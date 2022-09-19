@@ -275,47 +275,46 @@ void FunctionalFMTPlanar::calc_derivative_warnings(
 // _____________________________________________________________________________
 void FunctionalFMTPlanar::calc_bulk_derivative(
     std::vector<double>* bulk_derivative) {
-  //// Auxiliary variables
-  //double diameter{0.}, diameter2{0.}, diameter3{0.};
-  //// Calculate the fluid weighted densities and save them to the first position
-  //for (auto it = scalar_weighted_dens_real.begin();
-  //    it != scalar_weighted_dens_real.end(); ++it) {
-  //  it->at(0) = 0.;
-  //}
-  //for (size_t i = 0; i != species_count; ++i) {
-  //  // Define auxiliary values
-  //  diameter = diameters.at(i);
-  //  diameter2 = diameter * diameter;
-  //  diameter3 = diameter2 * diameter;
-  //  // All non-scalar weighted densities are 0 the others are obviously constant
-  //  scalar_weighted_dens_real.at(0).at(0) +=
-  //      bulk_densities.at(i) * diameter3 * M_PI / 6.0;
-  //  scalar_weighted_dens_real.at(1).at(0) +=
-  //      bulk_densities.at(i) * diameter2 * M_PI;
-  //  scalar_weighted_dens_real.at(2).at(0) +=
-  //      bulk_densities.at(i) * diameter / 2.0;
-  //  scalar_weighted_dens_real.at(3).at(0) += bulk_densities.at(i);
-  //}
-  //// Evaluate the partial derivatives at the first position
-  //calc_local_partial_derivatives(0);
-  //std::fill(bulk_derivative->begin(), bulk_derivative->end(), 0.);
-  //size_t spec_i{0};
-  //for (auto it = affected_species.begin(); it != affected_species.end(); ++it) {
-  //  spec_i = it - affected_species.begin();
-  //  // Define auxiliary values
-  //  diameter = diameters.at(spec_i);
-  //  diameter2 = diameter * diameter;
-  //  diameter3 = diameter2 * diameter;
-  //  // Calculate the derivatives of the excess free energy functional w.r.t. the
-  //  // weighted densities.
-  //  bulk_derivative->at(*it) = scalar_partial_derivative_real.at(0).at(0) *
-  //      diameter3 * M_PI / 6.0;
-  //  bulk_derivative->at(*it) += scalar_partial_derivative_real.at(1).at(0) *
-  //      diameter2 * M_PI;
-  //  bulk_derivative->at(*it) += scalar_partial_derivative_real.at(2).at(0) *
-  //      diameter / 2.0;
-  //  bulk_derivative->at(*it) += scalar_partial_derivative_real.at(3).at(0);
-  //}
+  // Auxiliary variables
+  double diameter{0.}, diameter2{0.}, diameter3{0.};
+  // Calculate the fluid weighted densities and save them to the first position
+  for (auto& weighted_density : scalar_weighted_dens_real) {
+    weighted_density.at(0) = 0.;
+  }
+  for (size_t i = 0; i != species_count; ++i) {
+    // Define auxiliary values
+    diameter = diameters.at(i);
+    diameter2 = diameter * diameter;
+    diameter3 = diameter2 * diameter;
+    // All non-scalar weighted densities are 0 the others are obviously constant
+    scalar_weighted_dens_real.at(0).at(0) +=
+        bulk_densities.at(i) * diameter3 * M_PI / 6.0;
+    scalar_weighted_dens_real.at(1).at(0) +=
+        bulk_densities.at(i) * diameter2 * M_PI;
+    scalar_weighted_dens_real.at(2).at(0) +=
+        bulk_densities.at(i) * diameter / 2.0;
+    scalar_weighted_dens_real.at(3).at(0) += bulk_densities.at(i);
+  }
+  // Evaluate the partial derivatives at the first position
+  calc_local_partial_derivatives(0);
+  std::fill(bulk_derivative->begin(), bulk_derivative->end(), 0.);
+  size_t spec_i{0};
+  for (auto it = affected_species.begin(); it != affected_species.end(); ++it) {
+    spec_i = it - affected_species.begin();
+    // Define auxiliary values
+    diameter = diameters.at(spec_i);
+    diameter2 = diameter * diameter;
+    diameter3 = diameter2 * diameter;
+    // Calculate the derivatives of the excess free energy functional w.r.t. the
+    // weighted densities.
+    bulk_derivative->at(*it) = scalar_partial_derivative_real.at(0).at(0) *
+        diameter3 * M_PI / 6.0;
+    bulk_derivative->at(*it) += scalar_partial_derivative_real.at(1).at(0) *
+        diameter2 * M_PI;
+    bulk_derivative->at(*it) += scalar_partial_derivative_real.at(2).at(0) *
+        diameter / 2.0;
+    bulk_derivative->at(*it) += scalar_partial_derivative_real.at(3).at(0);
+  }
 }
 // _____________________________________________________________________________
 double FunctionalFMTPlanar::calc_energy() {
