@@ -82,11 +82,11 @@ info:
 # Cleaning all targets (objects, binaries, and final includes)
 clean:
 	@echo " Cleaning objects ... "
-	rm -f $(ODIR)*
+	rm -f $(ODIR)/*
 	@echo " Cleaning binaries ... "
-	rm -f $(BDIR)*
+	rm -f $(BDIR)/*
 	@echo " Cleaning includes ... "
-	rm -f $(IDIR)*
+	rm -f $(IDIR)/*
 
 examples: $(EXAMPLES)
 
@@ -101,15 +101,15 @@ examples: $(EXAMPLES)
 ################################################################################
 
 # Make header and library and programs
-bind: $(IDIR)$(LIBNAME).hpp $(BDIR)lib$(HOST).$(LIBNAME).a
+bind: $(IDIR)/$(LIBNAME).hpp $(BDIR)/lib$(HOST).$(LIBNAME).a
 
 # Make header
-$(IDIR)$(LIBNAME).hpp: $(HEADERS)
+$(IDIR)/$(LIBNAME).hpp: $(HEADERS)
 	@echo " Make header $@ ... "
 	@cat $^ > $@
 
 # Make library
-$(BDIR)lib$(HOST).$(LIBNAME).a: $(OBJECTS)
+$(BDIR)/lib$(HOST).$(LIBNAME).a: $(OBJECTS)
 	@echo " Binding $@ ... "
 	@ar -rc $@ $^
 
@@ -121,7 +121,7 @@ $(BDIR)lib$(HOST).$(LIBNAME).a: $(OBJECTS)
 # 
 # If each source only depends on its own header (no cross linking) then we 
 # can use:
-# $(OOFF)%.o: $(SDIR)%.cpp $(SDIR)%.hpp
+# $(OOFF)%.o: $(SDIR)/%.cpp $(SDIR)/%.hpp
 # 	@echo " Compiling $< ... "
 # 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 # However, sometimes we expect to find cross linking. 
@@ -130,14 +130,14 @@ $(BDIR)lib$(HOST).$(LIBNAME).a: $(OBJECTS)
 #################
 # Explicit rules: 
 
-$(OOFF)parameter_handler.o: $(SDIR)parameter_handler.cpp $(SDIR)parameter_handler.hpp
+$(OOFF)parameter_handler.o: $(SDIR)/parameter_handler.cpp $(SDIR)/parameter_handler.hpp
 	@echo " Compiling $< ... "
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 #################
 # General rule: 
 
-$(OOFF)%.o: $(SDIR)%.cpp $(SDIR)%.hpp
+$(OOFF)%.o: $(SDIR)/%.cpp $(SDIR)/%.hpp
 	@echo " Compiling $< ... "
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
