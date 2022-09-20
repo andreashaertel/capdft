@@ -319,15 +319,15 @@ void FunctionalFMTPlanar::calc_bulk_derivative(
 // _____________________________________________________________________________
 double FunctionalFMTPlanar::calc_energy() {
   double integral{0.};
-  //DataFrame<1, double> free_energy_density(grid_count);
-  //// Calculate the weighted densities for the current density profile
-  //calc_weighted_densities();
-  //check_weighted_densities();
-  //// Store free energy density
-  //for (size_t i = 0; i < grid_count; ++i) {
-  //  free_energy_density.at(i) = calc_local_energy_density(i);
-  //}
-  //integral = radial_integration(free_energy_density.array(), grid_count, dr);
+  DataFrame<1, double> free_energy_density(grid_count);
+  // Calculate the weighted densities for the current density profile
+  calc_weighted_densities();
+  check_weighted_densities();
+ /// Store free energy density
+  for (size_t i = 0; i < grid_count; ++i) {
+    free_energy_density.at(i) = calc_local_energy_density(i);
+  }
+  integral = integration(free_energy_density.array(), grid_count, dz);
   return integral;
 }
 // _____________________________________________________________________________
@@ -654,5 +654,84 @@ void FunctionalFMTPlanar::calc_weighted_partial_derivatives(
   for (auto& plan : backward_plans) { fftw_destroy_plan(plan); }
 }
 // _____________________________________________________________________________
+double FunctionalFMTPlanar::calc_local_energy_density(size_t position) {
+  // Define a lot of dummy variables
+  double Phi1, Phi2, Phi3;  // energy density terms
+  double phi2, phi3;  // factors in the energy density terms
+  double phi2_num, phi3_num;  // factors in the energy density terms
+  double n0, n1, n2, n3;  // scalar weighted densities
+  double n3n3, n3n3n3, oneMn3, logOneMn3, oneMn3squared;  // auxiliary variables
+  double n2n2, n2n2n2;  // auxiliary variables
+  double trace2, trace3;  // auxiliary variables
+  double nvec1, nvec2;  // vectorial weighted densities (only z-comp. is non-0)
+  double ntensorm2first;  // tensorial weighted densities (tensor is diagonal)
+  double ntensorm2second;
+  double ntensorm2third;
+  // Assign values to the weighted densities
+  n3 = scalar_weighted_dens_real.at(0).at(position);
+  n2 = scalar_weighted_dens_real.at(1).at(position);
+  n1 = scalar_weighted_dens_real.at(2).at(position);
+  n0 = scalar_weighted_dens_real.at(3).at(position);
+  nvec2 = vector_weighted_dens_real.at(0).at(position);
+  nvec1 = vector_weighted_dens_real.at(1).at(position);
+  ntensorm2first = tensor_weighted_dens_real.at(0).at(position);
+  ntensorm2second = tensor_weighted_dens_real.at(0).at(position);
+  ntensorm2third = tensor_weighted_dens_real.at(1).at(position);
+  // Calculate auxiliary variables
+  n3n3 = n3 * n3;
+  n3n3n3 = n3 * n3 * n3;
+  oneMn3 = 1. - n3;
+  logOneMn3 = log(oneMn3);
+  oneMn3squared = oneMn3 * oneMn3;
+  n2n2 = n2 * n2;
+  n2n2n2 = n2 * n2n2;
+  trace2 = ntensorm2first * ntensorm2first + ntensorm2second * ntensorm2second +
+      ntensorm2third * ntensorm2third;
+  trace3 = ntensorm2first * ntensorm2first * ntensorm2first +
+      ntensorm2second * ntensorm2second * ntensorm2second +
+      ntensorm2third * ntensorm2third * ntensorm2third;
+  // Calculate factors in the energy density terms
+  if (n3 < 1e-5) {  // avoiding logarithm of very small numbers
+    phi2 = 1. + .5 * n3 + .3 * n3n3 + .2 * n3n3n3;  // +O(n^4)
+    phi3 = 1. - .125 * n3 - .05 * n3n3 - .025 * n3n3n3;  // +O(n^4)
+  } else {
+    phi2 = (6. * n3 - 3. * n3n3 + 6. * oneMn3 * logOneMn3) / n3n3n3;
+    phi3 = (6. * n3 - 9. * n3n3 + 6. * n3n3n3 + 6. * oneMn3squared * logOneMn3)/
+        (4. * n3n3n3);
+  }
+  phi2_num = 1. + n3n3 * phi2 / 9.;
+  phi3_num = 1. - 4. * n3 * phi3 / 9.;
+  // Calculate free energy density terms
+  Phi1 = -n0 * logOneMn3;
+  Phi2 = phi2_num *  (n1 * n2 - nvec1 * nvec2) / oneMn3;
+  Phi3 = phi3_num * (n2n2n2 - 3. * n2 * nvec2 * nvec2 + 4.5 * (
+      n2n2 * ntensorm2third - n2 * nvec2 * nvec2 - trace3 + n2 * trace2)) /
+      (24. * M_PI * oneMn3squared);
+  return Phi1 + Phi2 + Phi3;
+}
+// _____________________________________________________________________________
+double FunctionalFMTPlanar::integration(
+    double* data, int n, double delta) {
+  // Integrate with closed Newton-Cotes formula: Num. Rep. 3rd ed. eq. 4.1.14.
+  double integral = 0.;
+  if (grid_count < 6) {
+    std::cerr << "FunctionalFMTPlanar::integration(): ";
+    std::cerr << "\"Error: Integration needs more grid points.\"";
+    std::cerr << std::endl;
+    return 0.;
+  }
+  for (size_t i = 0; i != grid_count; ++i) {
+    if (i == grid_count - 1)
+      integral += data[i] * (3. / 8.);
+    else if (i == 0 || i == grid_count - 2)
+      integral += data[i] * (7. / 6.);
+    else if (i == 1 || i == grid_count - 3)
+      integral += data[i] * (23. / 24.);
+    else
+      integral += data[i];
+  }
+  integral *= delta;
+  return integral;
+}
 // _____________________________________________________________________________
 // _____________________________________________________________________________

@@ -184,7 +184,7 @@ class FunctionalFMTPlanar : public Functional {
    */
   void calc_partial_derivatives();
   /** \brief Calculate the partial derivatives of the free energy densities at
-   *  one position
+   *         one position
    */
   void calc_local_partial_derivatives(size_t i);
   /** \brief Calculate the weighted partial derivatives of the free energy
@@ -192,6 +192,14 @@ class FunctionalFMTPlanar : public Functional {
    */
   void calc_weighted_partial_derivatives(
       std::vector<DataFrame<1, double>>* functional_derivative);
+  /** \brief Calculate the energy density
+   *  
+   *  \param The index of the position of which the energy density value is
+   *  sought.
+   *
+   *  \return Returns the functional energy density at the specified position.
+   */
+  double calc_local_energy_density(size_t position);
   /** \brief From the system object extract the system properties
    */
   void extract_system_properties(const Properties& system_properties);
@@ -212,6 +220,9 @@ class FunctionalFMTPlanar : public Functional {
   /** \brief Set all weights to zero
    */
   void set_weights_to_zero();
+  /** \brief Radial integration
+   */
+  double integration(double* data, int n, double delta);
 
  protected:
 };

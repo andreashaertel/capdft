@@ -998,6 +998,26 @@ class FunctionalFMTPlanar : public Functional {
    *
    */
   std::vector<std::vector<DataFrame<1, fftw_complex>>> weights_four;
+  /** \brief Partial derivatives of the free energy density w.r.t. the
+   *  weighted densities
+   *
+   * There are three partial derivative types: scalar, vectorial, tensorial.
+   * There are four arrays containing the four scalar partial derivatives.
+   * There are two arrays containing the z-components of the two vectorial
+   * partial derivatives.
+   * There are two arrays containing the first (= second) and third element of
+   * the tensorial partial derivative.
+   *
+   */
+  std::vector<DataFrame<1, double>> scalar_partial_derivative_real;
+  std::vector<DataFrame<1, double>> vector_partial_derivative_real;
+  std::vector<DataFrame<1, double>> tensor_partial_derivative_real;
+  std::vector<DataFrame<1, fftw_complex>> scalar_partial_derivative_four;
+  std::vector<DataFrame<1, fftw_complex>> vector_partial_derivative_four;
+  std::vector<DataFrame<1, fftw_complex>> tensor_partial_derivative_four;
+  /** Fourier transform of the functional derivative
+   */
+  std::vector<DataFrame<1, fftw_complex>> functional_derivative_four;
   /** \brief Flags for the Fourier transforms
    *
    *  The first one preserves the input, while the second one might destroy it.
@@ -1011,25 +1031,25 @@ class FunctionalFMTPlanar : public Functional {
    */
   void check_weighted_densities();
   /** \brief Calculate the partial derivatives of the free energy densities
-   *
    */
   void calc_partial_derivatives();
   /** \brief Calculate the partial derivatives of the free energy densities at
    *  one position
-   *
    */
   void calc_local_partial_derivatives(size_t i);
+  /** \brief Calculate the weighted partial derivatives of the free energy
+   *  densities
+   */
+  void calc_weighted_partial_derivatives(
+      std::vector<DataFrame<1, double>>* functional_derivative);
   /** \brief From the system object extract the system properties
-   *
    */
   void extract_system_properties(const Properties& system_properties);
   /** \brief From the system object extract the species properties
-   *
    */
   void extract_species_properties(
       const std::vector<Properties>& species_properties);
   /** \brief Initialize all data frame vectors
-   *
    */
   void initialize_all_data_frames();
   /** \brief Updates the internal density profile arrays
@@ -1037,11 +1057,9 @@ class FunctionalFMTPlanar : public Functional {
    */
   void update_density_profiles();
   /** \brief Calculate the weight functions in Fourier space
-   *
    */
   void calc_weights();
   /** \brief Set all weights to zero
-   *
    */
   void set_weights_to_zero();
 
