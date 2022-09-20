@@ -941,7 +941,7 @@ double FunctionalFMTSpherical::radial_integration(
     return 0.;
   }
   for (size_t i = 0; i != grid_count; ++i) {
-    r = static_cast<double>(i + 1) * dr;
+    r = static_cast<double>(i + 1) * delta;
     if (i == grid_count - 1)
       integral += data[i] * r * r * (3. / 8.);
     else if (i == 0 || i == grid_count - 2)
