@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2021 Moritz Bültmann <moritz.bueltmann@gmx.de>
 // SPDX-License-Identifier: LGPL-3.0-or-later
-/** \file examples/spherical_functional/src/main.cpp
+/** \file examples/spherical_functionals_all_tools/src/main.cpp
  *  \brief Main file of the example of the spherical functionals.
  *  
  *  This main file contains examples to show how Functional classes work.
