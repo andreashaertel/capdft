@@ -243,7 +243,9 @@ void FunctionalFMTPlanar::calc_derivative(
     }
   }
   // Calculate the weighted densities
+  std::cerr << "AAA" << std::endl;  // TODO: remove
   calc_weighted_densities();
+  std::cerr << "BBB" << std::endl;  // TODO: remove
   // From the weighted densities calculate the partial derivatives of the
   // excess free energy
   calc_partial_derivatives();
@@ -332,6 +334,7 @@ double FunctionalFMTPlanar::calc_energy() {
 }
 // _____________________________________________________________________________
 void FunctionalFMTPlanar::calc_weighted_densities() {
+  std::cerr << "AA" << std::endl;  // TODO: remove
   std::vector<fftw_plan> forward_plans;
   std::vector<fftw_plan> backward_plans;
   // Specify the plans
@@ -366,10 +369,12 @@ void FunctionalFMTPlanar::calc_weighted_densities() {
   }
   // Creating plans clears the input array hence we need to update it
   update_density_profiles();
+  std::cerr << "BB" << std::endl;  // TODO: remove
   // Forward Fourier transform of density profiles
   for (auto& plan : forward_plans) {
     fftw_execute(plan);
   }
+  std::cerr << "CC" << std::endl;  // TODO: remove
   // Normalize
   for(auto& profile_four : density_profiles_four) {  // every species
     profile_four *= dz;
@@ -381,18 +386,19 @@ void FunctionalFMTPlanar::calc_weighted_densities() {
           density_profiles_four.at(j) * weights_four.at(j).at(i);
     }
   }
-  for (size_t i = 0; i != scalar_weighted_dens_four.size(); ++i) {
+  for (size_t i = 0; i != vector_weighted_dens_four.size(); ++i) {
     for (size_t j = 0; j != species_count; ++j) {
       vector_weighted_dens_four.at(i) +=
           density_profiles_four.at(j) * weights_four.at(j).at(i);
     }
   }
-  for (size_t i = 0; i != scalar_weighted_dens_four.size(); ++i) {
+  for (size_t i = 0; i != tensor_weighted_dens_four.size(); ++i) {
     for (size_t j = 0; j != species_count; ++j) {
       tensor_weighted_dens_four.at(i) +=
           density_profiles_four.at(j) * weights_four.at(j).at(i);
     }
   }
+  std::cerr << "DD" << std::endl;  // TODO: remove
   // Forward Fourier transform of density profiles
   for (auto& plan : backward_plans) {
     fftw_execute(plan);
@@ -412,6 +418,7 @@ void FunctionalFMTPlanar::calc_weighted_densities() {
   // forcing the density profile to vanish (i.e. two planar walls).
   for (auto& plan : forward_plans) { fftw_destroy_plan(plan); }
   for (auto& plan : backward_plans) { fftw_destroy_plan(plan); }
+  std::cerr << "EE" << std::endl;  // TODO: remove
 }
 // _____________________________________________________________________________
 void FunctionalFMTPlanar::check_weighted_densities() {
