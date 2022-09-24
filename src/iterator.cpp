@@ -72,15 +72,6 @@ void Iterator::run_picard(double mixing) {
   // Iterator loop
   while (!check_convergence_criteria()) {
     ++steps;
-
-      // TODO TODO TODO
-
-      if (steps == 12) {
-        std::cerr << "========================================" << std::endl;
-      }
-      
-      // TODO TODO TODO
-
     // Calculate the functional derivatives.
     for (size_t i = 0; i < excess_functionals.size(); ++i) {
       excess_functionals.at(i)->calc_derivative(&functional_derivatives.at(i));
