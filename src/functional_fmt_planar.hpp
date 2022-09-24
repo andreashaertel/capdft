@@ -147,7 +147,9 @@ class FunctionalFMTPlanar : public Functional {
    *  Every vector element contains all weight functions of another species.
    *
    */
-  std::vector<std::vector<DataFrame<1, fftw_complex>>> weights_four;
+  std::vector<std::vector<DataFrame<1, fftw_complex>>> scalar_weights_four;
+  std::vector<std::vector<DataFrame<1, fftw_complex>>> vector_weights_four;
+  std::vector<std::vector<DataFrame<1, fftw_complex>>> tensor_weights_four;
   /** \brief Partial derivatives of the free energy density w.r.t. the
    *  weighted densities
    *
