@@ -568,12 +568,15 @@ DataFrame<dim, T>& DataFrame<dim, T>::operator*=(
 template <>
 DataFrame<1, fftw_complex>& DataFrame<1, fftw_complex>::operator*=(
     const DataFrame<1, fftw_complex>& other) {
+  fftw_complex old_this{0., 0.};
   if (this->same_size(other)) {
     for (size_t i = 0; i < this->array_size; ++i) {
-      this->at(i)[0] = this->element(i)[0] * other.element(i)[0] -
-          this->element(i)[1] * other.element(i)[1];  // Real
-      this->at(i)[1] = this->element(i)[0] * other.element(i)[1] +
-          this->element(i)[1] * other.element(i)[0];  // Imaginary
+      old_this[0] = this->element(i)[0];
+      old_this[1] = this->element(i)[1];
+      this->at(i)[0] = old_this[0] * other.element(i)[0] -
+          old_this[1] * other.element(i)[1];  // Real
+      this->at(i)[1] = old_this[0] * other.element(i)[1] +
+          old_this[1] * other.element(i)[0];  // Imaginary
     }
   } else {
     std::cerr << "DataFrame::operator*=():";
@@ -586,12 +589,15 @@ DataFrame<1, fftw_complex>& DataFrame<1, fftw_complex>::operator*=(
 template <>
 DataFrame<2, fftw_complex>& DataFrame<2, fftw_complex>::operator*=(
     const DataFrame<2, fftw_complex>& other) {
+  fftw_complex old_this{0., 0.};
   if (this->same_size(other)) {
     for (size_t i = 0; i < this->array_size; ++i) {
-      this->at(i)[0] = this->element(i)[0] * other.element(i)[0] -
-          this->element(i)[1] * other.element(i)[1];  // Real
-      this->at(i)[1] = this->element(i)[0] * other.element(i)[1] +
-          this->element(i)[1] * other.element(i)[0];  // Imaginary
+      old_this[0] = this->element(i)[0];
+      old_this[1] = this->element(i)[1];
+      this->at(i)[0] = old_this[0] * other.element(i)[0] -
+          old_this[1] * other.element(i)[1];  // Real
+      this->at(i)[1] = old_this[0] * other.element(i)[1] +
+          old_this[1] * other.element(i)[0];  // Imaginary
     }
   } else {
     std::cerr << "DataFrame::operator*=():";
@@ -604,12 +610,15 @@ DataFrame<2, fftw_complex>& DataFrame<2, fftw_complex>::operator*=(
 template <>
 DataFrame<3, fftw_complex>& DataFrame<3, fftw_complex>::operator*=(
     const DataFrame<3, fftw_complex>& other) {
+  fftw_complex old_this{0., 0.};
   if (this->same_size(other)) {
     for (size_t i = 0; i < this->array_size; ++i) {
-      this->at(i)[0] = this->element(i)[0] * other.element(i)[0] -
-          this->element(i)[1] * other.element(i)[1];  // Real
-      this->at(i)[1] = this->element(i)[0] * other.element(i)[1] +
-          this->element(i)[1] * other.element(i)[0];  // Imaginary
+      old_this[0] = this->element(i)[0];
+      old_this[1] = this->element(i)[1];
+      this->at(i)[0] = old_this[0] * other.element(i)[0] -
+          old_this[1] * other.element(i)[1];  // Real
+      this->at(i)[1] = old_this[0] * other.element(i)[1] +
+          old_this[1] * other.element(i)[0];  // Imaginary
     }
   } else {
     std::cerr << "DataFrame::operator*=():";
@@ -638,13 +647,16 @@ DataFrame<dim, T>& DataFrame<dim, T>::operator/=(
 template <>
 DataFrame<1, fftw_complex>& DataFrame<1, fftw_complex>::operator/=(
     const DataFrame<1, fftw_complex>& other) {
+  fftw_complex old_this{0., 0.};
   if (this->size() == other.size()) {
     for (size_t i = 0; i < this->array_size; ++i) {
-      this->at(i)[0] = (this->element(i)[0] * other.element(i)[0] +
-          this->element(i)[1] * other.element(i)[1]) /
+      old_this[0] = this->element(i)[0];
+      old_this[1] = this->element(i)[1];
+      this->at(i)[0] = (old_this[0] * other.element(i)[0] +
+          old_this[1] * other.element(i)[1]) /
           (pow(other.element(i)[0], 2) + pow(other.element(i)[1], 2));  // Real
-      this->at(i)[1] = (this->element(i)[1] * other.element(i)[0] -
-          this->element(i)[0] * other.element(i)[1]) /
+      this->at(i)[1] = (old_this[1] * other.element(i)[0] -
+          old_this[0] * other.element(i)[1]) /
           (pow(other.element(i)[0], 2) + pow(other.element(i)[1], 2));  // Imag
     }
   } else {
@@ -658,13 +670,16 @@ DataFrame<1, fftw_complex>& DataFrame<1, fftw_complex>::operator/=(
 template <>
 DataFrame<2, fftw_complex>& DataFrame<2, fftw_complex>::operator/=(
     const DataFrame<2, fftw_complex>& other) {
+  fftw_complex old_this{0., 0.};
   if (this->size() == other.size()) {
     for (size_t i = 0; i < this->array_size; ++i) {
-      this->at(i)[0] = (this->element(i)[0] * other.element(i)[0] +
-          this->element(i)[1] * other.element(i)[1]) /
+      old_this[0] = this->element(i)[0];
+      old_this[1] = this->element(i)[1];
+      this->at(i)[0] = (old_this[0] * other.element(i)[0] +
+          old_this[1] * other.element(i)[1]) /
           (pow(other.element(i)[0], 2) + pow(other.element(i)[1], 2));  // Real
-      this->at(i)[1] = (this->element(i)[1] * other.element(i)[0] -
-          this->element(i)[0] * other.element(i)[1]) /
+      this->at(i)[1] = (old_this[1] * other.element(i)[0] -
+          old_this[0] * other.element(i)[1]) /
           (pow(other.element(i)[0], 2) + pow(other.element(i)[1], 2));  // Imag
     }
   } else {
@@ -678,13 +693,16 @@ DataFrame<2, fftw_complex>& DataFrame<2, fftw_complex>::operator/=(
 template <>
 DataFrame<3, fftw_complex>& DataFrame<3, fftw_complex>::operator/=(
     const DataFrame<3, fftw_complex>& other) {
+  fftw_complex old_this{0., 0.};
   if (this->size() == other.size()) {
     for (size_t i = 0; i < this->array_size; ++i) {
-      this->at(i)[0] = (this->element(i)[0] * other.element(i)[0] +
-          this->element(i)[1] * other.element(i)[1]) /
+      old_this[0] = this->element(i)[0];
+      old_this[1] = this->element(i)[1];
+      this->at(i)[0] = (old_this[0] * other.element(i)[0] +
+          old_this[1] * other.element(i)[1]) /
           (pow(other.element(i)[0], 2) + pow(other.element(i)[1], 2));  // Real
-      this->at(i)[1] = (this->element(i)[1] * other.element(i)[0] -
-          this->element(i)[0] * other.element(i)[1]) /
+      this->at(i)[1] = (old_this[1] * other.element(i)[0] -
+          old_this[0] * other.element(i)[1]) /
           (pow(other.element(i)[0], 2) + pow(other.element(i)[1], 2));  // Imag
     }
   } else {

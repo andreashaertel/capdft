@@ -13,8 +13,8 @@
  */
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_multiroots.h>
-#include <vector>
 #include <map>
+#include <vector>
 #include "convergence_criterion.hpp"  // NOLINT
 #include "data_frame.hpp"  // NOLINT
 #include "functional.hpp" // NOLINT

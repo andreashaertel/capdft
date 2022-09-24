@@ -109,9 +109,17 @@ void FunctionalFMTPlanar::initialize_all_data_frames() {
   }
   // Initialize weights
   for (size_t i = 0; i < species_count; ++i) {
-    weights_four.push_back(std::vector<DataFrame<1, fftw_complex>>(0));
-    for (size_t j = 0; j < 8; ++j) {
-      weights_four.at(i).push_back(
+    scalar_weights_four.push_back(std::vector<DataFrame<1, fftw_complex>>(0));
+    vector_weights_four.push_back(std::vector<DataFrame<1, fftw_complex>>(0));
+    tensor_weights_four.push_back(std::vector<DataFrame<1, fftw_complex>>(0));
+    for (size_t j = 0; j < 4; ++j) {
+      scalar_weights_four.at(i).push_back(
+          DataFrame<1, fftw_complex>(grid_count_fourier));
+    }
+    for (size_t j = 0; j < 2; ++j) {
+      vector_weights_four.at(i).push_back(
+          DataFrame<1, fftw_complex>(grid_count_fourier));
+      tensor_weights_four.at(i).push_back(
           DataFrame<1, fftw_complex>(grid_count_fourier));
     }
   }
@@ -130,17 +138,17 @@ void FunctionalFMTPlanar::initialize_all_data_frames() {
         DataFrame<1, fftw_complex>(grid_count_fourier));
   }
   // Initialize partial derivatives
+  for (size_t i = 0; i < 4; ++i) {
+    scalar_partial_derivative_real.push_back(DataFrame<1, double>(grid_count));
+    scalar_partial_derivative_four.push_back(
+        DataFrame<1, fftw_complex>(grid_count_fourier));
+  }
   for (size_t i = 0; i < 2; ++i) {
     vector_partial_derivative_real.push_back(DataFrame<1, double>(grid_count));
     tensor_partial_derivative_real.push_back(DataFrame<1, double>(grid_count));
     vector_partial_derivative_four.push_back(
         DataFrame<1, fftw_complex>(grid_count_fourier));
     tensor_partial_derivative_four.push_back(
-        DataFrame<1, fftw_complex>(grid_count_fourier));
-  }
-  for (size_t i = 0; i < 4; ++i) {
-    scalar_partial_derivative_real.push_back(DataFrame<1, double>(grid_count));
-    scalar_partial_derivative_four.push_back(
         DataFrame<1, fftw_complex>(grid_count_fourier));
   }
   // Initialize internal functional derivatives (Fourier transform)
@@ -172,13 +180,13 @@ void FunctionalFMTPlanar::calc_weights() {
     RRR = RR * R;
     // Calculate limits kz --> 0
     // scalar weight 3 (theta)
-    weights_four.at(i).at(0).at(0)[0] = 4. * M_PI * RRR / 3.;  // real
+    scalar_weights_four.at(i).at(0).at(0)[0] = 4. * M_PI * RRR / 3.;  // real
     // scalar weight 2 (delta)
-    weights_four.at(i).at(1).at(0)[0] = 4. * M_PI * RR;
+    scalar_weights_four.at(i).at(1).at(0)[0] = 4. * M_PI * RR;
     // scalar weight 1 (delta)
-    weights_four.at(i).at(2).at(0)[0] = R;
+    scalar_weights_four.at(i).at(2).at(0)[0] = R;
     // scalar weight 0 (delta)
-    weights_four.at(i).at(3).at(0)[0] = 1;
+    scalar_weights_four.at(i).at(3).at(0)[0] = 1;
     // Only calculate the weights for the positive frequencies in Fourier space
     for (size_t j = 1; j != grid_count_fourier; ++j) {
       // Absolute value of Fourier space coordinate and kz are equal, since we
@@ -189,35 +197,36 @@ void FunctionalFMTPlanar::calc_weights() {
       kzkz = kz * kz;
       kzkzkz = kzkz * kz;
       // scalar weight 3 (theta)
-      weights_four.at(i).at(0).at(j)[0] = 4. * M_PI *
+      scalar_weights_four.at(i).at(0).at(j)[0] = 4. * M_PI *
           (sin(Rkz) - Rkz * cos(Rkz)) / kzkzkz;  // real
-      weights_four.at(i).at(0).at(j)[1] = 0.;  // imaginary
+      scalar_weights_four.at(i).at(0).at(j)[1] = 0.;  // imaginary
       // scalar weight 2 (delta)
-      weights_four.at(i).at(1).at(j)[0] = 4. * M_PI * R * sin(Rkz) / kz;
-      weights_four.at(i).at(1).at(j)[1] = 0.;
+      scalar_weights_four.at(i).at(1).at(j)[0] = 4. * M_PI * R * sin(Rkz) / kz;
+      scalar_weights_four.at(i).at(1).at(j)[1] = 0.;
       // scalar weight 1 (delta)
-      weights_four.at(i).at(2).at(j)[0] = sin(Rkz) / kz;
-      weights_four.at(i).at(2).at(j)[1] = 0.;
+      scalar_weights_four.at(i).at(2).at(j)[0] = sin(Rkz) / kz;
+      scalar_weights_four.at(i).at(2).at(j)[1] = 0.;
       // scalar weight 0 (delta)
-      weights_four.at(i).at(3).at(j)[0] = sin(Rkz) / Rkz;
-      weights_four.at(i).at(3).at(j)[1] = 0.;
+      scalar_weights_four.at(i).at(3).at(j)[0] = sin(Rkz) / Rkz;
+      scalar_weights_four.at(i).at(3).at(j)[1] = 0.;
       // vectorial weight 2 3rd element (1st and 2nd element are zero)
-      weights_four.at(i).at(4).at(j)[0] = 0.;
-      weights_four.at(i).at(4).at(j)[1] = 4. * M_PI *
+      vector_weights_four.at(i).at(0).at(j)[0] = 0.;
+      vector_weights_four.at(i).at(0).at(j)[1] = 4. * M_PI *
           (Rkz * cos(Rkz) - sin(Rkz)) / kzkz;
       // vectorial weight 1 3rd element (1st and 2nd element are zero)
-      weights_four.at(i).at(5).at(j)[0] = 0.;
-      weights_four.at(i).at(5).at(j)[1] = (kz * cos(Rkz) - sin(Rkz) / R) / kzkz;
+      vector_weights_four.at(i).at(1).at(j)[0] = 0.;
+      vector_weights_four.at(i).at(1).at(j)[1] =
+          (kz * cos(Rkz) - sin(Rkz) / R) / kzkz;
       // tensorial weight (1,1)-element identical to (2,2)-element
-      weights_four.at(i).at(6).at(j)[0] =
+      tensor_weights_four.at(i).at(0).at(j)[0] =
           -4. * M_PI * R * sin(Rkz) / (3 * kz) +
           4. * M_PI * (sin(Rkz) - Rkz * cos(Rkz)) / (R * kzkzkz);
-      weights_four.at(i).at(6).at(j)[1] = 0.;
+      tensor_weights_four.at(i).at(0).at(j)[1] = 0.;
       // tensorial weight (3,3)-element
-      weights_four.at(i).at(7).at(j)[0] =
+      tensor_weights_four.at(i).at(1).at(j)[0] =
           8. * M_PI * R * sin(Rkz) / (3 * kz) +
           -8. * M_PI * (sin(Rkz) - Rkz * cos(Rkz)) / (R * kzkzkz);
-      weights_four.at(i).at(7).at(j)[1] = 0.;
+      tensor_weights_four.at(i).at(1).at(j)[1] = 0.;
     }
   }
 }
@@ -225,8 +234,14 @@ void FunctionalFMTPlanar::calc_weights() {
 void FunctionalFMTPlanar::set_weights_to_zero() {
   fftw_complex zero{0., 0.};
   for (size_t i = 0; i != species_count; ++i) {
-    for (size_t j = 0; j != weights_four.at(i).size(); ++j) {  // different weights
-      weights_four.at(i).at(j).set_all_elements_to(zero);
+    for (size_t j = 0; j != scalar_weights_four.at(i).size(); ++j) {
+      scalar_weights_four.at(i).at(j).set_all_elements_to(zero);
+    }
+    for (size_t j = 0; j != vector_weights_four.at(i).size(); ++j) {
+      vector_weights_four.at(i).at(j).set_all_elements_to(zero);
+    }
+    for (size_t j = 0; j != tensor_weights_four.at(i).size(); ++j) {
+      tensor_weights_four.at(i).at(j).set_all_elements_to(zero);
     }
   }
 }
@@ -243,9 +258,7 @@ void FunctionalFMTPlanar::calc_derivative(
     }
   }
   // Calculate the weighted densities
-  std::cerr << "AAA" << std::endl;  // TODO: remove
   calc_weighted_densities();
-  std::cerr << "BBB" << std::endl;  // TODO: remove
   // From the weighted densities calculate the partial derivatives of the
   // excess free energy
   calc_partial_derivatives();
@@ -334,7 +347,6 @@ double FunctionalFMTPlanar::calc_energy() {
 }
 // _____________________________________________________________________________
 void FunctionalFMTPlanar::calc_weighted_densities() {
-  std::cerr << "AA" << std::endl;  // TODO: remove
   std::vector<fftw_plan> forward_plans;
   std::vector<fftw_plan> backward_plans;
   // Specify the plans
@@ -367,58 +379,136 @@ void FunctionalFMTPlanar::calc_weighted_densities() {
             tensor_weighted_dens_real.at(i).array(),
             flags_destroy));
   }
+
+  // TODO TODO TODO
+  
+  for (size_t i = 0; i < grid_count; ++i) {
+    //std::cerr << density_profiles.at(0).at(i) << " ";
+    //std::cerr << density_profiles.at(1).at(i) << " ";
+
+    //std::cerr << scalar_weighted_dens_real.at(0).at(i) << " ";  // TODO: remove
+    //std::cerr << scalar_weighted_dens_real.at(1).at(i) << " ";  // TODO: remove
+    //std::cerr << scalar_weighted_dens_real.at(2).at(i) << " ";  // TODO: remove
+    //std::cerr << scalar_weighted_dens_real.at(3).at(i) << " ";  // TODO: remove
+    //std::cerr << vector_weighted_dens_real.at(0).at(i) << " ";  // TODO: remove
+    //std::cerr << vector_weighted_dens_real.at(1).at(i) << " ";  // TODO: remove
+    //std::cerr << tensor_weighted_dens_real.at(0).at(i) << " ";  // TODO: remove
+    //std::cerr << tensor_weighted_dens_real.at(1).at(i);  // TODO: remove
+
+    //std::cerr << scalar_partial_derivative_real.at(0).at(i) << " ";  // TODO: remove
+    //std::cerr << scalar_partial_derivative_real.at(1).at(i) << " ";  // TODO: remove
+    //std::cerr << scalar_partial_derivative_real.at(2).at(i) << " ";  // TODO: remove
+    //std::cerr << scalar_partial_derivative_real.at(3).at(i) << " ";  // TODO: remove
+    //std::cerr << vector_partial_derivative_real.at(0).at(i) << " ";  // TODO: remove
+    //std::cerr << vector_partial_derivative_real.at(1).at(i) << " ";  // TODO: remove
+    //std::cerr << tensor_partial_derivative_real.at(0).at(i) << " ";  // TODO: remove
+    //std::cerr << tensor_partial_derivative_real.at(1).at(i);
+
+    //std::cerr << functional_derivative->at(0).at(i) << " ";  // TODO: remove
+    //std::cerr << functional_derivative->at(1).at(i) << " ";  // TODO: remove
+    //std::cerr << functional_derivative->at(2).at(i) << " ";  // TODO: remove
+
+    //std::cerr << std::endl;
+  }
+
+  for (size_t i = 0; i < grid_count_fourier; ++i) {
+    //std::cerr << scalar_weights_four.at(0).at(0).at(i)[0] << " ";  // TODO: remove
+    //std::cerr << scalar_weights_four.at(0).at(1).at(i)[0] << " ";  // TODO: remove
+    //std::cerr << scalar_weights_four.at(0).at(2).at(i)[0] << " ";  // TODO: remove
+    //std::cerr << scalar_weights_four.at(0).at(3).at(i)[0] << " ";  // TODO: remove
+    //std::cerr << vector_weights_four.at(0).at(0).at(i)[0] << " ";  // TODO: remove
+    //std::cerr << vector_weights_four.at(0).at(1).at(i)[0] << " ";  // TODO: remove
+    //std::cerr << tensor_weights_four.at(0).at(0).at(i)[0] << " ";  // TODO: remove
+    //std::cerr << tensor_weights_four.at(0).at(1).at(i)[0] << " ";
+    //std::cerr << scalar_weights_four.at(0).at(0).at(i)[1] << " ";  // TODO: remove
+    //std::cerr << scalar_weights_four.at(0).at(1).at(i)[1] << " ";  // TODO: remove
+    //std::cerr << scalar_weights_four.at(0).at(2).at(i)[1] << " ";  // TODO: remove
+    //std::cerr << scalar_weights_four.at(0).at(3).at(i)[1] << " ";  // TODO: remove
+    //std::cerr << vector_weights_four.at(0).at(0).at(i)[1] << " ";  // TODO: remove
+    //std::cerr << vector_weights_four.at(0).at(1).at(i)[1] << " ";  // TODO: remove
+    //std::cerr << tensor_weights_four.at(0).at(0).at(i)[1] << " ";  // TODO: remove
+    //std::cerr << tensor_weights_four.at(0).at(1).at(i)[1] << " ";
+
+    //std::cerr << density_profiles_four.at(0).at(i)[0] << " ";  // TODO: remove
+    //std::cerr << density_profiles_four.at(0).at(i)[1];  // TODO: remove
+
+    //std::cerr << scalar_partial_derivative_four.at(0).at(i)[0] << " ";  // TODO: remove
+    //std::cerr << scalar_partial_derivative_four.at(1).at(i)[0] << " ";  // TODO: remove
+    //std::cerr << scalar_partial_derivative_four.at(2).at(i)[0] << " ";  // TODO: remove
+    //std::cerr << scalar_partial_derivative_four.at(3).at(i)[0] << " ";  // TODO: remove
+    //std::cerr << vector_partial_derivative_four.at(0).at(i)[0] << " ";  // TODO: remove
+    //std::cerr << vector_partial_derivative_four.at(1).at(i)[0] << " ";  // TODO: remove
+    //std::cerr << tensor_partial_derivative_four.at(0).at(i)[0] << " ";  // TODO: remove
+    //std::cerr << tensor_partial_derivative_four.at(1).at(i)[0] << " ";
+    //std::cerr << scalar_partial_derivative_four.at(0).at(i)[1] << " ";  // TODO: remove
+    //std::cerr << scalar_partial_derivative_four.at(1).at(i)[1] << " ";  // TODO: remove
+    //std::cerr << scalar_partial_derivative_four.at(2).at(i)[1] << " ";  // TODO: remove
+    //std::cerr << scalar_partial_derivative_four.at(3).at(i)[1] << " ";  // TODO: remove
+    //std::cerr << vector_partial_derivative_four.at(0).at(i)[1] << " ";  // TODO: remove
+    //std::cerr << vector_partial_derivative_four.at(1).at(i)[1] << " ";  // TODO: remove
+    //std::cerr << tensor_partial_derivative_four.at(0).at(i)[1] << " ";  // TODO: remove
+    //std::cerr << tensor_partial_derivative_four.at(1).at(i)[1] << " ";
+
+    //std::cerr << functional_derivative_four.at(0).at(i)[0] << " ";  // TODO: remove
+    //std::cerr << functional_derivative_four.at(0).at(i)[1] << " ";
+
+    //std::cerr << std::endl;
+  }
+  //exit(1);
+
+  // TODO TODO TODO
+  
   // Creating plans clears the input array hence we need to update it
   update_density_profiles();
-  std::cerr << "BB" << std::endl;  // TODO: remove
   // Forward Fourier transform of density profiles
   for (auto& plan : forward_plans) {
     fftw_execute(plan);
   }
-  std::cerr << "CC" << std::endl;  // TODO: remove
   // Normalize
   for(auto& profile_four : density_profiles_four) {  // every species
     profile_four *= dz;
   }
   // Convolution
   for (size_t i = 0; i != scalar_weighted_dens_four.size(); ++i) {
+    scalar_weighted_dens_four.at(i).zero();
     for (size_t j = 0; j != species_count; ++j) {
       scalar_weighted_dens_four.at(i) +=
-          density_profiles_four.at(j) * weights_four.at(j).at(i);
+          density_profiles_four.at(j) * scalar_weights_four.at(j).at(i);
     }
   }
   for (size_t i = 0; i != vector_weighted_dens_four.size(); ++i) {
+    vector_weighted_dens_four.at(i).zero();
     for (size_t j = 0; j != species_count; ++j) {
       vector_weighted_dens_four.at(i) +=
-          density_profiles_four.at(j) * weights_four.at(j).at(i);
+          (density_profiles_four.at(j) * vector_weights_four.at(j).at(i));
     }
   }
   for (size_t i = 0; i != tensor_weighted_dens_four.size(); ++i) {
+    tensor_weighted_dens_four.at(i).zero();
     for (size_t j = 0; j != species_count; ++j) {
       tensor_weighted_dens_four.at(i) +=
-          density_profiles_four.at(j) * weights_four.at(j).at(i);
+          density_profiles_four.at(j) * tensor_weights_four.at(j).at(i);
     }
   }
-  std::cerr << "DD" << std::endl;  // TODO: remove
   // Forward Fourier transform of density profiles
   for (auto& plan : backward_plans) {
     fftw_execute(plan);
   }
   // Normalize
-  for(auto& profile_four : scalar_weighted_dens_four) {  // every weighted dens
-    profile_four *= dkz / (2. * M_PI);
+  for(auto& profile_real : scalar_weighted_dens_real) {
+    profile_real *= dkz / (2. * M_PI);
   }
-  for(auto& profile_four : vector_weighted_dens_four) {  // every weighted dens
-    profile_four *= dkz / (2. * M_PI);
+  for(auto& profile_real : vector_weighted_dens_real) {
+    profile_real *= dkz / (2. * M_PI);
   }
-  for(auto& profile_four : tensor_weighted_dens_four) {  // every weighted dens
-    profile_four *= dkz / (2. * M_PI);
+  for(auto& profile_real : tensor_weighted_dens_real) {
+    profile_real *= dkz / (2. * M_PI);
   }
   // The convolution may have numerical at both ends of the array.
   // One way of avoiding this is by using an outer external potential
   // forcing the density profile to vanish (i.e. two planar walls).
   for (auto& plan : forward_plans) { fftw_destroy_plan(plan); }
   for (auto& plan : backward_plans) { fftw_destroy_plan(plan); }
-  std::cerr << "EE" << std::endl;  // TODO: remove
 }
 // _____________________________________________________________________________
 void FunctionalFMTPlanar::check_weighted_densities() {
@@ -629,25 +719,22 @@ void FunctionalFMTPlanar::calc_weighted_partial_derivatives(
   }
   // Convolution
   for (size_t i = 0; i < species_count; ++i) {
+    functional_derivative_four.at(i).zero();
     // Scalar
-    functional_derivative_four.at(i) += scalar_partial_derivative_four.at(0) *
-        weights_four.at(i).at(0);
-    functional_derivative_four.at(i) += scalar_partial_derivative_four.at(1) *
-        weights_four.at(i).at(1);
-    functional_derivative_four.at(i) += scalar_partial_derivative_four.at(2) *
-        weights_four.at(i).at(2);
-    functional_derivative_four.at(i) += scalar_partial_derivative_four.at(3) *
-        weights_four.at(i).at(3);
+    for (size_t j = 0; j < scalar_weights_four.size(); ++j) {
+      functional_derivative_four.at(i) += scalar_partial_derivative_four.at(j) *
+          scalar_weights_four.at(i).at(j);
+    }
     // Vector (hard coded minus, because of the assymetry of the vector weights)
-    functional_derivative_four.at(i) -= vector_partial_derivative_four.at(0) *
-        weights_four.at(i).at(4);
-    functional_derivative_four.at(i) -= vector_partial_derivative_four.at(1) *
-        weights_four.at(i).at(5);
+    for (size_t j = 0; j < vector_weights_four.size(); ++j) {
+      functional_derivative_four.at(i) -= vector_partial_derivative_four.at(j) *
+          vector_weights_four.at(i).at(j);
+    }
     // Tensor
-    functional_derivative_four.at(i) += tensor_partial_derivative_four.at(0) *
-        weights_four.at(i).at(6);
-    functional_derivative_four.at(i) += tensor_partial_derivative_four.at(1) *
-        weights_four.at(i).at(7);
+    for (size_t j = 0; j < vector_weights_four.size(); ++j) {
+      functional_derivative_four.at(i) += tensor_partial_derivative_four.at(j) *
+          tensor_weights_four.at(i).at(j);
+    }
   }
   // Back transform
   for (auto& plan : backward_plans) {

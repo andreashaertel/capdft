@@ -46,7 +46,7 @@ int main(int argc, char** args) {
    * step lies exactly between two bins.
    */
 // _____________________________________________________________________________
-  size_t grid_count = static_cast<size_t>(1e4+.5) + 1;  // equals 10,001
+  size_t grid_count = static_cast<size_t>(4e2+.5) + 1;  // equals 10,001
   double system_length = 10.01769616026711185309;  // in nm
   double bjerrum_length = 1.;  // in nm
   double temperature = 300.;  // in K
@@ -171,8 +171,8 @@ int main(int argc, char** args) {
   my_iterator.add_convergence_criterion<ConvergenceCriterionSteps>(2e3);
   my_iterator.add_convergence_criterion<ConvergenceCriterionMaxDev>(1.0e-4);
   my_iterator.add_convergence_criterion<ConvergenceCriterionNan>(0);
-  my_iterator.run_picard(1.5e-4);
-  //my_iterator.run_anderson(1.5e-4, 10);
+  my_iterator.run_picard(1e-1);
+  //my_iterator.run_anderson(1e-1, 10);
 // _____________________________________________________________________________
   /* All done!
    * Now we produce some output and view it in gnuplot.
@@ -183,23 +183,23 @@ int main(int argc, char** args) {
    * [M. Bültmann and A. Härtel 2022 J. Phys.: Condens. Matter 34 235101].
    */
 // _____________________________________________________________________________
-  //// Write density profile to file
-  //std::fstream out_stream;
-  //out_stream.open("spherical_profile.dat", std::ios::out);
-  //for (size_t i = 0; i < grid_count; ++i) {
-  //  r = dr * static_cast<double>(i+1);
-  //  out_stream << r << " ";
-  //  for (size_t j = 0; j < species_properties.size(); ++j) {
-  //    out_stream << density_profiles.at(j).at(i) << " ";
-  //  }
-  //  out_stream << std::endl;
-  //}
-  //out_stream.close();
-  //// Obtain grand potential of the system
-  //double energy;
-  //energy = my_fmt_functional.calc_energy();
-  //std::cout << "Excess free energy of FMT functional: ";
-  //std::cout << energy << std::endl;
+  // Write density profile to file
+  std::fstream out_stream;
+  out_stream.open("planar_profile.dat", std::ios::out);
+  for (size_t i = 0; i < grid_count; ++i) {
+    z = dz * static_cast<double>(i);
+    out_stream << z << " ";
+    for (size_t j = 0; j < species_properties.size(); ++j) {
+      out_stream << density_profiles.at(j).at(i) << " ";
+    }
+    out_stream << std::endl;
+  }
+  out_stream.close();
+  // Obtain grand potential of the system
+  double energy;
+  energy = my_fmt_functional.calc_energy();
+  std::cout << "Excess free energy per square nanometer of FMT functional: ";
+  std::cout << energy << std::endl;
   //energy = my_es_functional.calc_energy();
   //std::cout << "Excess free energy of mean-field electrostatic functional: ";
   //std::cout << energy << std::endl;
