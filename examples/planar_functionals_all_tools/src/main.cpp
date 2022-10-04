@@ -3,8 +3,8 @@
 /** \file examples/planar_functionals_all_tools/src/main.cpp
  *  \brief Main file of the example of the planar functionals.
  *  
- *  This main file contains examples to show how Functional in the planar
- *  geometry works classes work.
+ *  This main file contains examples to show how Functional classes in the
+ *  planar geometry work.
  */
 // _____________________________________________________________________________
 // Includes
@@ -97,9 +97,9 @@ int main(int argc, char** args) {
       species_properties, system_properties, affected_species_fmt);
   //// Create an ES functional object.
   //std::vector<size_t> affected_species_es{0, 2};  // selected species 0 and 2
-  ////FunctionalESMFSpherical my_es_functional(&density_profiles,
+  ////FunctionalESMFPlanar my_es_functional(&density_profiles,
   ////    species_properties, system_properties, affected_species_es);
-  //FunctionalESDeltaSpherical my_es_functional(&density_profiles,
+  //FunctionalESDeltaPlanar my_es_functional(&density_profiles,
   //    species_properties, system_properties, affected_species_es);
 // _____________________________________________________________________________
   // Picard iterations
