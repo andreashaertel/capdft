@@ -89,10 +89,10 @@ class DataFrame {
    *
    */
   std::string element_string(size_t i, std::streamsize stream_size) const;
-  /** \brief Function that returns the data array pointer.
+  /** \brief Function that returns the reference to the data array pointer.
    *
    */
-  T* array();
+  T*& array();
   /** \brief Function that sets all elements in the DataFrame object to
    *         a certain value.
    *
