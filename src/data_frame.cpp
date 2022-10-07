@@ -175,7 +175,7 @@ std::string DataFrame<3, fftw_complex>::element_string(
 }
 // _____________________________________________________________________________
 template <size_t dim, typename T>
-T* DataFrame<dim, T>::array() {
+T*& DataFrame<dim, T>::array() {
   return data;
 }
 // _____________________________________________________________________________

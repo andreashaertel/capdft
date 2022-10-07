@@ -12,24 +12,24 @@
 #include "convergence_criterion_steps.hpp"  // NOLINT
 #include "convergence_criterion_nan.hpp"  // NOLINT
 // _____________________________________________________________________________
-Iterator::Iterator(
-    std::vector<DataFrame<1, double>>* density_profiles,
-    const std::vector<DataFrame<1, double>>& exp_external_potentials,
-    const std::vector<Properties>& species_properties)
-  : density_profiles(density_profiles),
-    exp_external_potentials(&exp_external_potentials),
-    species_properties(&species_properties) {
-  size_t grid_count = density_profiles->at(0).size();
-  size_t species_count = density_profiles->size();
-  proposed_densities = std::vector(species_count,
-      DataFrame<1, double>(grid_count));
-  add_convergence_criterion<ConvergenceCriterionMaxDev>(1.0e-6);
-  add_convergence_criterion<ConvergenceCriterionSteps>(1e4);
-  add_convergence_criterion<ConvergenceCriterionNan>(0);
-}
-// _____________________________________________________________________________
 Iterator::~Iterator() {
   clear_convergence_criteria();
+  // Overwrite DataFrames that contain external pointers
+  for (auto& profile : density_profiles) {
+    profile.array() = NULL;
+  }
+  for (auto& potential : exp_external_potentials) {
+    potential.array() = NULL;
+  }
+}
+// _____________________________________________________________________________
+void Iterator::initialize_data_frames(size_t species_count, size_t grid_count) {
+  proposed_densities = std::vector(
+      species_count, DataFrame<1, double>(grid_count));
+  this->density_profiles = std::vector(
+      species_count, DataFrame<1, double>(grid_count));
+  this->exp_external_potentials = std::vector(
+      species_count, DataFrame<1, double>(grid_count));
 }
 // _____________________________________________________________________________
 void Iterator::add_excess_functional(Functional* functional) {
@@ -42,8 +42,8 @@ void Iterator::add_excess_functional(Functional* functional) {
   index = functional_derivatives.size() - 1;
   for (size_t i = 0; i < species_count; ++i) {
     bulk_derivatives.at(index).push_back(0.);
-    functional_derivatives.at(index).push_back(DataFrame<1, double>(
-        density_profiles->at(0).size()));
+    functional_derivatives.at(index).push_back(
+        DataFrame<1, double>(density_profiles.at(0).size()));
   }
 }
 // _____________________________________________________________________________
@@ -67,8 +67,6 @@ void Iterator::run_picard(double mixing) {
   for (size_t i = 0; i < excess_functionals.size(); ++i) {
     excess_functionals.at(i)->calc_bulk_derivative(&bulk_derivatives.at(i));
   }
-
-
   // Iterator loop
   while (!check_convergence_criteria()) {
     ++steps;
@@ -80,13 +78,13 @@ void Iterator::run_picard(double mixing) {
     for (size_t i = 0; i < species_count; ++i) {
       species_properties->at(i).get_property("bulk density", &bulk_density);
       // Calculate the right hand side of the update formula of cDFT.
-      proposed_densities.at(i) = bulk_density * exp_external_potentials->at(i);
+      proposed_densities.at(i) = bulk_density * exp_external_potentials.at(i);
       for (size_t j = 0; j < functional_derivatives.size(); ++j) {
         proposed_densities.at(i) *= exp(bulk_derivatives.at(j).at(i)) *
             exp(-1. * functional_derivatives.at(j).at(i));
       }
       // Mix the new solution with the old one
-      density_profiles->at(i) = density_profiles->at(i) * (1. - mixing) +
+      density_profiles.at(i) = density_profiles.at(i) * (1. - mixing) +
           mixing * proposed_densities.at(i);
     }
   }
@@ -120,17 +118,17 @@ void Iterator::run_anderson(double mixing, size_t memory) {
     for (size_t i = 0; i < species_count; ++i) {
       species_properties->at(i).get_property("bulk density", &bulk_density);
       // Calculate the right hand side of the update formula of cDFT.
-      proposed_densities.at(i) = bulk_density * exp_external_potentials->at(i);
+      proposed_densities.at(i) = bulk_density * exp_external_potentials.at(i);
       for (size_t j = 0; j < functional_derivatives.size(); ++j) {
         proposed_densities.at(i) *= exp(bulk_derivatives.at(j).at(i)) *
             exp(-1. * functional_derivatives.at(j).at(i));
         deviation_profiles.at(i) =
-            proposed_densities.at(i) - density_profiles->at(i);
+            proposed_densities.at(i) - density_profiles.at(i);
       }
     }
     // Append density profile, proposed density profile and deviation profile
     // to history
-    past_density_profiles.push_back(*(density_profiles));
+    past_density_profiles.push_back(density_profiles);
     past_proposed_densities.push_back(proposed_densities);
     past_density_deviations.push_back(deviation_profiles);
     if (past_density_profiles.size() > memory) {
@@ -144,11 +142,11 @@ void Iterator::run_anderson(double mixing, size_t memory) {
     alphas = shortest_linear_combination(scalar_products);
     // Update formula
     for (size_t i = 0; i < species_count; ++i) {
-      density_profiles->at(i).zero();
+      density_profiles.at(i).zero();
       for (size_t j = 0; j < past_density_profiles.size(); ++j) {
-        density_profiles->at(i) += (1. - mixing) * alphas.at(j) *
+        density_profiles.at(i) += (1. - mixing) * alphas.at(j) *
             past_density_profiles.at(j).at(i);
-        density_profiles->at(i) += mixing * alphas.at(j) *
+        density_profiles.at(i) += mixing * alphas.at(j) *
             past_proposed_densities.at(j).at(i);
       }
     }
@@ -179,6 +177,13 @@ void Iterator::clear_convergence_criteria() {
     delete(criterion);
   }
   convergence_criteria.clear();
+}
+// _____________________________________________________________________________
+void Iterator::add_standard_convergence_criteria() {
+  clear_convergence_criteria();
+  add_convergence_criterion<ConvergenceCriterionMaxDev>(1.0e-6);
+  add_convergence_criterion<ConvergenceCriterionSteps>(1e4);
+  add_convergence_criterion<ConvergenceCriterionNan>(0);
 }
 // _____________________________________________________________________________
 bool Iterator::check_convergence_criteria() {
