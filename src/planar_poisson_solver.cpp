@@ -13,15 +13,13 @@ PlanarPoissonSolver::PlanarPoissonSolver() {
   //
 }
 // _____________________________________________________________________________
-//PlanarPoissonSolver::PlanarPoissonSolver(
-//    size_t dim, double dr, double inner_distance
-//): dim(dim), dr(dr), inner_distance(inner_distance) {
-//  this->drdr = dr * dr;
-//  // Allocate memory for the matrix elements
-//  upper = new double[dim];
-//  diag = new double[dim];
-//  lower = new double[dim];
-//}
+PlanarPoissonSolver::PlanarPoissonSolver(size_t dim, double dz)
+  : dim(dim), dz(dz) {
+  // Allocate memory for the matrix elements
+  upper = new double[dim];
+  diag = new double[dim];
+  lower = new double[dim];
+}
 // _____________________________________________________________________________
 PlanarPoissonSolver::~PlanarPoissonSolver() {
   // Free memory
@@ -30,38 +28,38 @@ PlanarPoissonSolver::~PlanarPoissonSolver() {
   delete [] lower;
 }
 // _____________________________________________________________________________
-//void PlanarPoissonSolver::set_radial_laplacian(BoundaryFlag flag) {
-//  this->flag = flag;
-//  // Set boundary conditions
-//  switch (flag) {
-//    case NEUMANN_NEUMANN:
-//      this->shiftLeft = 0.5;
-//      this->shiftRight = 0.5;
-//      set_radial_laplacian_NN();
-//      break;
-//    case DIRICHLET_DIRICHLET:
-//      this->shiftLeft = 1.;
-//      this->shiftRight = 1.;
-//      set_radial_laplacian_DD();
-//      break;
-//    case NEUMANN_DIRICHLET:
-//      this->shiftLeft = 0.5;
-//      this->shiftRight = 1.;
-//      set_radial_laplacian_ND();
-//      break;
-//    case DIRICHLET_NEUMANN:
-//      this->shiftLeft = 1.;
-//      this->shiftRight = 0.5;
-//      set_radial_laplacian_DN();
-//      break;
-//    default:
-//      std::cerr << "set_radial_laplacian(): \"ERROR: Invalid flag!\"";
-//      std::cerr << std::endl;
-//      exit(1);
-//  }
-//}
-//// _____________________________________________________________________________
-//void PlanarPoissonSolver::set_radial_laplacian() {
+void PlanarPoissonSolver::set_laplacian(BoundaryFlag flag) {
+  this->flag = flag;
+  // Set boundary conditions
+  switch (flag) {
+    case NEUMANN_NEUMANN:
+      //this->shiftLeft = 0.5;
+      //this->shiftRight = 0.5;
+      set_laplacian_NN();
+      break;
+    case DIRICHLET_DIRICHLET:
+      //this->shiftLeft = 1.;
+      //this->shiftRight = 1.;
+      set_laplacian_DD();
+      break;
+    case NEUMANN_DIRICHLET:
+      //this->shiftLeft = 0.5;
+      //this->shiftRight = 1.;
+      set_laplacian_ND();
+      break;
+    case DIRICHLET_NEUMANN:
+      //this->shiftLeft = 1.;
+      //this->shiftRight = 0.5;
+      set_laplacian_DN();
+      break;
+    default:
+      std::cerr << "set_laplacian(): \"ERROR: Invalid flag!\"";
+      std::cerr << std::endl;
+      exit(1);
+  }
+}
+// _____________________________________________________________________________
+void PlanarPoissonSolver::set_laplacian() {
 //  double r = 0.;
 //  // Just set the matrix elements without any boundary conditions
 //  // First the regular second derivative
@@ -77,9 +75,9 @@ PlanarPoissonSolver::~PlanarPoissonSolver() {
 //    diag[i] += 0.;
 //    lower[i] += -1. / (r * dr);
 //  }
-//}
-//// _____________________________________________________________________________
-//void PlanarPoissonSolver::set_radial_laplacian_NN() {
+}
+// _____________________________________________________________________________
+void PlanarPoissonSolver::set_laplacian_NN() {
 //  double r = 0.;
 //  // Set Laplacian without boundary conditions
 //  set_radial_laplacian();
@@ -98,18 +96,18 @@ PlanarPoissonSolver::~PlanarPoissonSolver() {
 //  // These matrix element do not exist.
 //  lower[0] = 0.;
 //  upper[dim-1] = 0.;
-//}
-//// _____________________________________________________________________________
-//void PlanarPoissonSolver::set_radial_laplacian_DD() {
+}
+// _____________________________________________________________________________
+void PlanarPoissonSolver::set_laplacian_DD() {
 //  // Set Laplacian without boundary conditions
 //  set_radial_laplacian();
 //  // The standard Laplacian corresponds to the DD case.
 //  // These matrix element do not exist.
 //  lower[0] = 0.;
 //  upper[dim-1] = 0.;
-//}
-//// _____________________________________________________________________________
-//void PlanarPoissonSolver::set_radial_laplacian_ND() {
+}
+// _____________________________________________________________________________
+void PlanarPoissonSolver::set_laplacian_ND() {
 //  double r = 0.;
 //  // Set Laplacian without boundary conditions
 //  set_radial_laplacian();
@@ -123,9 +121,9 @@ PlanarPoissonSolver::~PlanarPoissonSolver() {
 //  // These matrix element do not exist.
 //  lower[0] = 0.;
 //  upper[dim-1] = 0.;
-//}
-//// _____________________________________________________________________________
-//void PlanarPoissonSolver::set_radial_laplacian_DN() {
+}
+// _____________________________________________________________________________
+void PlanarPoissonSolver::set_laplacian_DN() {
 //  double r = 0.;
 //  // Set Laplacian without boundary conditions
 //  set_radial_laplacian();
@@ -139,8 +137,8 @@ PlanarPoissonSolver::~PlanarPoissonSolver() {
 //  // These matrix element do not exist.
 //  lower[0] = 0.;
 //  upper[dim-1] = 0.;
-//}
-//// _____________________________________________________________________________
+}
+// _____________________________________________________________________________
 //void PlanarPoissonSolver::solve(
 //    double leftBoundaryValue, double rightBoundaryValue, double* rhs,
 //    double* solution

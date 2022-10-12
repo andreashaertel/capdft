@@ -27,7 +27,7 @@ REPOFILE += functional_es_mf_planar
 REPOFILE += integration
 REPOFILE += iterator
 REPOFILE += properties
-#REPOFILE += planar_poisson_solver
+REPOFILE += planar_poisson_solver
 # Get host name ################################################################
 HOST = $(shell hostname)
 # Offsets for binaries and objects #############################################

@@ -35,13 +35,13 @@ class PlanarPoissonSolver {
    * Passes the size "dim" of the array to be solved, the grid spacing "dr" of
    * the array and the left boundary condition position "inner_distance".
    */
-  PlanarPoissonSolver(size_t dim, double dr, double inner_distance);
+  PlanarPoissonSolver(size_t dim, double dz);
   /** \brief Destructor
    */
   ~PlanarPoissonSolver();
-  /** \brief Set the radial Laplace matrix with the chosen boundary conditions
+  /** \brief Set the Laplace matrix with the chosen boundary conditions
    */
-  void set_radial_laplacian(BoundaryFlag flag);
+  void set_laplacian(BoundaryFlag flag);
   /** \brief Solve the linear equation system: the boundary must be specified
    *  
    *  For example the DIRICHLET_NEUMANN case expects a left boundary value
@@ -61,11 +61,7 @@ class PlanarPoissonSolver {
   size_t dim;
   /** Radial bin size (not needed in carthesian case)
    */
-  double dr;
-  double drdr;
-  /** \brief The innermost radial position
-   */
-  double inner_distance;
+  double dz;
   /** \brief Holds the specified boundary conditions
    */
   BoundaryFlag flag;
@@ -90,13 +86,13 @@ class PlanarPoissonSolver {
    *  For DD the boundaries should be a full grid point away from the start/end
    *  point (x_{Wall}=x_{-1}|x_0|x_1|...|x_N|x_{N+1}=x_Wall).
    */
-  void set_radial_laplacian_NN();
-  void set_radial_laplacian_DD();
-  void set_radial_laplacian_ND();
-  void set_radial_laplacian_DN();
+  void set_laplacian_NN();
+  void set_laplacian_DD();
+  void set_laplacian_ND();
+  void set_laplacian_DN();
   /** \brief Set the Laplace matrix without boundary conditions
    */
-  void set_radial_laplacian();
+  void set_laplacian();
   /** \brief Add the boundary values to the right-hand side
    */
   void set_boundary_values_laplace_radial(double leftBoundaryValue,

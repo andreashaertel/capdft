@@ -76,9 +76,6 @@ class FunctionalESMFPlanar : public Functional {
   /** \brief Bin width
    */
   double dz;
-  /** \brief Bin width in Fourier space
-   */
-  double dkz;
   /** \brief Number of species
    */
   size_t species_count;
