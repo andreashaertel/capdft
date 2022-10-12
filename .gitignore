@@ -1,8 +1,4 @@
 # SPDX-FileCopyrightText: 2021 Moritz Bültmann <moritz.bueltmann@physik.uni-freiburg.de>
-<<<<<<< HEAD
-=======
-#
->>>>>>> 7277f8181f7df11e7866e0736c890ae3e0b65b8a
 # SPDX-License-Identifier: CC0-1.0
 *.swp
 *.vim
@@ -11,14 +7,6 @@
 *.systeminfo
 *.a
 .nfs*
-<<<<<<< HEAD
 bin
 obj
 include
-=======
-calc_rdf
-bin
-obj
-include
-spherical_profile.dat
->>>>>>> 7277f8181f7df11e7866e0736c890ae3e0b65b8a

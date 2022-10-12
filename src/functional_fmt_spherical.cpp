@@ -387,7 +387,6 @@ void FunctionalFMTSpherical::calc_weighted_densities() {
     }
   }
   // Convolution of density profiles with weights
-<<<<<<< HEAD
   for (auto& weighted_density : scalar_weighted_dens_four) {
     weighted_density.zero();
   }
@@ -396,16 +395,6 @@ void FunctionalFMTSpherical::calc_weighted_densities() {
   }
   for (auto& weighted_density : tensor_weighted_dens_four) {
     weighted_density.zero();
-=======
-  for (size_t i = 0; i < scalar_weighted_dens_four.size(); ++i) {
-    scalar_weighted_dens_four.at(i).set_all_elements_to(0.);
-  }
-  for (size_t i = 0; i < vector_weighted_dens_four.size(); ++i) {
-    vector_weighted_dens_four.at(i).set_all_elements_to(0.);
-  }
-  for (size_t i = 0; i < tensor_weighted_dens_four.size(); ++i) {
-    tensor_weighted_dens_four.at(i).set_all_elements_to(0.);
->>>>>>> 7277f8181f7df11e7866e0736c890ae3e0b65b8a
   }
   for (size_t i = 1; i != grid_count+1; ++i) {
     kr = dkr * static_cast<double>(i);
@@ -891,11 +880,7 @@ double FunctionalFMTSpherical::calc_local_energy_density(size_t position) {
   double n0, n1, n2, n3;  // scalar weighted densities
   double n3n3, n3n3n3, oneMn3, logOneMn3, oneMn3squared;  // auxiliary variables
   double n2n2, n2n2n2;  // auxiliary variables
-<<<<<<< HEAD
   double trace3;  // auxiliary variables
-=======
-  double trace2, trace3;  // auxiliary variables
->>>>>>> 7277f8181f7df11e7866e0736c890ae3e0b65b8a
   double nvec1, nvec2;  // vectorial weighted densities (only z-comp. is non-0)
   double ntensorm2first;  // tensorial weighted densities (tensor is diagonal)
   double ntensorm2second;
@@ -918,24 +903,13 @@ double FunctionalFMTSpherical::calc_local_energy_density(size_t position) {
   oneMn3squared = oneMn3 * oneMn3;
   n2n2 = n2 * n2;
   n2n2n2 = n2 * n2n2;
-<<<<<<< HEAD
-=======
-  trace2 = ntensorm2first * ntensorm2first + ntensorm2second * ntensorm2second +
-      ntensorm2third * ntensorm2third;
->>>>>>> 7277f8181f7df11e7866e0736c890ae3e0b65b8a
   trace3 = ntensorm2first * ntensorm2first * ntensorm2first +
       ntensorm2second * ntensorm2second * ntensorm2second +
       ntensorm2third * ntensorm2third * ntensorm2third;
   // Calculate factors in the energy density terms
-<<<<<<< HEAD
   if (n3 < sqrt(std::numeric_limits<double>::epsilon())) {
     phi2 = 1. + .5 * n3 + .3 * n3n3 + .2 * n3n3n3;  // + O(n^4)
     phi3 = 1. - .125 * n3 - .05 * n3n3 - .025 * n3n3n3;  // + O(n^4)
-=======
-  if (n3 < 1e-5) {  // avoiding logarithm of very small numbers
-    phi2 = 1. + .5 * n3 + .3 * n3n3 + .2 * n3n3n3;  // +O(n^4)
-    phi3 = 1. - .125 * n3 - .05 * n3n3 - .025 * n3n3n3;  // +O(n^4)
->>>>>>> 7277f8181f7df11e7866e0736c890ae3e0b65b8a
   } else {
     phi2 = (6. * n3 - 3. * n3n3 + 6. * oneMn3 * logOneMn3) / n3n3n3;
     phi3 = (6. * n3 - 9. * n3n3 + 6. * n3n3n3 + 6. * oneMn3squared * logOneMn3)/
@@ -947,12 +921,7 @@ double FunctionalFMTSpherical::calc_local_energy_density(size_t position) {
   Phi1 = -n0 * logOneMn3;
   Phi2 = phi2_num *  (n1 * n2 - nvec1 * nvec2) / oneMn3;
   Phi3 = phi3_num * (n2n2n2 - 3. * n2 * nvec2 * nvec2 + 4.5 * (
-<<<<<<< HEAD
       nvec2 * ntensorm2third * nvec2 - trace3)) / (24. * M_PI * oneMn3squared);
-=======
-      n2n2 * ntensorm2third - n2 * nvec2 * nvec2 - trace3 + n2 * trace2)) /
-      (24. * M_PI * oneMn3squared);
->>>>>>> 7277f8181f7df11e7866e0736c890ae3e0b65b8a
   return Phi1 + Phi2 + Phi3;
 }
 // _____________________________________________________________________________
