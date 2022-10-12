@@ -8,7 +8,10 @@
 #include <fstream>
 #include <iostream>
 #include "data_frame.hpp"  // NOLINT
+<<<<<<< HEAD
 #include "integration.hpp"  // NOLINT
+=======
+>>>>>>> 7277f8181f7df11e7866e0736c890ae3e0b65b8a
 // _____________________________________________________________________________
 FunctionalFMTCartesian::FunctionalFMTCartesian() {
   //
@@ -152,6 +155,7 @@ void FunctionalFMTCartesian::initialize_all_data_frames() {
     tensor_weighted_dens_four.push_back(
         DataFrame<3, fftw_complex>(grid_counts_four));
   }
+<<<<<<< HEAD
   // Initialize partial derivatives
   for (size_t i = 0; i < 4; ++i) {
     scalar_partial_derivative_real.push_back(DataFrame<3, double>(grid_counts));
@@ -171,6 +175,27 @@ void FunctionalFMTCartesian::initialize_all_data_frames() {
     functional_derivative_four.push_back(
         DataFrame<3, fftw_complex>(grid_counts_four));
   }
+=======
+  //// Initialize partial derivatives
+  //for (size_t i = 0; i < 4; ++i) {
+  //  scalar_partial_derivative_real.push_back(DataFrame<3, double>(grid_counts));
+  //  scalar_partial_derivative_four.push_back(
+  //      DataFrame<3, fftw_complex>(grid_counts_four));
+  //}
+  //for (size_t i = 0; i < 2; ++i) {
+  //  vector_partial_derivative_real.push_back(DataFrame<3, double>(grid_counts));
+  //  tensor_partial_derivative_real.push_back(DataFrame<3, double>(grid_counts));
+  //  vector_partial_derivative_four.push_back(
+  //      DataFrame<3, fftw_complex>(grid_counts_four));
+  //  tensor_partial_derivative_four.push_back(
+  //      DataFrame<3, fftw_complex>(grid_counts_four));
+  //}
+  //// Initialize internal functional derivatives (Fourier transform)
+  //for (size_t i = 0; i < species_count; ++i) {
+  //  functional_derivative_four.push_back(
+  //      DataFrame<3, fftw_complex>(grid_counts_four));
+  //}
+>>>>>>> 7277f8181f7df11e7866e0736c890ae3e0b65b8a
 }
 // _____________________________________________________________________________
 void FunctionalFMTCartesian::update_density_profiles() {
@@ -320,6 +345,7 @@ void FunctionalFMTCartesian::calc_derivative(
   // From the weighted densities calculate the partial derivatives of the
   // excess free energy
   calc_partial_derivatives();
+<<<<<<< HEAD
   // Calculate the weighted partial derivatives
   calc_weighted_partial_derivatives(functional_derivative);
 }
@@ -388,10 +414,81 @@ void FunctionalFMTCartesian::calc_bulk_derivative(
         diameter / 2.0;
     bulk_derivative->at(*it) += scalar_partial_derivative_real.at(3).at(0);
   }
+=======
+  //// Calculate the weighted partial derivatives
+  //calc_weighted_partial_derivatives(functional_derivative);
+}
+// _____________________________________________________________________________
+//void FunctionalFMTCartesian::calc_derivative_warnings(
+//    std::vector<DataFrame<1, double>>* functional_derivative) {
+//  // Check if the given DataFrame has correct array length
+//  for (auto it = affected_species.begin(); it != affected_species.end(); ++it) {
+//    if (functional_derivative->at(*it).size() != grid_count) {
+//      std::cerr << "FunctionalFMTCartesian::calc_derivative(): \"";
+//      std::cerr << "Error: Supplied DataFrame has incorrect array size.\"";
+//      std::cerr << std::endl;
+//      exit(1);
+//    }
+//  }
+//  // Calculate the weighted densities
+//  calc_weighted_densities();
+//  // Check whether there are unphysical values in the  weighted densities
+//  check_weighted_densities();
+//  // From the weighted densities calculate the partial derivatives of the
+//  // excess free energy
+//  calc_partial_derivatives();
+//  // Calculate the weighted partial derivatives
+//  calc_weighted_partial_derivatives(functional_derivative);
+//}
+// _____________________________________________________________________________
+void FunctionalFMTCartesian::calc_bulk_derivative(
+    std::vector<double>* bulk_derivative) {
+  //// Auxiliary variables
+  //double diameter{0.}, diameter2{0.}, diameter3{0.};
+  //// Calculate the fluid weighted densities and save them to the first position
+  //for (auto& weighted_density : scalar_weighted_dens_real) {
+  //  weighted_density.at(0) = 0.;
+  //}
+  //for (size_t i = 0; i != species_count; ++i) {
+  //  // Define auxiliary values
+  //  diameter = diameters.at(i);
+  //  diameter2 = diameter * diameter;
+  //  diameter3 = diameter2 * diameter;
+  //  // All non-scalar weighted densities are 0 the others are obviously constant
+  //  scalar_weighted_dens_real.at(0).at(0) +=
+  //      bulk_densities.at(i) * diameter3 * M_PI / 6.0;
+  //  scalar_weighted_dens_real.at(1).at(0) +=
+  //      bulk_densities.at(i) * diameter2 * M_PI;
+  //  scalar_weighted_dens_real.at(2).at(0) +=
+  //      bulk_densities.at(i) * diameter / 2.0;
+  //  scalar_weighted_dens_real.at(3).at(0) += bulk_densities.at(i);
+  //}
+  //// Evaluate the partial derivatives at the first position
+  //calc_local_partial_derivatives(0);
+  //std::fill(bulk_derivative->begin(), bulk_derivative->end(), 0.);
+  //size_t spec_i{0};
+  //for (auto it = affected_species.begin(); it != affected_species.end(); ++it) {
+  //  spec_i = it - affected_species.begin();
+  //  // Define auxiliary values
+  //  diameter = diameters.at(spec_i);
+  //  diameter2 = diameter * diameter;
+  //  diameter3 = diameter2 * diameter;
+  //  // Calculate the derivatives of the excess free energy functional w.r.t. the
+  //  // weighted densities.
+  //  bulk_derivative->at(*it) = scalar_partial_derivative_real.at(0).at(0) *
+  //      diameter3 * M_PI / 6.0;
+  //  bulk_derivative->at(*it) += scalar_partial_derivative_real.at(1).at(0) *
+  //      diameter2 * M_PI;
+  //  bulk_derivative->at(*it) += scalar_partial_derivative_real.at(2).at(0) *
+  //      diameter / 2.0;
+  //  bulk_derivative->at(*it) += scalar_partial_derivative_real.at(3).at(0);
+  //}
+>>>>>>> 7277f8181f7df11e7866e0736c890ae3e0b65b8a
 }
 // _____________________________________________________________________________
 double FunctionalFMTCartesian::calc_energy() {
   double integral{0.};
+<<<<<<< HEAD
   DataFrame<3, double> free_energy_density(grid_counts);
   // Calculate the weighted densities for the current density profile
   calc_weighted_densities();
@@ -401,6 +498,17 @@ double FunctionalFMTCartesian::calc_energy() {
     free_energy_density.at(i) = calc_local_energy_density(i);
   }
   integral = integration_3d_closed(free_energy_density, bin_sizes);
+=======
+  //DataFrame<1, double> free_energy_density(grid_count);
+  //// Calculate the weighted densities for the current density profile
+  //calc_weighted_densities();
+  //check_weighted_densities();
+ ///// Store free energy density
+  //for (size_t i = 0; i < grid_count; ++i) {
+  //  free_energy_density.at(i) = calc_local_energy_density(i);
+  //}
+  //integral = integration(free_energy_density.array(), grid_count, dz);
+>>>>>>> 7277f8181f7df11e7866e0736c890ae3e0b65b8a
   return integral;
 }
 // _____________________________________________________________________________
@@ -572,23 +680,36 @@ void FunctionalFMTCartesian::calc_local_partial_derivatives(size_t i) {
   double nvec1z{vector_weighted_dens_real.at(5).at(i)};
   double nvec1nvec2{nvec1x * nvec2x + nvec1y * nvec2y + nvec1z * nvec2z};
   double nvec2nvec2{nvec2x * nvec2x + nvec2y * nvec2y + nvec2z * nvec2z};
+<<<<<<< HEAD
   // Tensor weighted densities (symmetric)
+=======
+  // Tensor: diagonal, 3 radial components
+>>>>>>> 7277f8181f7df11e7866e0736c890ae3e0b65b8a
   double ntensorxx{tensor_weighted_dens_real.at(0).at(i)};
   double ntensorxy{tensor_weighted_dens_real.at(1).at(i)};
   double ntensorxz{tensor_weighted_dens_real.at(2).at(i)};
   double ntensoryy{tensor_weighted_dens_real.at(3).at(i)};
   double ntensoryz{tensor_weighted_dens_real.at(4).at(i)};
   double ntensorzz{tensor_weighted_dens_real.at(5).at(i)};
+<<<<<<< HEAD
   double nvec2ntensornvec2 =  // nvec2 * ntensor * nvec2
       nvec2x * nvec2x * ntensorxx + nvec2y * nvec2y * ntensoryy +
       nvec2z * nvec2z * ntensorzz + 2. * nvec2x * nvec2y * ntensorxy +
       2. * nvec2x * nvec2z * ntensorxz + 2. * nvec2y * nvec2z * ntensoryz;
   double trace3 =  // Tr(ntensor * ntensor * ntensor)
+=======
+  double nvec2ntensornvec2 =
+      nvec2x * nvec2x * ntensorxx + nvec2y * nvec2y * ntensoryy +
+      nvec2z * nvec2z * ntensorzz + 2. * nvec2x * nvec2y * ntensorxy +
+      2. * nvec2x * nvec2z * ntensorxz + 2. * nvec2y * nvec2z * ntensoryz;
+  double trace3 =
+>>>>>>> 7277f8181f7df11e7866e0736c890ae3e0b65b8a
       pow(ntensorxx, 3) + pow(ntensoryy, 3) + pow(ntensorzz, 3) +
       3. * pow(ntensorxy, 2) * ntensorxx + 3. * pow(ntensorxy, 2) * ntensoryy +
       3. * pow(ntensorxz, 2) * ntensorxx + 3. * pow(ntensorxz, 2) * ntensorzz +
       3. * pow(ntensoryz, 2) * ntensoryy + 3. * pow(ntensoryz, 2) * ntensorzz +
       6. * ntensorxy * ntensorxz * ntensoryz;
+<<<<<<< HEAD
   double ntensornvec2x =  // ntensor * nvec2
       ntensorxx * nvec2x + ntensorxy * nvec2y + ntensorxz * nvec2z;
   double ntensornvec2y =
@@ -608,6 +729,8 @@ void FunctionalFMTCartesian::calc_local_partial_derivatives(size_t i) {
       ntensorxy * ntensorxz + ntensoryy * ntensoryz + ntensoryz * ntensorzz;
   double ntensorntensorzz =
       pow(ntensorxz, 2) + pow(ntensoryz, 2) + pow(ntensorzz, 2);
+=======
+>>>>>>> 7277f8181f7df11e7866e0736c890ae3e0b65b8a
   // Auxiliary variables \phi^{num}_2 and \phi^{num}_3 (B.18)-(B.21)
   double phi2, phi3;
   // Auxiliary variables \partial\phi^{num}_j/partial n_3 (B.30)-(B.33)
@@ -623,8 +746,23 @@ void FunctionalFMTCartesian::calc_local_partial_derivatives(size_t i) {
   double dPhi3dntensorxy, dPhi3dntensorxz, dPhi3dntensoryz;
   // Auxiliary constants
   double oneO24pi{1. / (24. * M_PI)};
+<<<<<<< HEAD
   // Prefactors that depend on n3. They contain logarithm terms, which need to
   // be approximated (Taylor) in certain situations.
+=======
+  // Calculate auxiliary weight functions ("M"=minus, "O"=over)
+  //nvec2 = vector_weighted_dens_real.at(0).at(i);  // nvec2
+  //nvec2nvec2 = nvec2 * nvec2;
+  //nvec1 = vector_weighted_dens_real.at(1).at(i);  // nvec1
+  //ntensorm2first = tensor_weighted_dens_real.at(0).at(i);  // tensor
+  //ntensorm2second = ntensorm2first;
+  //ntensorm2third = tensor_weighted_dens_real.at(1).at(i);  // tensor
+  //trace3 = ntensorm2first * ntensorm2first * ntensorm2first +
+  //    ntensorm2second * ntensorm2second * ntensorm2second  +
+  //    ntensorm2third * ntensorm2third * ntensorm2third;
+
+  // If argument of log is close to one, use Taylor series, because of 1/n3.
+>>>>>>> 7277f8181f7df11e7866e0736c890ae3e0b65b8a
   if (n3 >= sqrt(std::numeric_limits<double>::epsilon())) {
     phi2 = (5./3.) + (2./3.) * (oneMn3*oneOn3) * log(oneMn3) - (n3/3.);
     phi3 = 2. - (2./3.) *
@@ -663,6 +801,7 @@ void FunctionalFMTCartesian::calc_local_partial_derivatives(size_t i) {
       (n2n2n2 - 3. * n2 * nvec2nvec2 +
       4.5 * (nvec2ntensornvec2 - trace3)) * oneO24pi * oneOoneMn3 *
       oneOoneMn3;
+<<<<<<< HEAD
   dPhi3dnvec2x = phi3 * (9. * ntensornvec2x - 6. * n2 * nvec2x) *
       oneO24pi * oneOoneMn3 * oneOoneMn3;
   dPhi3dnvec2y = phi3 * (9. * ntensornvec2y - 6. * n2 * nvec2y) *
@@ -867,3 +1006,198 @@ double FunctionalFMTCartesian::calc_local_energy_density(size_t i) {
 // _____________________________________________________________________________
 // _____________________________________________________________________________
 // _____________________________________________________________________________
+=======
+  // TODO TODO TODO
+  dPhi3dnvec2x = phi3 * (9. * ntensorm2third * nvec2 - 6. * n2 * nvec2x) *
+      oneO24pi * oneOoneMn3 * oneOoneMn3;  // times direction vector
+  dPhi3dnvec2y = phi3 * (9. * ntensorm2third * nvec2 - 6. * n2 * nvec2y) *
+      oneO24pi * oneOoneMn3 * oneOoneMn3;  // times direction vector
+  dPhi3dnvec2z = phi3 * (9. * ntensorm2third * nvec2 - 6. * n2 * nvec2z) *
+      oneO24pi * oneOoneMn3 * oneOoneMn3;  // times direction vector
+  // TODO TODO TODO
+  //dPhi3dnmat2first = 4.5 * phi3 * (-3. * ntensorm2first * ntensorm2first) *
+  //    oneO24pi * oneOoneMn3 * oneOoneMn3;  // times direction tensor
+  //dPhi3dnmat2third = 4.5 * phi3 *
+  //    (nvec2nvec2 - 3. * ntensorm2third * ntensorm2third) *
+  //    oneO24pi * oneOoneMn3 * oneOoneMn3;  // times direction tensor
+  //// Sum partial derivatives \sum_{i=1}^3\partial\Phi_i/\partial n_k
+  //// Scalar n3
+  //scalar_partial_derivative_real.at(0).at(i) = dPhi1dn3 + dPhi2dn3 + dPhi3dn3;
+  //// Scalar n2
+  //scalar_partial_derivative_real.at(1).at(i) = dPhi2dn2 + dPhi3dn2;
+  //// Scalar n1
+  //scalar_partial_derivative_real.at(2).at(i) = dPhi2dn1;
+  //// Scalar n0
+  //scalar_partial_derivative_real.at(3).at(i) = dPhi1dn0;
+  //// Vector n2
+  //vector_partial_derivative_real.at(0).at(i) = dPhi2dnvec2 + dPhi3dnvec2;
+  //// Vector n1
+  //vector_partial_derivative_real.at(1).at(i) = dPhi2dnvec1;
+  //// Tensor nm2 (first and second diagonal element are the same)
+  //tensor_partial_derivative_real.at(0).at(i) = dPhi3dnmat2first;
+  //tensor_partial_derivative_real.at(1).at(i) = dPhi3dnmat2third;
+}
+// _____________________________________________________________________________
+//void FunctionalFMTCartesian::calc_weighted_partial_derivatives(
+//    std::vector<DataFrame<1, double>>* functional_derivative) {
+//  size_t spec_i{0};
+//  // TODO(Moritz): speed anhancement by saving transforms
+//  std::vector<fftw_plan> forward_plans;
+//  std::vector<fftw_plan> backward_plans;
+//  // Specify the plans
+//  for (size_t i = 0; i != scalar_partial_derivative_real.size(); ++i) {
+//    forward_plans.push_back(
+//        fftw_plan_dft_r2c_1d(grid_count,
+//            scalar_partial_derivative_real.at(i).array(),
+//            scalar_partial_derivative_four.at(i).array(),
+//            flags_keep));
+//  }
+//  for (size_t i = 0; i != vector_partial_derivative_real.size(); ++i) {
+//    forward_plans.push_back(
+//        fftw_plan_dft_r2c_1d(grid_count,
+//            vector_partial_derivative_real.at(i).array(),
+//            vector_partial_derivative_four.at(i).array(),
+//            flags_keep));
+//  }
+//  for (size_t i = 0; i != tensor_partial_derivative_real.size(); ++i) {
+//    forward_plans.push_back(
+//        fftw_plan_dft_r2c_1d(grid_count,
+//            tensor_partial_derivative_real.at(i).array(),
+//            tensor_partial_derivative_four.at(i).array(),
+//            flags_keep));
+//  }
+//  for (auto it = affected_species.begin(); it != affected_species.end(); ++it) {
+//    spec_i = it - affected_species.begin();  // internal species number
+//    backward_plans.push_back(
+//        fftw_plan_dft_c2r_1d(grid_count,
+//            functional_derivative_four.at(spec_i).array(),
+//            functional_derivative->at(*it).array(),
+//            flags_destroy));
+//  }
+//  // Transform the partial derivatives into Fourier space.
+//  for (auto& plan : forward_plans) {
+//    fftw_execute(plan);
+//  }
+//  // Normalize
+//  for (auto& partial_derivative : scalar_partial_derivative_four) {
+//      partial_derivative *= dz;
+//  }
+//  for (auto& partial_derivative : vector_partial_derivative_four) {
+//      partial_derivative *= dz;
+//  }
+//  for (auto& partial_derivative : tensor_partial_derivative_four) {
+//      partial_derivative *= dz;
+//  }
+//  // Convolution
+//  for (size_t i = 0; i < species_count; ++i) {
+//    functional_derivative_four.at(i).zero();
+//    // Scalar
+//    for (size_t j = 0; j < scalar_weights_four.size(); ++j) {
+//      functional_derivative_four.at(i) += scalar_partial_derivative_four.at(j) *
+//          scalar_weights_four.at(i).at(j);
+//    }
+//    // Vector (hard coded minus, because of the assymetry of the vector weights)
+//    for (size_t j = 0; j < vector_weights_four.size(); ++j) {
+//      functional_derivative_four.at(i) -= vector_partial_derivative_four.at(j) *
+//          vector_weights_four.at(i).at(j);
+//    }
+//    // Tensor
+//    for (size_t j = 0; j < vector_weights_four.size(); ++j) {
+//      functional_derivative_four.at(i) += tensor_partial_derivative_four.at(j) *
+//          tensor_weights_four.at(i).at(j);
+//    }
+//  }
+//  // Back transform
+//  for (auto& plan : backward_plans) {
+//    fftw_execute(plan);
+//  }
+//  // Normalize
+//  for (auto it = affected_species.begin(); it != affected_species.end(); ++it) {
+//    functional_derivative->at(*it) *= dkz / (2. * M_PI);
+//  }
+//  for (auto& plan : forward_plans) { fftw_destroy_plan(plan); }
+//  for (auto& plan : backward_plans) { fftw_destroy_plan(plan); }
+//}
+//// _____________________________________________________________________________
+//double FunctionalFMTCartesian::calc_local_energy_density(size_t position) {
+//  // Define a lot of dummy variables
+//  double Phi1, Phi2, Phi3;  // energy density terms
+//  double phi2, phi3;  // factors in the energy density terms
+//  double phi2_num, phi3_num;  // factors in the energy density terms
+//  double n0, n1, n2, n3;  // scalar weighted densities
+//  double n3n3, n3n3n3, oneMn3, logOneMn3, oneMn3squared;  // auxiliary variables
+//  double n2n2, n2n2n2;  // auxiliary variables
+//  double trace2, trace3;  // auxiliary variables
+//  double nvec1, nvec2;  // vectorial weighted densities (only z-comp. is non-0)
+//  double ntensorm2first;  // tensorial weighted densities (tensor is diagonal)
+//  double ntensorm2second;
+//  double ntensorm2third;
+//  // Assign values to the weighted densities
+//  n3 = scalar_weighted_dens_real.at(0).at(position);
+//  n2 = scalar_weighted_dens_real.at(1).at(position);
+//  n1 = scalar_weighted_dens_real.at(2).at(position);
+//  n0 = scalar_weighted_dens_real.at(3).at(position);
+//  nvec2 = vector_weighted_dens_real.at(0).at(position);
+//  nvec1 = vector_weighted_dens_real.at(1).at(position);
+//  ntensorm2first = tensor_weighted_dens_real.at(0).at(position);
+//  ntensorm2second = tensor_weighted_dens_real.at(0).at(position);
+//  ntensorm2third = tensor_weighted_dens_real.at(1).at(position);
+//  // Calculate auxiliary variables
+//  n3n3 = n3 * n3;
+//  n3n3n3 = n3 * n3 * n3;
+//  oneMn3 = 1. - n3;
+//  logOneMn3 = log(oneMn3);
+//  oneMn3squared = oneMn3 * oneMn3;
+//  n2n2 = n2 * n2;
+//  n2n2n2 = n2 * n2n2;
+//  trace2 = ntensorm2first * ntensorm2first + ntensorm2second * ntensorm2second +
+//      ntensorm2third * ntensorm2third;
+//  trace3 = ntensorm2first * ntensorm2first * ntensorm2first +
+//      ntensorm2second * ntensorm2second * ntensorm2second +
+//      ntensorm2third * ntensorm2third * ntensorm2third;
+//  // Calculate factors in the energy density terms
+//  if (n3 < 1e-5) {  // avoiding logarithm of very small numbers
+//    phi2 = 1. + .5 * n3 + .3 * n3n3 + .2 * n3n3n3;  // +O(n^4)
+//    phi3 = 1. - .125 * n3 - .05 * n3n3 - .025 * n3n3n3;  // +O(n^4)
+//  } else {
+//    phi2 = (6. * n3 - 3. * n3n3 + 6. * oneMn3 * logOneMn3) / n3n3n3;
+//    phi3 = (6. * n3 - 9. * n3n3 + 6. * n3n3n3 + 6. * oneMn3squared * logOneMn3)/
+//        (4. * n3n3n3);
+//  }
+//  phi2_num = 1. + n3n3 * phi2 / 9.;
+//  phi3_num = 1. - 4. * n3 * phi3 / 9.;
+//  // Calculate free energy density terms
+//  Phi1 = -n0 * logOneMn3;
+//  Phi2 = phi2_num *  (n1 * n2 - nvec1 * nvec2) / oneMn3;
+//  Phi3 = phi3_num * (n2n2n2 - 3. * n2 * nvec2 * nvec2 + 4.5 * (
+//      n2n2 * ntensorm2third - n2 * nvec2 * nvec2 - trace3 + n2 * trace2)) /
+//      (24. * M_PI * oneMn3squared);
+//  return Phi1 + Phi2 + Phi3;
+//}
+//// _____________________________________________________________________________
+//double FunctionalFMTCartesian::integration(
+//    double* data, int n, double delta) {
+//  // Integrate with closed Newton-Cotes formula: Num. Rep. 3rd ed. eq. 4.1.14.
+//  double integral = 0.;
+//  if (grid_count < 6) {
+//    std::cerr << "FunctionalFMTCartesian::integration(): ";
+//    std::cerr << "\"Error: Integration needs more grid points.\"";
+//    std::cerr << std::endl;
+//    return 0.;
+//  }
+//  for (size_t i = 0; i != grid_count; ++i) {
+//    if (i == grid_count - 1)
+//      integral += data[i] * (3. / 8.);
+//    else if (i == 0 || i == grid_count - 2)
+//      integral += data[i] * (7. / 6.);
+//    else if (i == 1 || i == grid_count - 3)
+//      integral += data[i] * (23. / 24.);
+//    else
+//      integral += data[i];
+//  }
+//  integral *= delta;
+//  return integral;
+//}
+//// _____________________________________________________________________________
+//// _____________________________________________________________________________
+>>>>>>> 7277f8181f7df11e7866e0736c890ae3e0b65b8a

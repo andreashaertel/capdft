@@ -164,6 +164,7 @@ class FunctionalFMTCartesian : public Functional {
    * the tensorial partial derivative.
    *
    */
+<<<<<<< HEAD
   std::vector<DataFrame<3, double>> scalar_partial_derivative_real;
   std::vector<DataFrame<3, double>> vector_partial_derivative_real;
   std::vector<DataFrame<3, double>> tensor_partial_derivative_real;
@@ -173,6 +174,17 @@ class FunctionalFMTCartesian : public Functional {
   /** Fourier transform of the functional derivative
    */
   std::vector<DataFrame<3, fftw_complex>> functional_derivative_four;
+=======
+  std::vector<DataFrame<1, double>> scalar_partial_derivative_real;
+  std::vector<DataFrame<1, double>> vector_partial_derivative_real;
+  std::vector<DataFrame<1, double>> tensor_partial_derivative_real;
+  std::vector<DataFrame<1, fftw_complex>> scalar_partial_derivative_four;
+  std::vector<DataFrame<1, fftw_complex>> vector_partial_derivative_four;
+  std::vector<DataFrame<1, fftw_complex>> tensor_partial_derivative_four;
+  /** Fourier transform of the functional derivative
+   */
+  std::vector<DataFrame<1, fftw_complex>> functional_derivative_four;
+>>>>>>> 7277f8181f7df11e7866e0736c890ae3e0b65b8a
   /** \brief Flags for the Fourier transforms
    *
    *  The first one preserves the input, while the second one might destroy it.
@@ -204,7 +216,11 @@ class FunctionalFMTCartesian : public Functional {
    *
    *  \return Returns the functional energy density at the specified position.
    */
+<<<<<<< HEAD
   double calc_local_energy_density(size_t i);
+=======
+  double calc_local_energy_density(size_t position);
+>>>>>>> 7277f8181f7df11e7866e0736c890ae3e0b65b8a
   /** \brief From the system object extract the system properties
    */
   void extract_system_properties(const Properties& system_properties);
@@ -225,6 +241,12 @@ class FunctionalFMTCartesian : public Functional {
   /** \brief Set all weights to zero
    */
   void set_weights_to_zero();
+<<<<<<< HEAD
+=======
+  /** \brief Radial integration
+   */
+  double integration(double* data, int n, double delta);
+>>>>>>> 7277f8181f7df11e7866e0736c890ae3e0b65b8a
 
  protected:
 };
