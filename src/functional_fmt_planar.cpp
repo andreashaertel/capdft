@@ -642,17 +642,17 @@ void FunctionalFMTPlanar::calc_weighted_partial_derivatives(
   for (size_t i = 0; i < species_count; ++i) {
     functional_derivative_four.at(i).zero();
     // Scalar
-    for (size_t j = 0; j < scalar_weights_four.size(); ++j) {
+    for (size_t j = 0; j < scalar_weights_four.at(0).size(); ++j) {
       functional_derivative_four.at(i) += scalar_partial_derivative_four.at(j) *
           scalar_weights_four.at(i).at(j);
     }
     // Vector (hard coded minus, because of the assymetry of the vector weights)
-    for (size_t j = 0; j < vector_weights_four.size(); ++j) {
+    for (size_t j = 0; j < vector_weights_four.at(0).size(); ++j) {
       functional_derivative_four.at(i) -= vector_partial_derivative_four.at(j) *
           vector_weights_four.at(i).at(j);
     }
     // Tensor
-    for (size_t j = 0; j < vector_weights_four.size(); ++j) {
+    for (size_t j = 0; j < tensor_weights_four.at(0).size(); ++j) {
       functional_derivative_four.at(i) += tensor_partial_derivative_four.at(j) *
           tensor_weights_four.at(i).at(j);
     }
@@ -677,7 +677,7 @@ double FunctionalFMTPlanar::calc_local_energy_density(size_t position) {
   double n0, n1, n2, n3;  // scalar weighted densities
   double n3n3, n3n3n3, oneMn3, logOneMn3, oneMn3squared;  // auxiliary variables
   double n2n2, n2n2n2;  // auxiliary variables
-  double trace2, trace3;  // auxiliary variables
+  double trace3;  // auxiliary variables
   double nvec1, nvec2;  // vectorial weighted densities (only z-comp. is non-0)
   double ntensorm2first;  // tensorial weighted densities (tensor is diagonal)
   double ntensorm2second;
@@ -700,13 +700,12 @@ double FunctionalFMTPlanar::calc_local_energy_density(size_t position) {
   oneMn3squared = oneMn3 * oneMn3;
   n2n2 = n2 * n2;
   n2n2n2 = n2 * n2n2;
-  trace2 = ntensorm2first * ntensorm2first + ntensorm2second * ntensorm2second +
-      ntensorm2third * ntensorm2third;
   trace3 = ntensorm2first * ntensorm2first * ntensorm2first +
       ntensorm2second * ntensorm2second * ntensorm2second +
       ntensorm2third * ntensorm2third * ntensorm2third;
-  // Calculate factors in the energy density terms
-  if (n3 < 1e-5) {  // avoiding logarithm of very small numbers
+  // Calculate factors in the energy density terms while avoiding logarithm of
+  // very small numbers
+  if (n3 < sqrt(std::numeric_limits<double>::epsilon())) {
     phi2 = 1. + .5 * n3 + .3 * n3n3 + .2 * n3n3n3;  // +O(n^4)
     phi3 = 1. - .125 * n3 - .05 * n3n3 - .025 * n3n3n3;  // +O(n^4)
   } else {
@@ -720,8 +719,7 @@ double FunctionalFMTPlanar::calc_local_energy_density(size_t position) {
   Phi1 = -n0 * logOneMn3;
   Phi2 = phi2_num *  (n1 * n2 - nvec1 * nvec2) / oneMn3;
   Phi3 = phi3_num * (n2n2n2 - 3. * n2 * nvec2 * nvec2 + 4.5 * (
-      n2n2 * ntensorm2third - n2 * nvec2 * nvec2 - trace3 + n2 * trace2)) /
-      (24. * M_PI * oneMn3squared);
+      nvec2 *ntensorm2third * nvec2 - trace3)) / (24. * M_PI * oneMn3squared);
   return Phi1 + Phi2 + Phi3;
 }
 // _____________________________________________________________________________

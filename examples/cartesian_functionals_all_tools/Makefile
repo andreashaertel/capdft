@@ -24,9 +24,11 @@ REPOFILE += functional
 REPOFILE += functional_fmt_cartesian
 #REPOFILE += functional_es_mf_cartesian
 #REPOFILE += functional_es_delta_cartesian
+REPOFILE += integration
 REPOFILE += iterator
 REPOFILE += properties
-#REPOFILE += planar_poisson_solver
+REPOFILE += properties
+#REPOFILE += cartesian_poisson_solver
 # Get host name ################################################################
 HOST = $(shell hostname)
 # Offsets for binaries and objects #############################################
