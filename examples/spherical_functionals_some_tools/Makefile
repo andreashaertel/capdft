@@ -18,6 +18,7 @@ REPOFILE = data_frame
 REPOFILE += properties
 REPOFILE += functional
 REPOFILE += functional_fmt_spherical
+REPOFILE += integration
 # Get host name ################################################################
 HOST = $(shell hostname)
 # Offsets for binaries and objects #############################################

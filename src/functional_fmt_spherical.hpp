@@ -269,6 +269,5 @@ class FunctionalFMTSpherical : public Functional {
   /** \brief Radial integration
    *
    */
-  double radial_integration(double* data, int n, double delta);
 };
 #endif  // SRC_FUNCTIONAL_FMT_SPHERICAL_HPP_

@@ -8,6 +8,7 @@
 #include <iostream>
 #include <limits>
 #include "data_frame.hpp"  // NOLINT
+#include "integration.hpp"  // NOLINT
 // _____________________________________________________________________________
 FunctionalFMTSpherical::FunctionalFMTSpherical() {
   //
@@ -309,7 +310,7 @@ double FunctionalFMTSpherical::calc_energy() {
   for (size_t i = 0; i < grid_count; ++i) {
     free_energy_density.at(i) = calc_local_energy_density(i);
   }
-  integral = radial_integration(free_energy_density.array(), grid_count, dr);
+  integral = integration_1d_radial_open_closed(free_energy_density, dr);
   return integral;
 }
 // _____________________________________________________________________________
@@ -923,34 +924,6 @@ double FunctionalFMTSpherical::calc_local_energy_density(size_t position) {
   Phi3 = phi3_num * (n2n2n2 - 3. * n2 * nvec2 * nvec2 + 4.5 * (
       nvec2 * ntensorm2third * nvec2 - trace3)) / (24. * M_PI * oneMn3squared);
   return Phi1 + Phi2 + Phi3;
-}
-// _____________________________________________________________________________
-double FunctionalFMTSpherical::radial_integration(
-    double* data, int n, double delta) {
-  // Integrate with closed Newton-Cotes formula: Num. Rep. 3rd ed. eq. 4.1.14.
-  // r = 0 has no contribution.
-  double integral = 0.;
-  double r = 0.;
-  if (grid_count < 6) {
-    std::cerr << "FunctionalFMTSpherical::radial_integration(): ";
-    std::cerr << "\"Error: Integration needs more grid points.\"";
-    std::cerr << std::endl;
-    return 0.;
-  }
-  for (size_t i = 0; i != grid_count; ++i) {
-    r = static_cast<double>(i + 1) * delta;
-    if (i == grid_count - 1)
-      integral += data[i] * r * r * (3. / 8.);
-    else if (i == 0 || i == grid_count - 2)
-      integral += data[i] * r * r * (7. / 6.);
-    else if (i == 1 || i == grid_count - 3)
-      integral += data[i] * r * r * (23. / 24.);
-    else
-      integral += data[i] * r * r;
-  }
-  // Spherical coordinates --> 4\pi
-  integral *= delta * 4. * M_PI;
-  return integral;
 }
 // _____________________________________________________________________________
 // _____________________________________________________________________________

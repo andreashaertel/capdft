@@ -8,6 +8,7 @@
 #include <fstream>
 #include <iostream>
 #include "data_frame.hpp"  // NOLINT
+#include "integration.hpp"  // NOLINT
 // _____________________________________________________________________________
 FunctionalFMTPlanar::FunctionalFMTPlanar() {
   //
@@ -342,7 +343,7 @@ double FunctionalFMTPlanar::calc_energy() {
   for (size_t i = 0; i < grid_count; ++i) {
     free_energy_density.at(i) = calc_local_energy_density(i);
   }
-  integral = integration(free_energy_density.array(), grid_count, dz);
+  integral = integration_1d_closed(free_energy_density, dz);
   return integral;
 }
 // _____________________________________________________________________________
@@ -721,30 +722,6 @@ double FunctionalFMTPlanar::calc_local_energy_density(size_t position) {
   Phi3 = phi3_num * (n2n2n2 - 3. * n2 * nvec2 * nvec2 + 4.5 * (
       nvec2 *ntensorm2third * nvec2 - trace3)) / (24. * M_PI * oneMn3squared);
   return Phi1 + Phi2 + Phi3;
-}
-// _____________________________________________________________________________
-double FunctionalFMTPlanar::integration(
-    double* data, int n, double delta) {
-  // Integrate with closed Newton-Cotes formula: Num. Rep. 3rd ed. eq. 4.1.14.
-  double integral = 0.;
-  if (grid_count < 6) {
-    std::cerr << "FunctionalFMTPlanar::integration(): ";
-    std::cerr << "\"Error: Integration needs more grid points.\"";
-    std::cerr << std::endl;
-    return 0.;
-  }
-  for (size_t i = 0; i != grid_count; ++i) {
-    if (i == grid_count - 1)
-      integral += data[i] * (3. / 8.);
-    else if (i == 0 || i == grid_count - 2)
-      integral += data[i] * (7. / 6.);
-    else if (i == 1 || i == grid_count - 3)
-      integral += data[i] * (23. / 24.);
-    else
-      integral += data[i];
-  }
-  integral *= delta;
-  return integral;
 }
 // _____________________________________________________________________________
 // _____________________________________________________________________________

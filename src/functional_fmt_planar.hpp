@@ -222,9 +222,6 @@ class FunctionalFMTPlanar : public Functional {
   /** \brief Set all weights to zero
    */
   void set_weights_to_zero();
-  /** \brief Radial integration
-   */
-  double integration(double* data, int n, double delta);
 
  protected:
 };

@@ -24,6 +24,7 @@ REPOFILE += functional
 REPOFILE += functional_fmt_planar
 #REPOFILE += functional_es_mf_planar
 #REPOFILE += functional_es_delta_planar
+REPOFILE += integration
 REPOFILE += iterator
 REPOFILE += properties
 #REPOFILE += planar_poisson_solver
