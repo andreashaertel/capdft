@@ -1,10 +1,10 @@
 // SPDX-FileCopyrightText: 2021 Moritz Bültmann <moritz.bueltmann@gmx.de>
 // SPDX-License-Identifier: LGPL-3.0-or-later
-/** \file examples/planar_functionals_all_tools/src/main.cpp
- *  \brief Main file of the example of the planar functionals.
+/** \file examples/cartesian_functionals_all_tools/src/main.cpp
+ *  \brief Main file of the example of the 3D cartesian functionals.
  *  
  *  This main file contains examples to show how Functional classes in the
- *  planar geometry work.
+ *  3D cartesian geometry work.
  */
 // _____________________________________________________________________________
 // Includes
@@ -18,9 +18,7 @@
 #include "../../../src/convergence_criterion_nan.hpp"
 #include "../../../src/data_frame.hpp"
 #include "../../../src/functional.hpp"
-#include "../../../src/functional_fmt_planar.hpp"
-#include "../../../src/functional_es_mf_planar.hpp"
-//#include "../../../src/functional_es_delta_planar.hpp"
+#include "../../../src/functional_fmt_cartesian.hpp"
 #include "../../../src/iterator.hpp"
 #include "../../../src/properties.hpp"
 // _____________________________________________________________________________
@@ -46,61 +44,47 @@ int main(int argc, char** args) {
    * step lies exactly between two bins.
    */
 // _____________________________________________________________________________
-  size_t grid_count = static_cast<size_t>(4e2+.5) + 1;  // equals 10,001
-  double system_length = 10.01769616026711185309;  // in nm
-  double bjerrum_length = 1.;  // in nm
-  double temperature = 300.;  // in K
-  double voltage = 0.1;  // in Volt
+  std::vector<size_t> grid_counts{128, 128, 128};  // (x, y, z)
+  std::vector<double> system_lengths{2., 2., 2.};  // in nm (x, y, z)
   // Create objects of Properties class
   Properties properties;
   Properties system_properties;
   std::vector<Properties> species_properties;
   // Put the system properties into a Properties container
-  system_properties.add_property<double>("length", system_length);
-  system_properties.add_property<double>("bjerrum length", bjerrum_length);
-  system_properties.add_property<double>("temperature", temperature);
-  system_properties.add_property<size_t>("grid count", grid_count);
-  system_properties.add_property<size_t>("voltage", voltage);
-  // First species
+  system_properties.add_property<double>("length x", system_lengths.at(0));
+  system_properties.add_property<double>("length y", system_lengths.at(1));
+  system_properties.add_property<double>("length z", system_lengths.at(2));
+  system_properties.add_property<size_t>("grid count x", grid_counts.at(0));
+  system_properties.add_property<size_t>("grid count y", grid_counts.at(1));
+  system_properties.add_property<size_t>("grid count z", grid_counts.at(2));
+  // One hard-sphere species
   properties.add_property<double>("diameter", .3);
-  properties.add_property<double>("bulk density", 3.);
-  properties.add_property<double>("valency", -1.);
-  species_properties.push_back(properties);
-  properties.clear();
-  // Second species
-  properties.add_property<double>("bulk density", 1.5);
-  species_properties.push_back(properties);
-  properties.clear();
-  // Third species
-  properties.add_property<double>("diameter", .3);
-  properties.add_property<double>("bulk density", 3.);
-  properties.add_property<double>("valency", +1.);
+  properties.add_property<double>("bulk density", 7.);  // 0.1 volume fraction
   species_properties.push_back(properties);
   properties.clear();
 // _____________________________________________________________________________
   /* The functional objects are created. As input they require the Properties of
    * the system and the std::vector<Properties> from the species. Moreover
-   * the pointer of the density profiles needs to be passed on, as well as a
-   * std::vector<size_t> with the species numbers, that are affected by the
-   * functional.
+   * the pointer of the three-dimensional density profiles needs to be passed
+   * on, as well as a std::vector<size_t> with the species numbers, that are
+   * affected by the functional.
+   * 
+   * Remark: Even though the DataFrames (e.g. density_profiles) are
+   * three-dimensional, the underlying data arrays are still one-dimensional.
+   * The only difference are the 3-dim. helper functions like
+   * at(size_t,size_t,size_t).
    */
 // _____________________________________________________________________________
   // Create density profiles
-  std::vector<DataFrame<1, double>> density_profiles(0);
+  std::vector<DataFrame<3, double>> density_profiles(0);
   for (size_t i = 0; i < species_properties.size(); ++i) {
-    density_profiles.push_back(DataFrame<1, double>(grid_count));
+    density_profiles.push_back(DataFrame<3, double>(grid_counts));
   }
   // Create an FMT Functional object. For this we specify the
   // species which are interacting via this functional in affected_species.
-  std::vector<size_t> affected_species_fmt{0, 2};  // selected species 0 and 2
-  FunctionalFMTPlanar my_fmt_functional(&density_profiles,
+  std::vector<size_t> affected_species_fmt{0};  // selected species 0
+  FunctionalFMTCartesian my_fmt_functional(&density_profiles,
       species_properties, system_properties, affected_species_fmt);
-  // Create an ES functional object.
-  std::vector<size_t> affected_species_es{0, 2};  // selected species 0 and 2
-  FunctionalESMFPlanar my_es_functional(&density_profiles,
-      species_properties, system_properties, affected_species_es);
-  //FunctionalESDeltaPlanar my_es_functional(&density_profiles,
-  //    species_properties, system_properties, affected_species_es);
 // _____________________________________________________________________________
   // Picard iterations
   /* For the Picard iterations the Iterator class is used. For that we define
@@ -109,7 +93,7 @@ int main(int argc, char** args) {
    * to carry out the Picard iterations. In this case we use two planar hard
    * walls at distance system_length as external potential.
    *
-   * If you want to save loads of time use the Andersen mixing algorithm
+   * If you want to save loads of time use the Anderson mixing algorithm
    * run_andersen() instead of the Picard iterations. They usually are faster
    * by a factor of 20.
    *
@@ -125,24 +109,36 @@ int main(int argc, char** args) {
    */
 // _____________________________________________________________________________
   // Create external potential DataFrames
-  double diameter{0.}, valency{0.}, bulk_density{0.}, z{0.};
-  double dz{system_length / static_cast<double>(grid_count)};
-  std::vector<DataFrame<1, double>> exp_ext_potential(
-      species_properties.size(), DataFrame<1, double>(grid_count));
-  for (auto& potential : exp_ext_potential) {
-    potential.set_all_elements_to(1.);
-  }
-  // Set external hard potential
+  double diameter{0.}, bulk_density{0.};
+  double x{0.}, y{0.}, z{0.};
+  double frequency{4. * M_PI / system_lengths.at(0)};
+  double wave_left{0.}, wave_right{0.};;
+  double dx{system_lengths.at(0) / static_cast<double>(grid_counts.at(0))};
+  double dy{system_lengths.at(1) / static_cast<double>(grid_counts.at(1))};
+  double dz{system_lengths.at(2) / static_cast<double>(grid_counts.at(2))};
+  std::vector<DataFrame<3, double>> exp_ext_potential(
+      species_properties.size(), DataFrame<3, double>(grid_counts));
+  // Set external hard potential: two plates with sine wave shape
+  // The left (z=0) plate is wave shaped in the x direction, while the right
+  // (z=L) plate is wave shaped in the y direction.
   for (auto& species : affected_species_fmt) {
     species_properties.at(species).get_property("diameter", &diameter);
-    for (size_t j = 0; j != grid_count; ++j) {
-      z = dz * static_cast<double>(j);
-      if (z < (diameter / 2.)) {
-        exp_ext_potential.at(species).at(j) = 0.;
-      } else if ((system_length - z) < (diameter / 2.)) {
-        exp_ext_potential.at(species).at(j) = 0.;
-      } else {
-        exp_ext_potential.at(species).at(j) = 1.;
+    for (size_t i = 0; i != grid_counts.at(0); ++i) {
+      x = dx * static_cast<double>(i);
+      for (size_t j = 0; j != grid_counts.at(1); ++j) {
+        y = dy * static_cast<double>(j);
+        for (size_t k = 0; k != grid_counts.at(2); ++k) {
+          z = dz * static_cast<double>(k);
+          wave_left = .5 + 2. * pow(sin(frequency * x), 2);
+          wave_right =.5 + 2. * pow(sin(frequency * y), 2);
+          if (z < diameter * wave_left) {
+            exp_ext_potential.at(species).at(i, j, k) = 0.;
+          } else if ((system_lengths.at(2) - z) < diameter * wave_right) {
+            exp_ext_potential.at(species).at(i, j, k) = 0.;
+          } else {
+            exp_ext_potential.at(species).at(i, j, k) = 1.;
+          }
+        }
       }
     }
   }
@@ -152,27 +148,16 @@ int main(int argc, char** args) {
     density_profiles.at(i).set_all_elements_to(bulk_density);
     density_profiles.at(i) *= exp_ext_potential.at(i);
   }
-  // Set external electrostatic potential (linear between two charged plates)
-  for (auto& species : affected_species_es) {
-    species_properties.at(species).get_property("valency", &valency);
-    species_properties.at(species).get_property("diameter", &diameter);
-    for (size_t j = 0; j != grid_count; ++j) {
-      z = dz * static_cast<double>(j);
-      exp_ext_potential.at(species).at(j) *=
-          exp(voltage * (1. / 2. - z / system_length));
-    }
-  }
   // Create iterator and run iterations
   Iterator my_iterator(&density_profiles, exp_ext_potential,
       species_properties);
   my_iterator.add_excess_functional(&my_fmt_functional);
-  //my_iterator.add_excess_functional(&my_es_functional);
   my_iterator.clear_convergence_criteria();
   my_iterator.add_convergence_criterion<ConvergenceCriterionSteps>(2e3);
-  my_iterator.add_convergence_criterion<ConvergenceCriterionMaxDev>(1.0e-4);
+  my_iterator.add_convergence_criterion<ConvergenceCriterionMaxDev>(1.0e-6);
   my_iterator.add_convergence_criterion<ConvergenceCriterionNan>(0);
   //my_iterator.run_picard(1e-1);
-  my_iterator.run_anderson(1e-1, 10);
+  my_iterator.run_anderson(1e-1, 20);
 // _____________________________________________________________________________
   /* All done!
    * Now we produce some output and view it in gnuplot.
@@ -185,20 +170,25 @@ int main(int argc, char** args) {
 // _____________________________________________________________________________
   // Write density profile to file
   std::fstream out_stream;
-  out_stream.open("planar_profile.dat", std::ios::out);
-  for (size_t i = 0; i < grid_count; ++i) {
-    z = dz * static_cast<double>(i);
-    out_stream << z << " ";
-    for (size_t j = 0; j < species_properties.size(); ++j) {
-      out_stream << density_profiles.at(j).at(i) << " ";
+  out_stream.open("3d_profile.dat", std::ios::out);
+  out_stream << "# [x] [y] [z] [density profile]" << std::endl;
+  for (size_t i = 0; i < grid_counts.at(0); ++i) {
+    x = dx * static_cast<double>(i);
+    for (size_t j = 0; j < grid_counts.at(1); ++j) {
+      y = dy * static_cast<double>(j);
+      for (size_t k = 0; k < grid_counts.at(2); ++k) {
+        z = dz * static_cast<double>(k);
+        out_stream << x << " " << y << " " << z << " ";
+        out_stream << density_profiles.at(0).at(i, j, k);
+        out_stream << std::endl;
+      }
     }
-    out_stream << std::endl;
   }
   out_stream.close();
   // Obtain grand potential of the system
   double energy;
   energy = my_fmt_functional.calc_energy();
-  std::cout << "Excess free energy per square nanometer of FMT functional: ";
+  std::cout << "Excess free energy of the FMT functional: ";
   std::cout << energy << std::endl;
   //energy = my_es_functional.calc_energy();
   //std::cout << "Excess free energy of mean-field electrostatic functional: ";

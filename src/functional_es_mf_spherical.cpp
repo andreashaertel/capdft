@@ -4,6 +4,7 @@
 #include <cmath>
 #include <algorithm>
 #include "data_frame.hpp"  // NOLINT
+#include "integration.hpp"  // NOLINT
 // Define some natural constants
 #define ELECTRON_CHARGE 1.602176634  // *1e-19
 #define BOLTZMANN 1.38064852  // *1e-23
@@ -208,24 +209,12 @@ void FunctionalESMFSpherical::calc_bulk_derivative(
 }
 // _____________________________________________________________________________
 double FunctionalESMFSpherical::calc_energy() {
-  DataFrame<1, double> integrand(grid_count);
+  DataFrame<1, double> energy_density(grid_count);
   double integral{0.};
-  double r{0.};
   calc_charge_densities();
   calc_potential();
-  integrand = potential * charge_density_profile;
-  // Trapezoidal integral rule, spherical integral
-  r = static_cast<double>(0 + 1) * dr;
-  integral += .5 * r * r * integrand.at(0) * dr;
-  for (size_t i = 1; i < grid_count - 1; ++i) {
-    r = static_cast<double>(i + 1) * dr;
-    integral += r * r * integrand.at(i) * dr;
-  }
-  integral += .5 * r * r * dr * integrand.at(grid_count - 1);
-  // Spherical symmetry
-  integral *= 4. * M_PI;
-  // 1/2 occuring in the MF functional
-  integral /= 2.;
+  energy_density = .5 * potential * charge_density_profile;
+  integral = integration_1d_radial_open_closed(energy_density, dr);
   return integral;
 }
 // _____________________________________________________________________________

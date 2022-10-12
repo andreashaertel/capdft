@@ -30,7 +30,7 @@
  */
 class Iterator {
  public:
-  /** \brief Constructor
+  /** \brief Constructor template for dim-dimensional systems
    * 
    *  \param density_profiles The density profiles of different species given as
    *         DataFrame
@@ -38,13 +38,23 @@ class Iterator {
    *
    *  Get the density profiles pointer and the external potentials.
    *  The system data is provided to the functionals and is not needed here.
-   *
    */
-  // TODO(Andreas): add a functional_ideal object
+  template <size_t dim>
   Iterator(
-      std::vector<DataFrame<1, double>>* density_profiles,
-      const std::vector<DataFrame<1, double>>& exp_external_potentials,
-      const std::vector<Properties>& species_properties);
+      std::vector<DataFrame<dim, double>>* density_profiles,
+      std::vector<DataFrame<dim, double>>& exp_external_potentials,
+      const std::vector<Properties>& species_properties)
+    : species_properties(&species_properties) {
+    initialize_data_frames(
+        density_profiles->size(), density_profiles->at(0).size());
+    // Get the data pointer from the external DataFrames
+    for (size_t i = 0; i < density_profiles->size(); ++i) {
+      this->density_profiles.at(i).array() = density_profiles->at(i).array();
+      this->exp_external_potentials.at(i).array() =
+          exp_external_potentials.at(i).array();
+    }
+    add_standard_convergence_criteria();
+  }
   /** \brief Destructor
    *
    */
@@ -59,7 +69,6 @@ class Iterator {
    *  Iterator my_iterator(my_densities, my_external_potentials);
    *  FunctionalFMTSpherical my_functional(...);
    *  my_iterator.add_excess_functional(my_functional);
-   *
    */
   void add_excess_functional(Functional* functional);
   /** \brief Remove a functional according to its index. 
@@ -70,11 +79,9 @@ class Iterator {
    *  \param index Index of the functional that shall be removed.
    *
    *  \return Indicates whether a functional has been removed or not. 
-   *
    */
   void remove_excess_functional(size_t index);
   /** \brief Remove all functionals
-   *
    */
   void clear_functionals();
   /** \brief Iterates the system densities according to the Picard iteration
@@ -83,7 +90,7 @@ class Iterator {
    *  \param Mixing factor of the Picard iteration scheme.
    */
   void run_picard(double mixing);
-  /** \brief Iterates the system densities according to the Andersen mixing
+  /** \brief Iterates the system densities according to the Anderson mixing
    *         method.
              https://doi.org/10.1016/j.fluid.2017.03.023
    *
@@ -98,7 +105,6 @@ class Iterator {
    *  state without further iteration. 
    *
    *  \return The grand canonical energy in kT per system volume.
-   *
    */
   double calculate_excess_free_energy();
   /** \brief Calculate the grand canonical energy of the system. 
@@ -107,25 +113,23 @@ class Iterator {
    *  state without further iteration. 
    *
    *  \return The grand canonical energy in kT per system volume.
-   *
    */
   double calculate_gc_energy();
   /** \brief Add a convergence criterion
    *
    *  The standard criterion (ConvergenceCriterionMaxDev) is added when a new
    *  Iterator is created.
-   *
    */
   template <typename T>
   void add_convergence_criterion(double threshold) {
     ConvergenceCriterion* criterion = 
-        new T(*density_profiles, proposed_densities, threshold);
+        new T(density_profiles, proposed_densities, threshold);
     convergence_criteria.push_back(criterion);
   }
   template <typename U>
   void add_convergence_criterion(int threshold_int) {
     ConvergenceCriterion* criterion =
-        new U(*density_profiles, proposed_densities, threshold_int);
+        new U(density_profiles, proposed_densities, threshold_int);
     convergence_criteria.push_back(criterion);
   }
   /** \brief Clear convergence criteria
@@ -133,47 +137,53 @@ class Iterator {
    *  Clears the convergence criteria. This is especially important when
    *  overwriting the standard criteria. If run_*() is executed without a
    *  ConvergenceCriterion, it will run forever.
-   *
    */
   void clear_convergence_criteria();
+  /** \brief Add some sane standard convergence criteria
+   */
+  void add_standard_convergence_criteria();
 
  private:
-  /** \brief Density profiles
-   *
+  /** \brief "Internal" density profiles
+   *  
+   *  The corresponding DataFrames will be modified in the following way.
+   *  After initilization the data pointers are overwritten via array()
+   *  with the external density_profiles' data pointers. This is done to be
+   *  compatible with all DataFrames no matter the dimensionality. In the end
+   *  the destructor overwrites the DataFrame trivially, such that the pointer
+   *  is overwritten and no external memory is freed.
    */
-  std::vector<DataFrame<1, double>>* density_profiles;
+  std::vector<DataFrame<1, double>> density_profiles;
   /** \brief Proposed density profiles by Picard iteration
-   *
    */
   std::vector<DataFrame<1, double>> proposed_densities;
   /** \brief External potentials
    *
+   * For these DataFrames the same construction as for the internal density
+   * profiles is used.
    */
-  const std::vector<DataFrame<1, double>>* exp_external_potentials;
+  std::vector<DataFrame<1, double>> exp_external_potentials;
   /** \brief Species properties pointer
    *
    *  Species properties are required for the "bulk density" property.
-   *
    */
   const std::vector<Properties>* species_properties;
   /** \brief Container holding all functionals that have benn added
-   *
    */
   std::vector<Functional*> excess_functionals;
   /** \brief Container holding all convergence criteria to be checked
-   *
    */
   std::vector<ConvergenceCriterion*> convergence_criteria;
   /** \brief Functional derivatives
-   *
    */
   std::vector<std::vector<DataFrame<1, double>>> functional_derivatives;
   /** \brief Bulk functional derivatives
-   *
    */
   std::vector<std::vector<double>> bulk_derivatives;
+  /** \brief Initialize all internal data frames
+   */
+  void initialize_data_frames(size_t species_count, size_t grid_count);
   /** \brief Check all convergence criteria and return true if one is fulfilled
-   *
    */
   bool check_convergence_criteria();
   /** \brief Calculates all possible scalar product combinations of a profile

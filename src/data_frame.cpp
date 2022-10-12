@@ -43,7 +43,7 @@ T& DataFrame<dim, T>::at(size_t i, size_t j) {
   std::cerr << "DataFrame::at(): \"Error: This accessor only works in 2D.\"";
   std::cerr << std::endl;
   exit(1);
-  return data[0];
+  return data[0];  // prevents compiler warning
 }
 template <>
 double& DataFrame<2, double>::at(size_t i, size_t j) {
@@ -59,7 +59,7 @@ T& DataFrame<dim, T>::at(size_t i, size_t j, size_t k) {
   std::cerr << "DataFrame::at(): \"Error: This accessor only works in 3D.\"";
   std::cerr << std::endl;
   exit(1);
-  return data[0];
+  return data[0];  // prevents compiler warning
 }
 template <>
 double& DataFrame<3, double>::at(size_t i, size_t j, size_t k) {
@@ -175,7 +175,7 @@ std::string DataFrame<3, fftw_complex>::element_string(
 }
 // _____________________________________________________________________________
 template <size_t dim, typename T>
-T* DataFrame<dim, T>::array() {
+T*& DataFrame<dim, T>::array() {
   return data;
 }
 // _____________________________________________________________________________
@@ -255,8 +255,9 @@ DataFrame<dim, T>::DataFrame(std::vector<size_t> array_dimensions)
 template <size_t dim, typename T>
 DataFrame<dim, T>::DataFrame(size_t array_size) : DataFrame() {
   std::cerr << "DataFrame::DataFrame(): ";
-  std::cerr << "\"Error: Specifying just the array_size only works in one-";
-  std::cerr << "dimensional DataFrames.\"" << std::endl;
+  std::cerr << "\"Error: Specifying the array_size only works in one-";
+  std::cerr << "dimensional DataFrames. Try specifying array_dimensions.\"";
+  std::cerr << std::endl;
   exit(1);
 }
 template <>
@@ -1038,14 +1039,16 @@ double max(const DataFrame<3, double>& other) {  // friend
 template <size_t dim, typename T>
 std::vector<size_t> DataFrame<dim, T>::index_to_coordinates(size_t index)
     const {
+  // This works for dim <= 3
   std::vector<size_t> coordinates{};
   std::vector<size_t> array_dims = array_dimensions;
   array_dims.resize(3, 1);  // project dim!=3 into dim==3
+  // row-major order
+  coordinates.push_back(index / (array_dims.at(2) * array_dims.at(1)));
   coordinates.push_back(
-      (index % (array_dims.at(0) * array_dims.at(1))) % array_dims.at(0));
+      (index % (array_dims.at(2) * array_dims.at(1))) / array_dims.at(2));
   coordinates.push_back(
-      (index % (array_dims.at(0) * array_dims.at(1))) / array_dims.at(0));
-  coordinates.push_back(index / (array_dims.at(0) * array_dims.at(1)));
+      (index % (array_dims.at(2) * array_dims.at(1))) % array_dims.at(2));
   coordinates.resize(dim);  // remove trivial coordinates from projection
   return coordinates;
 }
@@ -1062,8 +1065,10 @@ size_t DataFrame<dim, T>::coordinates_to_index(
   size_t index{0};
   std::vector<size_t> bins{1};  // bins that need to be added for diff. dims
   for (size_t i = 0; i < coordinates.size(); ++i) {
-    index += coordinates.at(i) * bins.at(i);
-    bins.push_back(bins.at(i) * array_dimensions.at(i));
+    // row-major order --> coordinates.size() - i - 1
+    index += coordinates.at(coordinates.size() - i - 1) * bins.at(i);
+    bins.push_back(
+        bins.at(i) * array_dimensions.at(coordinates.size() - i - 1));
   }
   return index;
 }
