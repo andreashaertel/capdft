@@ -27,7 +27,6 @@ REPOFILE += functional_fmt_cartesian
 REPOFILE += integration
 REPOFILE += iterator
 REPOFILE += properties
-REPOFILE += properties
 #REPOFILE += cartesian_poisson_solver
 # Get host name ################################################################
 HOST = $(shell hostname)
