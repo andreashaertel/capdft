@@ -1,5 +1,4 @@
 # SPDX-FileCopyrightText: 2021 Moritz Bültmann <moritz.bueltmann@physik.uni-freiburg.de>
-#
 # SPDX-License-Identifier: CC0-1.0
 *.swp
 *.vim
@@ -15,3 +14,4 @@ include
 examples/spherical_functionals_all_tools/spherical_profile.dat
 examples/spherical_functionals_some_tools/spherical_profile.dat
 examples/cartesian_functionals_all_tools/3d_profile.dat
+examples/cartesian_functionals_all_tools/3d_profile1.pdf

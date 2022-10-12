@@ -1,3 +1,9 @@
+# SPDX-FileCopyrightText: 2022 Moritz Bültmann <moritz.bueltmann@physik.uni-freiburg.de>
+# SPDX-License-Identifier: CC0-1.0
+# ______________________________________________________________________________
+# This script creates a heat map of two slices of the 3D density profile created
+# the example program.
+# ______________________________________________________________________________
 rm(list = ls())
 library(tidyverse)
 library(viridis)
