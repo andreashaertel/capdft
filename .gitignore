@@ -7,11 +7,6 @@
 *.systeminfo
 *.a
 .nfs*
-calc_rdf
 bin
 obj
 include
-examples/spherical_functionals_all_tools/spherical_profile.dat
-examples/spherical_functionals_some_tools/spherical_profile.dat
-examples/cartesian_functionals_all_tools/3d_profile.dat
-examples/cartesian_functionals_all_tools/3d_profile1.pdf
