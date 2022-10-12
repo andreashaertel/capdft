@@ -19,7 +19,7 @@
 #include "../../../src/data_frame.hpp"
 #include "../../../src/functional.hpp"
 #include "../../../src/functional_fmt_planar.hpp"
-//#include "../../../src/functional_es_mf_planar.hpp"
+#include "../../../src/functional_es_mf_planar.hpp"
 //#include "../../../src/functional_es_delta_planar.hpp"
 #include "../../../src/iterator.hpp"
 #include "../../../src/properties.hpp"
@@ -95,11 +95,11 @@ int main(int argc, char** args) {
   std::vector<size_t> affected_species_fmt{0, 2};  // selected species 0 and 2
   FunctionalFMTPlanar my_fmt_functional(&density_profiles,
       species_properties, system_properties, affected_species_fmt);
-  //// Create an ES functional object.
-  //std::vector<size_t> affected_species_es{0, 2};  // selected species 0 and 2
-  ////FunctionalESMFSpherical my_es_functional(&density_profiles,
-  ////    species_properties, system_properties, affected_species_es);
-  //FunctionalESDeltaSpherical my_es_functional(&density_profiles,
+  // Create an ES functional object.
+  std::vector<size_t> affected_species_es{0, 2};  // selected species 0 and 2
+  FunctionalESMFPlanar my_es_functional(&density_profiles,
+      species_properties, system_properties, affected_species_es);
+  //FunctionalESDeltaPlanar my_es_functional(&density_profiles,
   //    species_properties, system_properties, affected_species_es);
 // _____________________________________________________________________________
   // Picard iterations
@@ -152,16 +152,16 @@ int main(int argc, char** args) {
     density_profiles.at(i).set_all_elements_to(bulk_density);
     density_profiles.at(i) *= exp_ext_potential.at(i);
   }
-  //// Set external electrostatic potential (linear between two charged plates)
-  //for (auto& species : affected_species_es) {
-  //  species_properties.at(species).get_property("valency", &valency);
-  //  species_properties.at(species).get_property("diameter", &diameter);
-  //  for (size_t j = 0; j != grid_count; ++j) {
-  //    z = dz * static_cast<double>(j);
-  //    exp_ext_potential.at(species).at(j) *=
-  //        exp(voltage * (1. / 2. - z / system_length));
-  //  }
-  //}
+  // Set external electrostatic potential (linear between two charged plates)
+  for (auto& species : affected_species_es) {
+    species_properties.at(species).get_property("valency", &valency);
+    species_properties.at(species).get_property("diameter", &diameter);
+    for (size_t j = 0; j != grid_count; ++j) {
+      z = dz * static_cast<double>(j);
+      exp_ext_potential.at(species).at(j) *=
+          exp(voltage * (1. / 2. - z / system_length));
+    }
+  }
   // Create iterator and run iterations
   Iterator my_iterator(&density_profiles, exp_ext_potential,
       species_properties);
@@ -171,8 +171,8 @@ int main(int argc, char** args) {
   my_iterator.add_convergence_criterion<ConvergenceCriterionSteps>(2e3);
   my_iterator.add_convergence_criterion<ConvergenceCriterionMaxDev>(1.0e-4);
   my_iterator.add_convergence_criterion<ConvergenceCriterionNan>(0);
-  my_iterator.run_picard(1e-1);
-  //my_iterator.run_anderson(1e-1, 10);
+  //my_iterator.run_picard(1e-1);
+  my_iterator.run_anderson(1e-1, 10);
 // _____________________________________________________________________________
   /* All done!
    * Now we produce some output and view it in gnuplot.
