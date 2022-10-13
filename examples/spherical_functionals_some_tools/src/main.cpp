@@ -37,7 +37,7 @@ int main(int argc, char** args) {
    * However, for this example we hard-coded the numbers to reduce complexity.
    */
 // _____________________________________________________________________________
-  size_t grid_count = static_cast<size_t>(1e4+.5) + 1;  // equals = 10,001
+  size_t grid_count = 10001;
   double system_length = 19.821782178217823;  // external pot. between two bins
   double bjerrum_length = 1.;  // not really needed
   // Create objects of Properties class

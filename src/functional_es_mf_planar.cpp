@@ -3,12 +3,9 @@
 #include "functional_es_mf_planar.hpp"  // NOLINT
 #include <cmath>
 #include <algorithm>
+#include "constants.hpp"  // NOLINT
 #include "data_frame.hpp"  // NOLINT
 #include "integration.hpp"  // NOLINT
-// Define some natural constants
-#define ELECTRON_CHARGE 1.602176634  // *1e-19
-#define BOLTZMANN 1.38064852  // *1e-23
-#define VACUUM_PERMITIVITY 8.8541878128  // *1e-12
 // _____________________________________________________________________________
 FunctionalESMFPlanar::FunctionalESMFPlanar() {
 }

@@ -12,6 +12,7 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
+#include "../../../src/constants.hpp"
 #include "../../../src/convergence_criterion.hpp"
 #include "../../../src/convergence_criterion_max_dev.hpp"
 #include "../../../src/convergence_criterion_steps.hpp"
@@ -20,7 +21,7 @@
 #include "../../../src/functional.hpp"
 #include "../../../src/functional_fmt_planar.hpp"
 #include "../../../src/functional_es_mf_planar.hpp"
-//#include "../../../src/functional_es_delta_planar.hpp"
+#include "../../../src/functional_es_delta_planar.hpp"
 #include "../../../src/iterator.hpp"
 #include "../../../src/properties.hpp"
 // _____________________________________________________________________________
@@ -50,7 +51,10 @@ int main(int argc, char** args) {
   double system_length = 10.01769616026711185309;  // in nm
   double bjerrum_length = 1.;  // in nm
   double temperature = 300.;  // in K
-  double voltage = 10.;  // in Volt
+  double voltage = 0.1;  // in Volt
+  // Convert voltage to reduced units
+  double potential =
+      1e4 * voltage * ELECTRON_CHARGE / (BOLTZMANN * temperature);
   // Create objects of Properties class
   Properties properties;
   Properties system_properties;
@@ -97,10 +101,10 @@ int main(int argc, char** args) {
       species_properties, system_properties, affected_species_fmt);
   // Create an ES functional object.
   std::vector<size_t> affected_species_es{0, 2};  // selected species 0 and 2
-  FunctionalESMFPlanar my_es_functional(&density_profiles,
-      species_properties, system_properties, affected_species_es);
-  //FunctionalESDeltaPlanar my_es_functional(&density_profiles,
+  //FunctionalESMFPlanar my_es_functional(&density_profiles,
   //    species_properties, system_properties, affected_species_es);
+  FunctionalESDeltaPlanar my_es_functional(&density_profiles,
+      species_properties, system_properties, affected_species_es);
 // _____________________________________________________________________________
   // Picard iterations
   /* For the Picard iterations the Iterator class is used. For that we define
@@ -159,7 +163,7 @@ int main(int argc, char** args) {
     for (size_t j = 0; j != grid_count; ++j) {
       z = dz * static_cast<double>(j);
       exp_ext_potential.at(species).at(j) *=
-          exp(valency * voltage * (1. / 2. - z / system_length));
+          exp(valency * potential * (1. / 2. - z / system_length));
     }
   }
   // Create iterator and run iterations
@@ -172,7 +176,7 @@ int main(int argc, char** args) {
   my_iterator.add_convergence_criterion<ConvergenceCriterionMaxDev>(1.0e-4);
   my_iterator.add_convergence_criterion<ConvergenceCriterionNan>(0);
   //my_iterator.run_picard(1e-3);
-  my_iterator.run_anderson(1e-3, 10);
+  my_iterator.run_anderson(1e-3, 15);
 // _____________________________________________________________________________
   /* All done!
    * Now we produce some output and view it in gnuplot.
