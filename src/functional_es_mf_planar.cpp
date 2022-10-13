@@ -146,7 +146,7 @@ void FunctionalESMFPlanar::initialize_all_data_frames() {
 // _____________________________________________________________________________
 void FunctionalESMFPlanar::initialize_poisson_solver() {
   poisson_solver = new PlanarPoissonSolver(grid_count, dz);
-  poisson_solver->set_laplacian(NEUMANN_NEUMANN);
+  poisson_solver->set_laplacian(DIRICHLET_DIRICHLET);
 }
 // _____________________________________________________________________________
 void FunctionalESMFPlanar::calc_charge_densities() {
@@ -159,11 +159,11 @@ void FunctionalESMFPlanar::calc_charge_densities() {
 }
 // _____________________________________________________________________________
 void FunctionalESMFPlanar::calc_potential() {
-  // Both boundary conditions equal 0 (Neumann). Note, that there is no
+  // Both boundary conditions equal 0 (Dirichlet). Note, that there is no
   // external potential involved inside the functional.
   double left_boundary{0.};
   double right_boundary{0.};
-  // Solve the radial Poisson equation numerically
+  // Solve the Poisson equation numerically
   //poisson_solver->solve(
   //    inner_boundary, outer_boundary, poisson_rhs.array(), potential.array());
 }

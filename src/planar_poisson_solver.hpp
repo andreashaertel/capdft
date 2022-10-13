@@ -33,13 +33,15 @@ class PlanarPoissonSolver {
   /** \brief Proper Constructor
    * 
    * Passes the size "dim" of the array to be solved, the grid spacing "dr" of
-   * the array and the left boundary condition position "inner_distance".
+   * the array.
    */
   PlanarPoissonSolver(size_t dim, double dz);
   /** \brief Destructor
    */
   ~PlanarPoissonSolver();
   /** \brief Set the Laplace matrix with the chosen boundary conditions
+   *
+   *  The boundary conditions are assumed to be 
    */
   void set_laplacian(BoundaryFlag flag);
   /** \brief Solve the linear equation system: the boundary must be specified
@@ -48,9 +50,19 @@ class PlanarPoissonSolver {
    *  and a right first derivative value of the sought function.
    *  The DIRICHLET_DIRICHLET case expects a left and right boundary value of
    *  the sought function.
+   *
+   *  The boundary is assumed to be half a grid point away from the first/last
+   *  grid point (z_{left boundary}=-0.5 * dz).
+   *
+   *  Solving the tridiagonal matrix equation is done in the following way.
+   *  One starts by eliminating solution[0] by subtracting the first from the
+   *  second line. One ends up with the same situation and does the whole thing
+   *  again with solution[1] and the second and the third line. And so on ...
+   *  This obviously fails for NEUMANN_NEUMANN, because the system is determined
+   *  up to a constant and thus the system of equation is underdetermined.
    */
-  void solve(double leftBoundaryValue, double rightBoundaryValue, double* rhs,
-      double* solution);
+  void solve(double left_boundary_value, double right_boundary_value,
+      double* rhs, double* solution);
   /** \brief Returns the size of the tridiagonal matrix
    */
   size_t size();
@@ -59,17 +71,15 @@ class PlanarPoissonSolver {
   /** \brief Number of rows/columns of the square tridiagonal matrix
    */
   size_t dim;
-  /** Radial bin size (not needed in carthesian case)
+  /** \brief Bin size
    */
   double dz;
+  /** \brief Bin size squared
+   */
+  double dzdz;
   /** \brief Holds the specified boundary conditions
    */
   BoundaryFlag flag;
-  /** \brief Boundary condition dependent positions of the first/last bin
-   * 
-   *  It is either (dr or dr/2) and determined automatically
-   */
-  double shiftLeft, shiftRight;
   /** \brief Upper off-diagonal elements of the tridiagonal matrix
    */
   double* upper;
@@ -80,11 +90,6 @@ class PlanarPoissonSolver {
    */
   double* lower;
   /** \brief Set the Laplace matrix with certain boundary conditions
-   *
-   *  For NN the boundaries should be half a grid point away from the start/end
-   *  point (x_{Wall}=x_{-0.5}|x_0|x_1|...|x_N|x_{N+0.5}=x_{Wall}).
-   *  For DD the boundaries should be a full grid point away from the start/end
-   *  point (x_{Wall}=x_{-1}|x_0|x_1|...|x_N|x_{N+1}=x_Wall).
    */
   void set_laplacian_NN();
   void set_laplacian_DD();
@@ -95,7 +100,10 @@ class PlanarPoissonSolver {
   void set_laplacian();
   /** \brief Add the boundary values to the right-hand side
    */
-  void set_boundary_values_laplace_radial(double leftBoundaryValue,
-      double rightBoundaryValue, double* rhs);
+  void set_boundary_values_laplace(double left_boundary_value,
+      double right_boundary_value, double* rhs);
+  /** \brief Solution algorithm for the tridiagonal matrix equation
+   */
+  void solve(double* rhs, double* solution);
 };
 #endif  // SRC_PLANAR_POISSON_SOLVER_HPP_
