@@ -7,7 +7,6 @@
  *
  *  The file contains the class declarations of the FunctionalESMFPlanar
  *  class.
- *
  */
 // Includes
 #include "functional.hpp"  // NOLINT
@@ -15,11 +14,12 @@
 #include "data_frame.hpp"  // NOLINT
 #include "properties.hpp"  // NOLINT
 #include "planar_poisson_solver.hpp"  // NOLINT
-/** \brief This class calculates the elctrostatic mean field functional.
+/** \brief This class calculates the elctrostatic mean field functional in the
+ *  planar geometry.
  *  
  *  This class contains the tools to calculate functional and functional
- *  derivative values for point charges in the mean field approximation.
- *
+ *  derivative values of point charges using the mean field approximation in the
+ *  planar geometry.
  */
 class FunctionalESMFPlanar : public Functional {
  public:
@@ -46,14 +46,12 @@ class FunctionalESMFPlanar : public Functional {
    *
    *  This function calculates the functional derivatives and updates the
    *  corresponding internal arrays.
-   *
-   *  It uses the functions:
-   *  calc_weighted_densities(),
    */
   virtual void calc_derivative(
       std::vector<DataFrame<1, double>>* functional_derivative);
   /** \brief Calculate bulk derivatives
    *
+   *  They are always zero due to the required charge neutrality condition.
    */
   virtual void calc_bulk_derivative(std::vector<double>* bulk_derivative);
   /** \brief Calculate the energy value of this functional

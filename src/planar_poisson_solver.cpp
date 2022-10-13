@@ -149,10 +149,9 @@ void PlanarPoissonSolver::set_boundary_values_laplace(
 }
 // _____________________________________________________________________________
 void PlanarPoissonSolver::solve(double* rhs, double* solution) {
-  // Work space vector
-  std::vector<double> work(dim);
-  double diag_temp;
-  size_t index;
+  std::vector<double> work(dim);  // work space vector
+  double diag_temp;  // temporary variable of the diagonal value
+  size_t index;  // index used for going through the lines in reverse
   diag_temp = diag[0];
   if (diag_temp == 0.) {
     std::cerr << "PlanarPoissonSolver::solve(): ";

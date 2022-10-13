@@ -9,7 +9,6 @@
 #define ELECTRON_CHARGE 1.602176634  // *1e-19
 #define BOLTZMANN 1.38064852  // *1e-23
 #define VACUUM_PERMITIVITY 8.8541878128  // *1e-12
-#define AVOGADRO 6.02214076  // *1e23
 // _____________________________________________________________________________
 FunctionalESMFPlanar::FunctionalESMFPlanar() {
 }
@@ -41,7 +40,6 @@ FunctionalESMFPlanar::FunctionalESMFPlanar(
 }
 // _____________________________________________________________________________
 FunctionalESMFPlanar::~FunctionalESMFPlanar() {
-  //
 }
 // _____________________________________________________________________________
 void FunctionalESMFPlanar::extract_system_properties(
@@ -164,25 +162,9 @@ void FunctionalESMFPlanar::calc_potential() {
   double left_boundary{0.};
   double right_boundary{0.};
   // Solve the Poisson equation numerically
-  //poisson_solver->solve(
-  //    inner_boundary, outer_boundary, poisson_rhs.array(), potential.array());
+  poisson_solver->solve(
+      left_boundary, right_boundary, poisson_rhs.array(), potential.array());
 }
-// _____________________________________________________________________________
-//double FunctionalESMFPlanar::calc_net_charge() {
-//  double integral{0.};
-//  double r{0.};
-//  // Trapezoidal integral rule, spherical integral
-//  r = static_cast<double>(0 + 1) * dr;
-//  integral += .5 * r * r * charge_density_profile.at(0) * dr;
-//  for (size_t i = 1; i < grid_count - 1; ++i) {
-//    r = static_cast<double>(i + 1) * dr;
-//    integral += r * r * charge_density_profile.at(i) * dr;
-//  }
-//  integral += .5 * r * r * dr * charge_density_profile.at(grid_count - 1);
-//  // Spherical symmetry
-//  integral *= 4. * M_PI;
-//  return integral;
-//}
 // _____________________________________________________________________________
 void FunctionalESMFPlanar::calc_derivative(
     std::vector<DataFrame<1, double>>* functional_derivative) {
@@ -191,11 +173,11 @@ void FunctionalESMFPlanar::calc_derivative(
   calc_charge_densities();
   // From the charge densities calculate the electrostatic potential
   calc_potential();
-//  // Calculate the derivative from the electrostatic potential
-//  for (auto it = affected_species.begin(); it != affected_species.end(); ++it) {
-//    i = it - affected_species.begin();
-//    functional_derivative->at(*it) = valencies.at(i) * potential;
-//  }
+  // Calculate the functional derivative which is the electrostatic potential
+  for (auto it = affected_species.begin(); it != affected_species.end(); ++it) {
+    i = it - affected_species.begin();
+    functional_derivative->at(*it) = valencies.at(i) * potential;
+  }
 }
 // _____________________________________________________________________________
 void FunctionalESMFPlanar::calc_bulk_derivative(
@@ -207,10 +189,10 @@ void FunctionalESMFPlanar::calc_bulk_derivative(
 double FunctionalESMFPlanar::calc_energy() {
   DataFrame<1, double> energy_density(grid_count);
   double integral{0.};
-//  calc_charge_densities();
-//  calc_potential();
-//  energy_density = .5 * potential * charge_density_profile;
-//  integral = integration_1d_radial_open_closed(energy_density, dr);
+  calc_charge_densities();
+  calc_potential();
+  energy_density = .5 * potential * charge_density_profile;
+  integral = integration_1d_closed(energy_density, dz);
   return integral;
 }
 // _____________________________________________________________________________

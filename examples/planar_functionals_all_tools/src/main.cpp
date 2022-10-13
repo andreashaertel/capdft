@@ -46,11 +46,11 @@ int main(int argc, char** args) {
    * step lies exactly between two bins.
    */
 // _____________________________________________________________________________
-  size_t grid_count = static_cast<size_t>(4e2+.5) + 1;  // equals 10,001
+  size_t grid_count = 1e4;
   double system_length = 10.01769616026711185309;  // in nm
   double bjerrum_length = 1.;  // in nm
   double temperature = 300.;  // in K
-  double voltage = 0.1;  // in Volt
+  double voltage = 10.;  // in Volt
   // Create objects of Properties class
   Properties properties;
   Properties system_properties;
@@ -109,8 +109,8 @@ int main(int argc, char** args) {
    * to carry out the Picard iterations. In this case we use two planar hard
    * walls at distance system_length as external potential.
    *
-   * If you want to save loads of time use the Andersen mixing algorithm
-   * run_andersen() instead of the Picard iterations. They usually are faster
+   * If you want to save loads of time use the Anderson mixing algorithm
+   * run_anderson() instead of the Picard iterations. They usually are faster
    * by a factor of 20.
    *
    * The convergence criteria are also added to the Iterator. They are added via
@@ -159,7 +159,7 @@ int main(int argc, char** args) {
     for (size_t j = 0; j != grid_count; ++j) {
       z = dz * static_cast<double>(j);
       exp_ext_potential.at(species).at(j) *=
-          exp(voltage * (1. / 2. - z / system_length));
+          exp(valency * voltage * (1. / 2. - z / system_length));
     }
   }
   // Create iterator and run iterations
@@ -171,8 +171,8 @@ int main(int argc, char** args) {
   my_iterator.add_convergence_criterion<ConvergenceCriterionSteps>(2e3);
   my_iterator.add_convergence_criterion<ConvergenceCriterionMaxDev>(1.0e-4);
   my_iterator.add_convergence_criterion<ConvergenceCriterionNan>(0);
-  //my_iterator.run_picard(1e-1);
-  my_iterator.run_anderson(1e-1, 10);
+  //my_iterator.run_picard(1e-3);
+  my_iterator.run_anderson(1e-3, 10);
 // _____________________________________________________________________________
   /* All done!
    * Now we produce some output and view it in gnuplot.
@@ -200,8 +200,8 @@ int main(int argc, char** args) {
   energy = my_fmt_functional.calc_energy();
   std::cout << "Excess free energy per square nanometer of FMT functional: ";
   std::cout << energy << std::endl;
-  //energy = my_es_functional.calc_energy();
-  //std::cout << "Excess free energy of mean-field electrostatic functional: ";
-  //std::cout << energy << std::endl;
+  energy = my_es_functional.calc_energy();
+  std::cout << "Excess free energy of mean-field electrostatic functional: ";
+  std::cout << energy << std::endl;
   return 0;
 }
