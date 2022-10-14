@@ -92,26 +92,32 @@ class FunctionalESDeltaPlanar : public Functional {
   /** \brief A list with indices of the affected species
    */
   std::vector<size_t> affected_species;
+  /** \brief Hard-sphere diameters of every species
+   */
+  std::vector<double> diameters;
+  /** \brief Bulk densities of every species
+   */
+  std::vector<double> bulk_densities;
   /** \brief Valency of every species
    *
    *  To be more general, valencies must be given as "double".
    */
   std::vector<double> valencies;
-  /** \brief Bulk densities
-   */
-  std::vector<double> bulk_densities;
   /** \brief Pointer to density profiles
    */
   std::vector<DataFrame<1, double>>* density_profiles_pointer;
-  /** \brief Total charge density profile
+  /** \brief Charge density profile of every species
    */
-  DataFrame<1, double> charge_density_profile;
-  /** \brief Right hand side of the Poisson equation
+  std::vector<DataFrame<1, double>> charge_density_profiles;
+  /** \brief Right hand side of the Poisson equation for every charge density
    */
-  DataFrame<1, double> poisson_rhs;
-  /** \brief Electrostatic potential (numerical solution of Poisson equation)
+  std::vector<DataFrame<1, double>> poisson_rhs;
+  /** \brief Electrostatic potentials of every species
    */
-  DataFrame<1, double> potential;
+  std::vector<DataFrame<1, double>> potentials;
+  /** \brief Weighted (delta-functions) densities
+   */
+  std::vector<DataFrame<1, double>> weighted_densities;
   /** \brief Poisson solver
    *
    *  This object contains the matrix representation of the numerical Poisson

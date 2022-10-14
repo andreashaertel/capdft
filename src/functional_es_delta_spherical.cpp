@@ -26,7 +26,7 @@ FunctionalESDeltaSpherical::FunctionalESDeltaSpherical(
     density_profiles_pointer(density_profiles) {
   // Get system properties
   extract_system_properties(system_properties);
-  // Get species properties; excludes all species without diameter property
+  // Get species properties
   extract_species_properties(species_properties);
   // Initialize all data frames and update charge densities etc.
   initialize_all_data_frames();

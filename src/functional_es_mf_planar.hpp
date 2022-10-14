@@ -94,9 +94,6 @@ class FunctionalESMFPlanar : public Functional {
    *  To be more general, valencies must be given as "double".
    */
   std::vector<double> valencies;
-  /** \brief Bulk densities
-   */
-  std::vector<double> bulk_densities;
   /** \brief Pointer to density profiles
    */
   std::vector<DataFrame<1, double>>* density_profiles_pointer;

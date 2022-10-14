@@ -25,12 +25,12 @@ FunctionalESDeltaPlanar::FunctionalESDeltaPlanar(
     density_profiles_pointer(density_profiles) {
   // Get system properties
   extract_system_properties(system_properties);
-  //// Get species properties; excludes all species without diameter property
-  //extract_species_properties(species_properties);
-  //// Initialize all data frames and update charge densities
-  //initialize_all_data_frames();
-  //calc_charge_densities();
-  //initialize_poisson_solver();
+  // Get species properties
+  extract_species_properties(species_properties);
+  // Initialize all data frames and update charge densities
+  initialize_all_data_frames();
+  calc_charge_densities();
+  initialize_poisson_solver();
 }
 // _____________________________________________________________________________
 FunctionalESDeltaPlanar::FunctionalESDeltaPlanar(
@@ -106,59 +106,68 @@ void FunctionalESDeltaPlanar::extract_electrical_properties(
   }
 }
 // _____________________________________________________________________________
-//void FunctionalESDeltaPlanar::extract_species_properties(
-//    const std::vector<Properties>& species_properties) {
-//  // Sort the affected species numbers
-//  std::sort(affected_species.begin(), affected_species.end());
-//  // Remove duplicates
-//  affected_species.erase(
-//      unique(affected_species.begin(), affected_species.end()),
-//      affected_species.end());
-//  // If no affected species were specified, find them automatically
-//  double valency{0.};
-//  if (affected_species.empty()) {
-//    for (auto& properties : species_properties) {
-//      try {
-//        if (properties.get_property("valency", &valency)) {
-//          affected_species.push_back(&properties - &species_properties[0]);
-//        }
-//      } catch(...) {}
-//    }
-//  }
-//  // Get valencies
-//  for (auto& species : affected_species) {
-//    species_properties.at(species).get_property("valency", &valency);
-//    valencies.push_back(valency);
-//  }
-//  // Count species that interact via the electrostatic forces
-//  species_count = affected_species.size();
-//}
-//// _____________________________________________________________________________
-//void FunctionalESDeltaPlanar::initialize_all_data_frames() {
-//  // The initialization of the variables (header) called the empty constructor.
-//  // The following construction initializes the DataFrames correctly.
-//  charge_density_profile.~DataFrame<1, double>();
-//  new(&charge_density_profile) DataFrame<1, double>(grid_count);
-//  poisson_rhs.~DataFrame<1, double>();
-//  new(&poisson_rhs) DataFrame<1, double>(grid_count);
-//  potential.~DataFrame<1, double>();
-//  new(&potential) DataFrame<1, double>(grid_count);
-//}
-//// _____________________________________________________________________________
-//void FunctionalESDeltaPlanar::initialize_poisson_solver() {
-//  poisson_solver = new PlanarPoissonSolver(grid_count, dz);
-//  poisson_solver->set_laplacian(DIRICHLET_DIRICHLET);
-//}
-//// _____________________________________________________________________________
-//void FunctionalESDeltaPlanar::calc_charge_densities() {
-//  charge_density_profile.zero();
-//  for (size_t i = 0; i < species_count; ++i) {
-//    charge_density_profile += valencies.at(i) *
-//        density_profiles_pointer->at(affected_species.at(i));
-//  }
-//  poisson_rhs = -4. * M_PI * bjerrum * charge_density_profile;
-//}
-//// _____________________________________________________________________________
+void FunctionalESDeltaPlanar::extract_species_properties(
+    const std::vector<Properties>& species_properties) {
+  // Sort the affected species numbers
+  std::sort(affected_species.begin(), affected_species.end());
+  // Remove duplicates
+  affected_species.erase(
+      unique(affected_species.begin(), affected_species.end()),
+      affected_species.end());
+  // If no affected species were specified, find them automatically
+  double diameter{0.};
+  double bulk_density{0.};
+  double valency{0.};
+  if (affected_species.empty()) {
+    for (auto& properties : species_properties) {
+      try {
+        if (properties.get_property("valency", &valency) &&
+            properties.get_property("diameter", &diameter)) {
+          affected_species.push_back(&properties - &species_properties[0]);
+        }
+      } catch(...) {}
+    }
+  }
+  // Get species specific properties like diameter and valency
+  for (auto& species : affected_species) {
+    species_properties.at(species).get_property("diameter", &diameter);
+    species_properties.at(species).get_property("bulk density", &bulk_density);
+    species_properties.at(species).get_property("valency", &valency);
+    diameters.push_back(diameter);
+    bulk_densities.push_back(bulk_density);
+    valencies.push_back(valency);
+  }
+  // Count species that interact via this functional
+  species_count = affected_species.size();
+}
+// _____________________________________________________________________________
+void FunctionalESDeltaPlanar::initialize_all_data_frames() {
+  charge_density_profiles =
+      std::vector(species_count, DataFrame<1, double>(grid_count));
+  weigted_densities = 
+      std::vector(species_count, DataFrame<1, double>(grid_count));
+  poisson_rhs = std::vector(species_count, DataFrame<1, double>(grid_count));
+  potentials = std::vector(species_count, DataFrame<1, double>(grid_count));
+}
+// _____________________________________________________________________________
+void FunctionalESDeltaPlanar::initialize_poisson_solver() {
+  poisson_solver = new PlanarPoissonSolver(grid_count, dz);
+  poisson_solver->set_laplacian(DIRICHLET_DIRICHLET);
+}
+// _____________________________________________________________________________
+void FunctionalESDeltaPlanar::calc_charge_densities() {
+  for (size_t i = 0; i < species_count; ++i) {
+    charge_density_profiles.at(i) = valencies.at(i) *
+        density_profiles_pointer->at(affected_species.at(i));
+  }
+}
+// _____________________________________________________________________________
+void FunctionalESDeltaPlanar::calc_poisson_rhs() {
+  for (size_t i = 0; i < species_count; ++i) {
+    poisson_rhs.at(i) = -4. * M_PI * bjerrum * weighted_densities.at(i);
+  }
+}
+// _____________________________________________________________________________
 //void FunctionalESDeltaPlanar::calc_potential() {
 //  // Both boundary conditions equal 0 (Dirichlet). Note, that there is no
 //  // external potential involved inside the functional.

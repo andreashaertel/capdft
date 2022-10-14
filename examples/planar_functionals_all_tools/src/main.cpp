@@ -48,7 +48,7 @@ int main(int argc, char** args) {
    */
 // _____________________________________________________________________________
   size_t grid_count = 1e4;
-  double system_length = 10.01769616026711185309;  // in nm
+  double system_length = 10.;  // in nm
   double bjerrum_length = 1.;  // in nm
   double temperature = 300.;  // in K
   double voltage = 0.1;  // in Volt
