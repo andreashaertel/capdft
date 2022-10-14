@@ -10,6 +10,7 @@
  */
 // Includes
 #include "functional.hpp"  // NOLINT
+#include <fftw3.h>
 #include <vector>
 #include "data_frame.hpp"  // NOLINT
 #include "properties.hpp"  // NOLINT
@@ -26,24 +27,20 @@
  */
 class FunctionalESDeltaPlanar : public Functional {
  public:
-  /** \brief Standard Constructor
-   */
+  /** \brief Standard Constructor */
   FunctionalESDeltaPlanar();
-  /** \brief Manual Constructor
-   */
+  /** \brief Manual Constructor */
   FunctionalESDeltaPlanar(
       std::vector<DataFrame<1, double>>* density_profiles,
       const std::vector<Properties>& species_properties,
       const Properties& system_properties,
       std::vector<size_t> affected_species);
-  /** \brief Automated Constructor
-   */
+  /** \brief Automated Constructor */
   FunctionalESDeltaPlanar(
       std::vector<DataFrame<1, double>>* density_profiles,
       const std::vector<Properties>& species_properties,
       const Properties& system_properties);
-  /** \brief Destructor
-   */
+  /** \brief Destructor */
   ~FunctionalESDeltaPlanar();
   /** \brief Calculate the functional derivatives
    *
@@ -68,56 +65,74 @@ class FunctionalESDeltaPlanar : public Functional {
   virtual double calc_energy();
 
  private:
-  /** \brief System length
-   */
+  /** \brief System length */
   double length;
-  /** \brief Number of grid points
-   */
+  /** \brief Number of grid points */
   size_t grid_count;
-  /** \brief Bin width
+  /** \brief Number of grid points in Fourier space (extended system) */
+  size_t grid_count_four;
+  /** \brief Number of grid points of the extended grid.
+   *
+   * Since the weighted densities can penetrate the physically relevant system
+   * bounaries, an extended grid with more points is established.
    */
+  size_t extended_grid_count;
+  /** \brief Offset between extended and regular system in terms of grid points
+   *
+   *  The extended system starts extended_system_offset grid points to the left
+   *  of the regular system. To be more precise, the regular system starts at
+   *  z=0, while the extended system starts at z=-extended_system_offset*dz.
+   */
+  size_t extended_system_offset;
+  /** \brief Bin width */
   double dz;
-  /** \brief Number of species
-   */
+  /** \brief Bin width in Fourier space */
+  double dkz;
+  /** \brief Number of species */
   size_t species_count;
-  /** \brief Bjerrum length
-   */
+  /** \brief Bjerrum length */
   double bjerrum;
-  /** \brief System temperature
-   */
+  /** \brief System temperature */
   double temperature;
-  /** \brief Dielectric constant
-   */
+  /** \brief Dielectric constant */
   double dielectric;
-  /** \brief A list with indices of the affected species
-   */
+  /** \brief A list with indices of the affected species */
   std::vector<size_t> affected_species;
-  /** \brief Hard-sphere diameters of every species
-   */
+  /** \brief Hard-sphere diameters of every species */
   std::vector<double> diameters;
-  /** \brief Bulk densities of every species
-   */
+  /** \brief Bulk densities of every species */
   std::vector<double> bulk_densities;
   /** \brief Valency of every species
    *
    *  To be more general, valencies must be given as "double".
    */
   std::vector<double> valencies;
-  /** \brief Pointer to density profiles
-   */
+  /** \brief Pointer to density profiles */
   std::vector<DataFrame<1, double>>* density_profiles_pointer;
-  /** \brief Charge density profile of every species
-   */
+  /** \brief Charge density profile of every species */
   std::vector<DataFrame<1, double>> charge_density_profiles;
-  /** \brief Right hand side of the Poisson equation for every charge density
-   */
+  /** \brief Right hand side of the Poisson equation for every charge density */
   std::vector<DataFrame<1, double>> poisson_rhs;
-  /** \brief Electrostatic potentials of every species
-   */
+  /** \brief Electrostatic potentials of every species */
   std::vector<DataFrame<1, double>> potentials;
-  /** \brief Weighted (delta-functions) densities
+  /** \brief Weight functions (delta-functions)
+   *
+   *  This is a std::vector-matrix, because the weights depend on all
+   *  combinations of diameter pairs.
    */
-  std::vector<DataFrame<1, double>> weighted_densities;
+  std::vector<std::vector<DataFrame<1, fftw_complex>>> weights_four;
+  /** \brief Weighted (delta-functions) densities in Fourier space
+   *
+   *  This is a std::vector-matrix, because the weights depend on all
+   *  combinations of diameter pairs.
+   */
+  std::vector<std::vector<DataFrame<1, fftw_complex>>> weighted_densities_four;
+  /** \brief Weighted (delta-functions) densities
+   *
+   *  This is not a std::vector-matrix anymore, because a summation over one
+   *  index occured.
+   */
+  std::vector<DataFrame<1, double>> weighted_densities_real;
   /** \brief Poisson solver
    *
    *  This object contains the matrix representation of the numerical Poisson
@@ -137,14 +152,28 @@ class FunctionalESDeltaPlanar : public Functional {
    */
   void extract_species_properties(
       const std::vector<Properties>& species_properties);
+  /** \brief Calculate the properties of the extended system
+   *  
+   *  The extended system is one hard-sphere diameter larger on both ends
+   *  than the regular system. For that the larges hard-sphere diameter is used.
+   */
+  void calc_extended_system_bounds();
   /** \brief Allocate memory for all DataFrame objects */
   void initialize_all_data_frames();
   /** \brief Initialize the PlanarPoissonSolver object */
   void initialize_poisson_solver();
-  /** \brief Calculate the net charge density profile and the rhs of the Poisson
-   *         equation.
+  /** \brief Initialize the weight functions in Fourier space
+   *  
+   *  The weight functions are delta-functions with a radius of the average of
+   *  two hard-sphere diameters.
    */
+  void initialize_weights();
+  /** \brief Calculate charge density profiles */
   void calc_charge_densities();
+  /** \brief Calculate the weighted densities from the charge densities. */
+  void calc_weighted_densities();
+  /** \brief Calculate the rhs of the Poisson equation for every species */
+  void calc_poisson_rhs();
   /** \brief From the charge densities calculate the electrostatic potential */
   void calc_potential();
   /** \brief Integration over charge densities to obtain net charge */

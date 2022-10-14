@@ -45,7 +45,7 @@ FunctionalESDeltaSpherical::FunctionalESDeltaSpherical(
 }
 // _____________________________________________________________________________
 FunctionalESDeltaSpherical::~FunctionalESDeltaSpherical() {
-  //
+  delete poisson_solver;
 }
 // _____________________________________________________________________________
 void FunctionalESDeltaSpherical::extract_system_properties(
@@ -238,12 +238,12 @@ void FunctionalESDeltaSpherical::calc_weighted_densities() {
         fftw_plan_r2r_1d(
             grid_count, weighted_densities.at(i).at(0).array(),
             weighted_densities.at(i).at(0).array(), FFTW_RODFT00,
-            FFTW_MEASURE));
+            FFTW_PATIENT));
     plans_backward.push_back(
         fftw_plan_r2r_1d(
             grid_count, weighted_densities.at(0).at(i).array(),
             weighted_densities.at(0).at(i).array(), FFTW_RODFT00,
-            FFTW_MEASURE));
+            FFTW_PATIENT));
   }
   // Prepare charge densities for Fourier transform
   for (size_t i = 0; i < grid_count; ++i) {
