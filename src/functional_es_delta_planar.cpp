@@ -47,6 +47,7 @@ FunctionalESDeltaPlanar::FunctionalESDeltaPlanar(
 // _____________________________________________________________________________
 FunctionalESDeltaPlanar::~FunctionalESDeltaPlanar() {
   delete poisson_solver;
+  delete total_poisson_solver;
 }
 // _____________________________________________________________________________
 void FunctionalESDeltaPlanar::extract_system_properties(
@@ -167,6 +168,12 @@ void FunctionalESDeltaPlanar::initialize_all_data_frames() {
     std::cerr << std::endl;
     exit(1);
   }
+  total_charge_density_profile.~DataFrame<1, double>();
+  new(&total_charge_density_profile) DataFrame<1, double>(grid_count);
+  total_poisson_rhs.~DataFrame<1, double>();
+  new(&total_poisson_rhs) DataFrame<1, double>(grid_count);
+  total_potential.~DataFrame<1, double>();
+  new(&total_potential) DataFrame<1, double>(grid_count);
   charge_density_profiles =
       std::vector(species_count, DataFrame<1, double>(extended_grid_count));
   poisson_rhs =
@@ -184,6 +191,8 @@ void FunctionalESDeltaPlanar::initialize_all_data_frames() {
 }
 // _____________________________________________________________________________
 void FunctionalESDeltaPlanar::initialize_poisson_solver() {
+  total_poisson_solver = new PlanarPoissonSolver(grid_count, dz);
+  total_poisson_solver->set_laplacian(DIRICHLET_DIRICHLET);
   poisson_solver = new PlanarPoissonSolver(extended_grid_count, dz);
   poisson_solver->set_laplacian(DIRICHLET_DIRICHLET);
 }
@@ -212,7 +221,10 @@ void FunctionalESDeltaPlanar::initialize_weights() {
 // _____________________________________________________________________________
 void FunctionalESDeltaPlanar::calc_charge_densities() {
   size_t index{0};  // index of the extended system
+  total_charge_density_profile.zero();
   for (size_t i = 0; i < species_count; ++i) {
+    total_charge_density_profile += valencies.at(i) *
+          density_profiles_pointer->at(affected_species.at(i));
     charge_density_profiles.at(i).zero();
     for (size_t j = 0; j < grid_count; ++j) {
       index = extended_system_offset + j;
@@ -225,24 +237,28 @@ void FunctionalESDeltaPlanar::calc_charge_densities() {
 void FunctionalESDeltaPlanar::calc_derivative(
     std::vector<DataFrame<1, double>>* functional_derivative) {
   size_t i{0};
-  // Calculate the total charge density
-  calc_charge_densities();
   // From the charge densities calculate the weighted densities
+  // The charge densities are calculated after the FFTW plans are established.
   calc_weighted_densities();
   calc_poisson_rhs();
   // From the charge densities calculate the electrostatic potential
   calc_potential();
-  //// Calculate the functional derivative which is the electrostatic potential
-  //for (auto it = affected_species.begin(); it != affected_species.end(); ++it) {
-  //  i = it - affected_species.begin();
-  //  functional_derivative->at(*it) = valencies.at(i) * potential;
-  //}
+  // Calculate the derivative from the electrostatic potential
+  for (auto it = affected_species.begin(); it != affected_species.end(); ++it) {
+    i = it - affected_species.begin();
+    for (size_t j = 0; j < grid_count; ++j) {
+      functional_derivative->at(*it).at(j) = valencies.at(i) *
+          potentials.at(i).at(extended_system_offset+j);
+      //functional_derivative->at(*it).at(j) = valencies.at(i) *
+      //    total_potential.at(j);
+    }
+  }
 }
 // _____________________________________________________________________________
 void FunctionalESDeltaPlanar::calc_bulk_derivative(
     std::vector<double>* bulk_derivative) {
-  //// The bulk values of this functional's derivative are always zero
-  //std::fill(bulk_derivative->begin(), bulk_derivative->end(), 0.);
+  // The bulk values of this functional's derivative are always zero
+  std::fill(bulk_derivative->begin(), bulk_derivative->end(), 0.);  // TODO(Moritz): correct
 }
 // _____________________________________________________________________________
 void FunctionalESDeltaPlanar::calc_weighted_densities() {
@@ -259,6 +275,7 @@ void FunctionalESDeltaPlanar::calc_weighted_densities() {
             extended_grid_count, weighted_densities_four.at(0).at(i).array(),
             weighted_densities_real.at(i).array(), FFTW_PATIENT));
   }
+  calc_charge_densities();
   // Execute Fourier transform
   for (auto& plan : plans_forward) {
     fftw_execute(plan);
@@ -299,6 +316,7 @@ void FunctionalESDeltaPlanar::calc_weighted_densities() {
 }
 // _____________________________________________________________________________
 void FunctionalESDeltaPlanar::calc_poisson_rhs() {
+  total_poisson_rhs = -4. * M_PI * bjerrum * total_charge_density_profile;
   for (size_t i = 0; i < species_count; ++i) {
     poisson_rhs.at(i) = -4. * M_PI * bjerrum * weighted_densities_real.at(i);
   }
@@ -307,12 +325,24 @@ void FunctionalESDeltaPlanar::calc_poisson_rhs() {
 void FunctionalESDeltaPlanar::calc_potential() {
   // Both boundary conditions equal 0 (Dirichlet). Note, that there is no
   // external potential involved inside the functional.
-  double left_boundary{0.};
-  double right_boundary{0.};
-  // Solve the Poisson equation numerically
+  double left_boundary{0.}, left_boundary_extended{0.};
+  double right_boundary{0.}, right_boundary_extended{0.};
+  // Solve the regular Poisson equation numerically
+  total_poisson_solver->solve(left_boundary, right_boundary,
+      total_poisson_rhs.array(), total_potential.array());
+  // Calculate the boundary conditions via extrapolation
+  // Keep in mind, that the boundary condition is set to be half a bin outside
+  // the system.
+  left_boundary_extended = left_boundary +
+      static_cast<double>(extended_system_offset) *
+      2. * (left_boundary - total_potential.at(0));
+  right_boundary_extended = right_boundary +
+      static_cast<double>(extended_system_offset) *
+      2. * (right_boundary - total_potential.at(grid_count - 1));
+  // Now solve the Poisson equation for the weighted densities separately
   for (size_t i = 0; i < species_count; ++i) {
-    poisson_solver->solve(left_boundary, right_boundary,
-        poisson_rhs.at(i).array(), potential.at(i).array());
+    poisson_solver->solve(left_boundary_extended, right_boundary_extended,
+        poisson_rhs.at(i).array(), potentials.at(i).array());
   }
 }
 // _____________________________________________________________________________

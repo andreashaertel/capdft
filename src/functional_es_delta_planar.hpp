@@ -107,6 +107,12 @@ class FunctionalESDeltaPlanar : public Functional {
    *  To be more general, valencies must be given as "double".
    */
   std::vector<double> valencies;
+  /** \brief Total charge density profile */
+  DataFrame<1, double> total_charge_density_profile;
+  /** \brief Total charge density profile */
+  DataFrame<1, double> total_poisson_rhs;
+  /** \brief Total charge density profile */
+  DataFrame<1, double> total_potential;
   /** \brief Pointer to density profiles */
   std::vector<DataFrame<1, double>>* density_profiles_pointer;
   /** \brief Charge density profile of every species */
@@ -133,7 +139,13 @@ class FunctionalESDeltaPlanar : public Functional {
    *  index occured.
    */
   std::vector<DataFrame<1, double>> weighted_densities_real;
-  /** \brief Poisson solver
+  /** \brief Poisson solver for total charge densities
+   *
+   *  This object contains the matrix representation of the numerical Poisson
+   *  equation.
+   */
+  PlanarPoissonSolver* total_poisson_solver;
+  /** \brief Poisson solver for species potentials
    *
    *  This object contains the matrix representation of the numerical Poisson
    *  equation.
@@ -168,7 +180,11 @@ class FunctionalESDeltaPlanar : public Functional {
    *  two hard-sphere diameters.
    */
   void initialize_weights();
-  /** \brief Calculate charge density profiles */
+  /** \brief Calculate charge density profiles
+   *
+   *  calculates the total_charge_density_profile and the charge density
+   *  profiles of the species.
+   */
   void calc_charge_densities();
   /** \brief Calculate the weighted densities from the charge densities. */
   void calc_weighted_densities();
