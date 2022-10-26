@@ -13,23 +13,24 @@ PlanarPoissonSolver::PlanarPoissonSolver() {
   //
 }
 // _____________________________________________________________________________
-PlanarPoissonSolver::PlanarPoissonSolver(size_t dim, double dz)
-  : dim(dim), dz(dz), dzdz(dz * dz) {
-  // Allocate memory for the matrix elements
-  upper = new double[dim];
-  diag = new double[dim];
-  lower = new double[dim];
+PlanarPoissonSolver::PlanarPoissonSolver(
+    size_t dim, double dz, BoundaryFlag flag)
+  : dim(dim), dz(dz), dzdz(dz * dz), flag(flag) {
+  initialize_matrix();
+  set_laplacian();
 }
 // _____________________________________________________________________________
 PlanarPoissonSolver::~PlanarPoissonSolver() {
-  // Free memory
-  delete [] upper;
-  delete [] diag;
-  delete [] lower;
+  //
 }
 // _____________________________________________________________________________
-void PlanarPoissonSolver::set_laplacian(BoundaryFlag flag) {
-  this->flag = flag;
+void PlanarPoissonSolver::initialize_matrix() {
+  upper = std::vector<double>(dim);
+  diag = std::vector<double>(dim);
+  lower = std::vector<double>(dim);
+}
+// _____________________________________________________________________________
+void PlanarPoissonSolver::set_laplacian() {
   // Set boundary conditions
   switch (flag) {
     case NEUMANN_NEUMANN:
@@ -51,7 +52,7 @@ void PlanarPoissonSolver::set_laplacian(BoundaryFlag flag) {
   }
 }
 // _____________________________________________________________________________
-void PlanarPoissonSolver::set_laplacian() {
+void PlanarPoissonSolver::set_bare_laplacian() {
   // Just set the matrix elements without any boundary conditions
   for (size_t i = 0; i < dim; ++i) {
     upper[i] = 1. / dzdz;
@@ -65,7 +66,7 @@ void PlanarPoissonSolver::set_laplacian() {
 // _____________________________________________________________________________
 void PlanarPoissonSolver::set_laplacian_NN() {
   // Set Laplacian without boundary conditions
-  set_laplacian();
+  set_bare_laplacian();
   // Set the second derivative at the boundaries
   diag[0] = -1. / dzdz;
   upper[0] = 1. / dzdz;
@@ -77,7 +78,7 @@ void PlanarPoissonSolver::set_laplacian_NN() {
 // _____________________________________________________________________________
 void PlanarPoissonSolver::set_laplacian_DD() {
   // Set Laplacian without boundary conditions
-  set_laplacian();
+  set_bare_laplacian();
   // Set the second derivative at the boundaries
   diag[0] = -4. / dzdz;
   upper[0] = 4. / (3. * dzdz);
@@ -89,7 +90,7 @@ void PlanarPoissonSolver::set_laplacian_DD() {
 // _____________________________________________________________________________
 void PlanarPoissonSolver::set_laplacian_ND() {
   // Set Laplacian without boundary conditions
-  set_laplacian();
+  set_bare_laplacian();
   // Set the second derivative at the boundaries
   diag[0] = -1. / dzdz;
   upper[0] = 1. / dzdz;
@@ -101,7 +102,7 @@ void PlanarPoissonSolver::set_laplacian_ND() {
 // _____________________________________________________________________________
 void PlanarPoissonSolver::set_laplacian_DN() {
   // Set Laplacian without boundary conditions
-  set_laplacian();
+  set_bare_laplacian();
   // Set the second derivative at the boundaries
   diag[0] = -4. / dzdz;
   upper[0] = 4. / (3. * dzdz);

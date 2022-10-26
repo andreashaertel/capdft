@@ -9,7 +9,9 @@
  */
 // Includes
 #include <cstddef>
-// Flag definition for boundary conditions
+#include <vector>
+/** \brief Flag definition for boundary conditions
+ */
 enum BoundaryFlag {
   NEUMANN_NEUMANN = 0,
   DIRICHLET_DIRICHLET = 1,
@@ -35,15 +37,10 @@ class PlanarPoissonSolver {
    * Passes the size "dim" of the array to be solved, the grid spacing "dr" of
    * the array.
    */
-  PlanarPoissonSolver(size_t dim, double dz);
+  PlanarPoissonSolver(size_t dim, double dz, BoundaryFlag flag);
   /** \brief Destructor
    */
   ~PlanarPoissonSolver();
-  /** \brief Set the Laplace matrix with the chosen boundary conditions
-   *
-   *  The boundary conditions are assumed to be 
-   */
-  void set_laplacian(BoundaryFlag flag);
   /** \brief Solve the linear equation system: the boundary must be specified
    *  
    *  For example the DIRICHLET_NEUMANN case expects a left boundary value
@@ -82,22 +79,31 @@ class PlanarPoissonSolver {
   BoundaryFlag flag;
   /** \brief Upper off-diagonal elements of the tridiagonal matrix
    */
-  double* upper;
+  std::vector<double> upper;
   /** \brief Diagonal elements of the tridiagonal matrix
    */
-  double* diag;
+  std::vector<double> diag;
   /** \brief Lower off-diagonal elements of the tridiagonal matrix
    */
-  double* lower;
+  std::vector<double> lower;
+  /** \brief Check if the boundary positions are valid
+   */
+  bool check_boundary_positions();
   /** \brief Set the Laplace matrix with certain boundary conditions
    */
   void set_laplacian_NN();
   void set_laplacian_DD();
   void set_laplacian_ND();
   void set_laplacian_DN();
-  /** \brief Set the Laplace matrix without boundary conditions
+  /** \brief Set up arrays for needed to describe the tridiagonal matrix
+   */
+  void initialize_matrix();
+  /** \brief Set the Laplace matrix with boundary conditions
    */
   void set_laplacian();
+  /** \brief Set the Laplace matrix without boundary conditions
+   */
+  void set_bare_laplacian();
   /** \brief Add the boundary values to the right-hand side
    */
   void set_boundary_values_laplace(double left_boundary_value,

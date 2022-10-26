@@ -177,7 +177,7 @@ int main(int argc, char** args) {
   my_iterator.add_convergence_criterion<ConvergenceCriterionMaxDev>(1.0e-4);
   my_iterator.add_convergence_criterion<ConvergenceCriterionNan>(0);
   //my_iterator.run_picard(1e-5);
-  my_iterator.run_anderson(2e-5, 15);
+  my_iterator.run_anderson(2e-4, 15);
 // _____________________________________________________________________________
   /* All done!
    * Now we produce some output and view it in gnuplot.

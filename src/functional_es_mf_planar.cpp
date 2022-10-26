@@ -140,8 +140,7 @@ void FunctionalESMFPlanar::initialize_all_data_frames() {
 }
 // _____________________________________________________________________________
 void FunctionalESMFPlanar::initialize_poisson_solver() {
-  poisson_solver = new PlanarPoissonSolver(grid_count, dz);
-  poisson_solver->set_laplacian(DIRICHLET_DIRICHLET);
+  poisson_solver = new PlanarPoissonSolver(grid_count, dz, DIRICHLET_DIRICHLET);
 }
 // _____________________________________________________________________________
 void FunctionalESMFPlanar::calc_charge_densities() {

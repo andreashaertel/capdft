@@ -191,10 +191,10 @@ void FunctionalESDeltaPlanar::initialize_all_data_frames() {
 }
 // _____________________________________________________________________________
 void FunctionalESDeltaPlanar::initialize_poisson_solver() {
-  total_poisson_solver = new PlanarPoissonSolver(grid_count, dz);
-  total_poisson_solver->set_laplacian(DIRICHLET_DIRICHLET);
-  poisson_solver = new PlanarPoissonSolver(extended_grid_count, dz);
-  poisson_solver->set_laplacian(DIRICHLET_DIRICHLET);
+  poisson_solver = new PlanarPoissonSolver(
+      extended_grid_count, dz, DIRICHLET_DIRICHLET);
+  total_poisson_solver = new PlanarPoissonSolver(
+      grid_count, dz, DIRICHLET_DIRICHLET);
 }
 // _____________________________________________________________________________
 void FunctionalESDeltaPlanar::initialize_weights() {
@@ -249,8 +249,6 @@ void FunctionalESDeltaPlanar::calc_derivative(
     for (size_t j = 0; j < grid_count; ++j) {
       functional_derivative->at(*it).at(j) = valencies.at(i) *
           potentials.at(i).at(extended_system_offset+j);
-      //functional_derivative->at(*it).at(j) = valencies.at(i) *
-      //    total_potential.at(j);
     }
   }
 }
@@ -340,6 +338,7 @@ void FunctionalESDeltaPlanar::calc_potential() {
       static_cast<double>(extended_system_offset) *
       2. * (right_boundary - total_potential.at(grid_count - 1));
   // Now solve the Poisson equation for the weighted densities separately
+  // TODO(Moritz): set potential to zero at regular boundaries
   for (size_t i = 0; i < species_count; ++i) {
     poisson_solver->solve(left_boundary_extended, right_boundary_extended,
         poisson_rhs.at(i).array(), potentials.at(i).array());
