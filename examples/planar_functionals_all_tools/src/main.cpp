@@ -12,6 +12,7 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
+#include "../../../src/constants.hpp"
 #include "../../../src/convergence_criterion.hpp"
 #include "../../../src/convergence_criterion_max_dev.hpp"
 #include "../../../src/convergence_criterion_steps.hpp"
@@ -19,8 +20,8 @@
 #include "../../../src/data_frame.hpp"
 #include "../../../src/functional.hpp"
 #include "../../../src/functional_fmt_planar.hpp"
-//#include "../../../src/functional_es_mf_planar.hpp"
-//#include "../../../src/functional_es_delta_planar.hpp"
+#include "../../../src/functional_es_mf_planar.hpp"
+#include "../../../src/functional_es_delta_planar.hpp"
 #include "../../../src/iterator.hpp"
 #include "../../../src/properties.hpp"
 // _____________________________________________________________________________
@@ -46,11 +47,14 @@ int main(int argc, char** args) {
    * step lies exactly between two bins.
    */
 // _____________________________________________________________________________
-  size_t grid_count = static_cast<size_t>(4e2+.5) + 1;  // equals 10,001
-  double system_length = 10.01769616026711185309;  // in nm
+  size_t grid_count = 1e4;
+  double system_length = 10.;  // in nm
   double bjerrum_length = 1.;  // in nm
   double temperature = 300.;  // in K
   double voltage = 0.1;  // in Volt
+  // Convert voltage to reduced units
+  double potential =
+      1e4 * voltage * ELECTRON_CHARGE / (BOLTZMANN * temperature);
   // Create objects of Properties class
   Properties properties;
   Properties system_properties;
@@ -62,7 +66,7 @@ int main(int argc, char** args) {
   system_properties.add_property<size_t>("grid count", grid_count);
   system_properties.add_property<size_t>("voltage", voltage);
   // First species
-  properties.add_property<double>("diameter", .3);
+  properties.add_property<double>("diameter", .4);
   properties.add_property<double>("bulk density", 3.);
   properties.add_property<double>("valency", -1.);
   species_properties.push_back(properties);
@@ -95,12 +99,12 @@ int main(int argc, char** args) {
   std::vector<size_t> affected_species_fmt{0, 2};  // selected species 0 and 2
   FunctionalFMTPlanar my_fmt_functional(&density_profiles,
       species_properties, system_properties, affected_species_fmt);
-  //// Create an ES functional object.
-  //std::vector<size_t> affected_species_es{0, 2};  // selected species 0 and 2
-  ////FunctionalESMFPlanar my_es_functional(&density_profiles,
-  ////    species_properties, system_properties, affected_species_es);
-  //FunctionalESDeltaPlanar my_es_functional(&density_profiles,
+  // Create an ES functional object.
+  std::vector<size_t> affected_species_es{0, 2};  // selected species 0 and 2
+  //FunctionalESMFPlanar my_es_functional(&density_profiles,
   //    species_properties, system_properties, affected_species_es);
+  FunctionalESDeltaPlanar my_es_functional(&density_profiles,
+      species_properties, system_properties, affected_species_es);
 // _____________________________________________________________________________
   // Picard iterations
   /* For the Picard iterations the Iterator class is used. For that we define
@@ -109,8 +113,8 @@ int main(int argc, char** args) {
    * to carry out the Picard iterations. In this case we use two planar hard
    * walls at distance system_length as external potential.
    *
-   * If you want to save loads of time use the Andersen mixing algorithm
-   * run_andersen() instead of the Picard iterations. They usually are faster
+   * If you want to save loads of time use the Anderson mixing algorithm
+   * run_anderson() instead of the Picard iterations. They usually are faster
    * by a factor of 20.
    *
    * The convergence criteria are also added to the Iterator. They are added via
@@ -136,7 +140,7 @@ int main(int argc, char** args) {
   for (auto& species : affected_species_fmt) {
     species_properties.at(species).get_property("diameter", &diameter);
     for (size_t j = 0; j != grid_count; ++j) {
-      z = dz * static_cast<double>(j);
+      z = dz * (static_cast<double>(j) + 0.5);
       if (z < (diameter / 2.)) {
         exp_ext_potential.at(species).at(j) = 0.;
       } else if ((system_length - z) < (diameter / 2.)) {
@@ -152,27 +156,27 @@ int main(int argc, char** args) {
     density_profiles.at(i).set_all_elements_to(bulk_density);
     density_profiles.at(i) *= exp_ext_potential.at(i);
   }
-  //// Set external electrostatic potential (linear between two charged plates)
-  //for (auto& species : affected_species_es) {
-  //  species_properties.at(species).get_property("valency", &valency);
-  //  species_properties.at(species).get_property("diameter", &diameter);
-  //  for (size_t j = 0; j != grid_count; ++j) {
-  //    z = dz * static_cast<double>(j);
-  //    exp_ext_potential.at(species).at(j) *=
-  //        exp(voltage * (1. / 2. - z / system_length));
-  //  }
-  //}
+  // Set external electrostatic potential (linear between two charged plates)
+  for (auto& species : affected_species_es) {
+    species_properties.at(species).get_property("valency", &valency);
+    species_properties.at(species).get_property("diameter", &diameter);
+    for (size_t j = 0; j != grid_count; ++j) {
+      z = dz * (static_cast<double>(j) + 0.5);
+      exp_ext_potential.at(species).at(j) *=
+          exp(valency * potential * (1. / 2. - z / system_length));
+    }
+  }
   // Create iterator and run iterations
   Iterator my_iterator(&density_profiles, exp_ext_potential,
       species_properties);
   my_iterator.add_excess_functional(&my_fmt_functional);
-  //my_iterator.add_excess_functional(&my_es_functional);
+  my_iterator.add_excess_functional(&my_es_functional);
   my_iterator.clear_convergence_criteria();
-  my_iterator.add_convergence_criterion<ConvergenceCriterionSteps>(2e3);
-  my_iterator.add_convergence_criterion<ConvergenceCriterionMaxDev>(1.0e-4);
+  my_iterator.add_convergence_criterion<ConvergenceCriterionSteps>(3e3);
+  my_iterator.add_convergence_criterion<ConvergenceCriterionMaxDev>(1.0e-5);
   my_iterator.add_convergence_criterion<ConvergenceCriterionNan>(0);
-  my_iterator.run_picard(1e-1);
-  //my_iterator.run_anderson(1e-1, 10);
+  //my_iterator.run_picard(1e-7);
+  my_iterator.run_anderson(1e-4, 15);
 // _____________________________________________________________________________
   /* All done!
    * Now we produce some output and view it in gnuplot.
@@ -200,8 +204,8 @@ int main(int argc, char** args) {
   energy = my_fmt_functional.calc_energy();
   std::cout << "Excess free energy per square nanometer of FMT functional: ";
   std::cout << energy << std::endl;
-  //energy = my_es_functional.calc_energy();
-  //std::cout << "Excess free energy of mean-field electrostatic functional: ";
-  //std::cout << energy << std::endl;
+  energy = my_es_functional.calc_energy();
+  std::cout << "Excess free energy of mean-field electrostatic functional: ";
+  std::cout << energy << std::endl;
   return 0;
 }

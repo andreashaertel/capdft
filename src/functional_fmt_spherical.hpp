@@ -208,8 +208,8 @@ class FunctionalFMTSpherical : public Functional {
    *  The first one preserves the input, while the second one might destroy it.
    *
    */
-  static const unsigned int flags_keep = FFTW_MEASURE | FFTW_PRESERVE_INPUT;
-  static const unsigned int flags_destroy = FFTW_MEASURE;
+  static const unsigned int flags_keep = FFTW_PATIENT | FFTW_PRESERVE_INPUT;
+  static const unsigned int flags_destroy = FFTW_PATIENT;
   /** \brief Calculate the weighted densities
    *
    */

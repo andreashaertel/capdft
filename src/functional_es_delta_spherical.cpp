@@ -10,13 +10,9 @@
 #include <cmath>
 #include <algorithm>
 #include <vector>
+#include "constants.hpp"  // NOLINT
 #include "data_frame.hpp"  // NOLINT
 #include "integration.hpp"  // NOLINT
-// Define some natural constants
-#define ELECTRON_CHARGE 1.602176634  // *1e-19
-#define BOLTZMANN 1.38064852  // *1e-23
-#define VACUUM_PERMITIVITY 8.8541878128  // *1e-12
-#define AVOGADRO 6.02214076  // *1e23
 // _____________________________________________________________________________
 FunctionalESDeltaSpherical::FunctionalESDeltaSpherical() {
 }
@@ -30,7 +26,7 @@ FunctionalESDeltaSpherical::FunctionalESDeltaSpherical(
     density_profiles_pointer(density_profiles) {
   // Get system properties
   extract_system_properties(system_properties);
-  // Get species properties; excludes all species without diameter property
+  // Get species properties
   extract_species_properties(species_properties);
   // Initialize all data frames and update charge densities etc.
   initialize_all_data_frames();
@@ -49,7 +45,7 @@ FunctionalESDeltaSpherical::FunctionalESDeltaSpherical(
 }
 // _____________________________________________________________________________
 FunctionalESDeltaSpherical::~FunctionalESDeltaSpherical() {
-  //
+  delete poisson_solver;
 }
 // _____________________________________________________________________________
 void FunctionalESDeltaSpherical::extract_system_properties(
@@ -242,12 +238,12 @@ void FunctionalESDeltaSpherical::calc_weighted_densities() {
         fftw_plan_r2r_1d(
             grid_count, weighted_densities.at(i).at(0).array(),
             weighted_densities.at(i).at(0).array(), FFTW_RODFT00,
-            FFTW_MEASURE));
+            FFTW_PATIENT));
     plans_backward.push_back(
         fftw_plan_r2r_1d(
             grid_count, weighted_densities.at(0).at(i).array(),
             weighted_densities.at(0).at(i).array(), FFTW_RODFT00,
-            FFTW_MEASURE));
+            FFTW_PATIENT));
   }
   // Prepare charge densities for Fourier transform
   for (size_t i = 0; i < grid_count; ++i) {
