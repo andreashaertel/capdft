@@ -50,6 +50,52 @@ FunctionalESDeltaPlanar::~FunctionalESDeltaPlanar() {
   delete total_poisson_solver;
 }
 // _____________________________________________________________________________
+void FunctionalESDeltaPlanar::calc_derivative(
+    std::vector<DataFrame<1, double>>* functional_derivative) {
+  size_t i{0};
+  // From the charge densities calculate the weighted densities
+  // The charge densities are calculated after the FFTW plans are established.
+  calc_weighted_densities();
+  calc_poisson_rhs();
+  // From the charge densities calculate the electrostatic potential
+  calc_potential();
+  // Calculate the derivative from the electrostatic potential
+  for (auto it = affected_species.begin(); it != affected_species.end(); ++it) {
+    i = it - affected_species.begin();
+    for (size_t j = 0; j < grid_count; ++j) {
+      functional_derivative->at(*it).at(j) = valencies.at(i) *
+          potentials.at(i).at(extended_system_offset+j);
+    }
+  }
+}
+// _____________________________________________________________________________
+void FunctionalESDeltaPlanar::calc_bulk_derivative(
+    std::vector<double>* bulk_derivative) {
+  size_t index{0};
+  std::fill(bulk_derivative->begin(), bulk_derivative->end(), 0.);
+  for (size_t i = 0; i < species_count; ++i) {
+    index = affected_species.at(i);
+    for (size_t j = 0; j < species_count; ++j) {
+      bulk_derivative->at(index) += valencies.at(j) * bulk_densities.at(j) *
+          pow(diameters.at(i) + diameters.at(j), 2);
+    }
+    bulk_derivative->at(index) *= -M_PI * valencies.at(i) * bjerrum / 6.;
+  }
+}
+// _____________________________________________________________________________
+double FunctionalESDeltaPlanar::calc_energy() {
+  DataFrame<1, double> energy_density(extended_grid_count);
+  double integral{0.};
+  calc_charge_densities();
+  calc_weighted_densities();
+  calc_potential();
+  for (size_t i = 0; i < species_count; ++i) {
+    energy_density += .5 * potentials.at(i) * charge_density_profiles.at(i);
+  }
+  integral = integration_1d_closed(energy_density, dz);
+  return integral;
+}
+// _____________________________________________________________________________
 void FunctionalESDeltaPlanar::extract_system_properties(
     const Properties& system_properties) {
   // Extract system properties directly
@@ -234,31 +280,6 @@ void FunctionalESDeltaPlanar::calc_charge_densities() {
   }
 }
 // _____________________________________________________________________________
-void FunctionalESDeltaPlanar::calc_derivative(
-    std::vector<DataFrame<1, double>>* functional_derivative) {
-  size_t i{0};
-  // From the charge densities calculate the weighted densities
-  // The charge densities are calculated after the FFTW plans are established.
-  calc_weighted_densities();
-  calc_poisson_rhs();
-  // From the charge densities calculate the electrostatic potential
-  calc_potential();
-  // Calculate the derivative from the electrostatic potential
-  for (auto it = affected_species.begin(); it != affected_species.end(); ++it) {
-    i = it - affected_species.begin();
-    for (size_t j = 0; j < grid_count; ++j) {
-      functional_derivative->at(*it).at(j) = valencies.at(i) *
-          potentials.at(i).at(extended_system_offset+j);
-    }
-  }
-}
-// _____________________________________________________________________________
-void FunctionalESDeltaPlanar::calc_bulk_derivative(
-    std::vector<double>* bulk_derivative) {
-  // The bulk values of this functional's derivative are always zero
-  std::fill(bulk_derivative->begin(), bulk_derivative->end(), 0.);  // TODO(Moritz): correct
-}
-// _____________________________________________________________________________
 void FunctionalESDeltaPlanar::calc_weighted_densities() {
   // Create fftw plans
   std::vector<fftw_plan> plans_forward;
@@ -342,15 +363,5 @@ void FunctionalESDeltaPlanar::calc_potential() {
     poisson_solver->solve(left_boundary_extended, right_boundary_extended,
         poisson_rhs.at(i).array(), potentials.at(i).array());
   }
-}
-// _____________________________________________________________________________
-double FunctionalESDeltaPlanar::calc_energy() {
-  DataFrame<1, double> energy_density(grid_count);
-  double integral{0.};
-  calc_charge_densities();
-  //calc_potential();
-  //energy_density = .5 * potential * charge_density_profile;
-  //integral = integration_1d_closed(energy_density, dz);
-  return integral;
 }
 // _____________________________________________________________________________

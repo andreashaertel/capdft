@@ -47,7 +47,7 @@ int main(int argc, char** args) {
    * step lies exactly between two bins.
    */
 // _____________________________________________________________________________
-  size_t grid_count = 1e3;
+  size_t grid_count = 1e4;
   double system_length = 10.;  // in nm
   double bjerrum_length = 1.;  // in nm
   double temperature = 300.;  // in K
@@ -66,7 +66,7 @@ int main(int argc, char** args) {
   system_properties.add_property<size_t>("grid count", grid_count);
   system_properties.add_property<size_t>("voltage", voltage);
   // First species
-  properties.add_property<double>("diameter", .3);
+  properties.add_property<double>("diameter", .4);
   properties.add_property<double>("bulk density", 3.);
   properties.add_property<double>("valency", -1.);
   species_properties.push_back(properties);
@@ -176,7 +176,7 @@ int main(int argc, char** args) {
   my_iterator.add_convergence_criterion<ConvergenceCriterionMaxDev>(1.0e-5);
   my_iterator.add_convergence_criterion<ConvergenceCriterionNan>(0);
   //my_iterator.run_picard(1e-7);
-  my_iterator.run_anderson(1e-3, 15);
+  my_iterator.run_anderson(1e-4, 15);
 // _____________________________________________________________________________
   /* All done!
    * Now we produce some output and view it in gnuplot.
