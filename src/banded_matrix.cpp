@@ -76,39 +76,39 @@ void BandedMatrix::lu_decomposition() {
   }
   // LU decomposition algorithm
   l = lower_bw;
-  for (size_t k = 0; k < row_count; ++k) {
+  for (size_t i = 0; i < row_count; ++i) {
     // Check for pivoting
-    dummy = u_matrix.at(0).at(k);
-    m = k;
+    dummy = u_matrix.at(0).at(i);
+    m = i;
     if (l < row_count) { ++l; }
-    for (size_t j = k + 1; j < l; ++j) {
+    for (size_t j = i + 1; j < l; ++j) {
       if (fabs(u_matrix.at(0).at(j)) > fabs(dummy)) {
         dummy = u_matrix.at(0).at(j);
         m = j;
       }
     }
-    pivot[k] = m + 1;
+    pivot.at(i) = m + 1;
     if (dummy == 0.) {
-      u_matrix.at(0).at(k) = std::numeric_limits<double>::epsilon();
+      u_matrix.at(0).at(i) = std::numeric_limits<double>::epsilon();
       std::cerr << "BandedMatrix::solve(): \"Warning: ";
       std::cerr << "Banded matrix appears to be singular.\"";
       std::cerr << std::endl;
     }
     // Swap rows
-    if (m != k) {
+    if (m != i) {
       for (size_t j = 0; j < band_count; ++j) {
-        std::swap(u_matrix.at(j).at(k), u_matrix.at(j).at(m));
+        std::swap(u_matrix.at(j).at(i), u_matrix.at(j).at(m));
       }
     }
     // LU decomposition
-    for (size_t i = k + 1; i < l; ++i) {
-      dummy = u_matrix.at(0).at(i) / u_matrix.at(0).at(k);
-      l_matrix.at(i - k - 1).at(k) = dummy;
-      for (size_t j = 1; j <  band_count; ++j) {
-        u_matrix.at(j - 1).at(i) = 
-            u_matrix.at(j).at(i) - dummy * u_matrix.at(j).at(k);
-        u_matrix.at(band_count - 1).at(i) = 0.;
+    for (size_t j = i + 1; j < l; ++j) {
+      dummy = u_matrix.at(0).at(j) / u_matrix.at(0).at(i);
+      l_matrix.at(j - i - 1).at(i) = dummy;
+      for (size_t k = 1; k <  band_count; ++k) {
+        u_matrix.at(k - 1).at(j) = 
+            u_matrix.at(k).at(j) - dummy * u_matrix.at(k).at(i);
       }
+      u_matrix.at(band_count - 1).at(j) = 0.;
     }
   }
 }
@@ -117,16 +117,16 @@ void BandedMatrix::lu_solve(double* rhs, double* solution) {
   size_t band_count{lower_bw + upper_bw + 1};
   size_t l{0}, m{0};
   double dummy{0.};
-  l = lower_bw;
   for (size_t i = 0; i < row_count; ++i) {
     solution[i] = rhs[i];
   }
+  l = lower_bw;
   for (size_t i = 0; i < row_count; ++i) {
-    m = pivot[i] - 1;
+    m = pivot.at(i) - 1;
     if (i != m) { std::swap(solution[i], solution[m]); }
     if (l < row_count) { ++l; }
     for (size_t j = i + 1; j < l; ++j) {
-      solution[j] += -l_matrix.at(j-i-1).at(i) * solution[i];
+      solution[j] += -l_matrix.at(j - i - 1).at(i) * solution[i];
     }
   }
   l = 1;
