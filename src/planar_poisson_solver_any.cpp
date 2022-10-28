@@ -21,7 +21,7 @@ PlanarPoissonSolverAny::PlanarPoissonSolverAny(
   std::sort(boundary_positions.begin(), boundary_positions.end());
   this->boundary_positions.at(1) += 1;
   set_laplacian();
-  lu_decomposition();
+  BandedMatrix::lu_decomposition();
 }
 // _____________________________________________________________________________
 PlanarPoissonSolverAny::~PlanarPoissonSolverAny() {

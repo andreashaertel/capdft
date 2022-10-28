@@ -47,8 +47,7 @@ int main(int argc, char** args) {
    * step lies exactly between two bins.
    */
 // _____________________________________________________________________________
-  //size_t grid_count = 1e4;
-  size_t grid_count = 1e4;
+  size_t grid_count = 1e3;
   double system_length = 10.;  // in nm
   double bjerrum_length = 1.;  // in nm
   double temperature = 300.;  // in K
@@ -141,7 +140,7 @@ int main(int argc, char** args) {
   for (auto& species : affected_species_fmt) {
     species_properties.at(species).get_property("diameter", &diameter);
     for (size_t j = 0; j != grid_count; ++j) {
-      z = dz * static_cast<double>(j);
+      z = dz * (static_cast<double>(j) + 0.5);
       if (z < (diameter / 2.)) {
         exp_ext_potential.at(species).at(j) = 0.;
       } else if ((system_length - z) < (diameter / 2.)) {
@@ -162,7 +161,7 @@ int main(int argc, char** args) {
     species_properties.at(species).get_property("valency", &valency);
     species_properties.at(species).get_property("diameter", &diameter);
     for (size_t j = 0; j != grid_count; ++j) {
-      z = dz * static_cast<double>(j);
+      z = dz * (static_cast<double>(j) + 0.5);
       exp_ext_potential.at(species).at(j) *=
           exp(valency * potential * (1. / 2. - z / system_length));
     }
@@ -173,11 +172,11 @@ int main(int argc, char** args) {
   my_iterator.add_excess_functional(&my_fmt_functional);
   my_iterator.add_excess_functional(&my_es_functional);
   my_iterator.clear_convergence_criteria();
-  my_iterator.add_convergence_criterion<ConvergenceCriterionSteps>(2e3);
-  my_iterator.add_convergence_criterion<ConvergenceCriterionMaxDev>(1.0e-4);
+  my_iterator.add_convergence_criterion<ConvergenceCriterionSteps>(3e3);
+  my_iterator.add_convergence_criterion<ConvergenceCriterionMaxDev>(1.0e-5);
   my_iterator.add_convergence_criterion<ConvergenceCriterionNan>(0);
-  //my_iterator.run_picard(1e-5);
-  my_iterator.run_anderson(2e-4, 15);
+  //my_iterator.run_picard(1e-7);
+  my_iterator.run_anderson(1e-3, 15);
 // _____________________________________________________________________________
   /* All done!
    * Now we produce some output and view it in gnuplot.

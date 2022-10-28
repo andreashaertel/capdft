@@ -10,8 +10,7 @@
 // Includes
 #include <cstddef>
 #include <vector>
-#include "banded_matrix.hpp"  // NOLINT
-#include "flags.hpp"  // NOLINT
+#include "flags.hpp"
 /** \brief This class contians tools to solve the planar (1D) poisson equation
  * 
  *  The numerical Poisson equation can be rewritten into a matrix equation
@@ -21,17 +20,17 @@
  *  elements A(i,i+1), lower diagonal elements A(i,i-1).
  *  Hence this matrix can be solved easily and stored in three arrays.
  */
-class PlanarPoissonSolver : public BandedMatrix {
+class PlanarPoissonSolver {
  public:
   /** \brief Empty Constructor
    */
   PlanarPoissonSolver();
   /** \brief Proper Constructor
    * 
-   * Passes the "size" of the array to be solved, the grid spacing "dr" of
+   * Passes the size "dim" of the array to be solved, the grid spacing "dr" of
    * the array.
    */
-  PlanarPoissonSolver(size_t size, double dz, BoundaryFlag flag);
+  PlanarPoissonSolver(size_t dim, double dz, BoundaryFlag flag);
   /** \brief Destructor
    */
   ~PlanarPoissonSolver();
@@ -59,6 +58,9 @@ class PlanarPoissonSolver : public BandedMatrix {
   size_t size();
 
  private:
+  /** \brief Number of rows/columns of the square tridiagonal matrix
+   */
+  size_t dim;
   /** \brief Bin size
    */
   double dz;
@@ -77,12 +79,18 @@ class PlanarPoissonSolver : public BandedMatrix {
   /** \brief Lower off-diagonal elements of the tridiagonal matrix
    */
   std::vector<double> lower;
+  /** \brief Check if the boundary positions are valid
+   */
+  bool check_boundary_positions();
   /** \brief Set the Laplace matrix with certain boundary conditions
    */
   void set_laplacian_NN();
   void set_laplacian_DD();
   void set_laplacian_ND();
   void set_laplacian_DN();
+  /** \brief Set up arrays for needed to describe the tridiagonal matrix
+   */
+  void initialize_matrix();
   /** \brief Set the Laplace matrix with boundary conditions
    */
   void set_laplacian();
@@ -91,12 +99,8 @@ class PlanarPoissonSolver : public BandedMatrix {
   void set_bare_laplacian();
   /** \brief Add the boundary values to the right-hand side
    */
-  void add_boundary_values(
-      double* rhs, double left_boundary_value, double right_boundary_value);
-  /** \brief Add the boundary values to the right-hand side
-   */
-  void remove_boundary_values(
-      double* rhs, double left_boundary_value, double right_boundary_value);
+  void set_boundary_values_laplace(double left_boundary_value,
+      double right_boundary_value, double* rhs);
   /** \brief Solution algorithm for the tridiagonal matrix equation
    */
   void solve(double* rhs, double* solution);

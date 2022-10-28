@@ -15,6 +15,7 @@ SDIR = src/
 # All files from the normal repository that are used in this example ###########
 REPOSDIR = ../../src/
 REPOFILE =
+REPOFILE += banded_matrix
 REPOFILE += convergence_criterion
 REPOFILE += convergence_criterion_max_dev
 REPOFILE += convergence_criterion_steps
@@ -28,6 +29,7 @@ REPOFILE += integration
 REPOFILE += iterator
 REPOFILE += properties
 REPOFILE += planar_poisson_solver
+REPOFILE += planar_poisson_solver_any
 # Get host name ################################################################
 HOST = $(shell hostname)
 # Offsets for binaries and objects #############################################

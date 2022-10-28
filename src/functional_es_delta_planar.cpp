@@ -332,13 +332,12 @@ void FunctionalESDeltaPlanar::calc_potential() {
   // Keep in mind, that the boundary condition is set to be half a bin outside
   // the system.
   left_boundary_extended = left_boundary +
-      static_cast<double>(extended_system_offset) *
+      (static_cast<double>(extended_system_offset)) *
       2. * (left_boundary - total_potential.at(0));
   right_boundary_extended = right_boundary +
       static_cast<double>(extended_system_offset) *
       2. * (right_boundary - total_potential.at(grid_count - 1));
   // Now solve the Poisson equation for the weighted densities separately
-  // TODO(Moritz): set potential to zero at regular boundaries
   for (size_t i = 0; i < species_count; ++i) {
     poisson_solver->solve(left_boundary_extended, right_boundary_extended,
         poisson_rhs.at(i).array(), potentials.at(i).array());
