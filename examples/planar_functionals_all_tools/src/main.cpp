@@ -30,7 +30,7 @@ int main(int argc, char** args) {
 // _____________________________________________________________________________
   // Set the desired system properties
   /* We start by defining the necessary geometric and physical properties.
-   * The general properties of a system are put into one Properties conainer.
+   * The general properties of a system are put into one Properties container.
    * The properties of every species are put in separate Properties container.
    * The containers containing the species properties are encapsulated by an
    * std::vector.

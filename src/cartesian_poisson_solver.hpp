@@ -25,12 +25,13 @@ class CartesianPoissonSolver : public SparseMatrix {
    */
   CartesianPoissonSolver();
   /** \brief Proper Constructor
-   * 
-   * Passes the "size" of the array to be solved, the grid spacing "dr" of
-   * the array.
+   *
+   *  \param bin_count grid points in all three dimensions
+   *  \param bin_size is the size of the bins in the three dimensions
+   *  \param pariodic_boundaries contains wether a dimension has PBC
    */
   CartesianPoissonSolver(
-      std::vector<size_t> size, double bin_size,
+      std::vector<size_t> bin_count, std::vector<double> bin_size,
       std::vector<bool> periodic_boundaries);
   /** \brief Destructor
    */
@@ -51,10 +52,10 @@ class CartesianPoissonSolver : public SparseMatrix {
   std::vector<size_t> bin_count;
   /** \brief Bin size
    */
-  double bin_size;
+  std::vector<double> bin_size;
   /** \brief Bin size squared
    */
-  double bin_size_squared;
+  std::vector<double> bin_size_squared;
   /** \brief Holds the specified boundary conditions
    */
   std::vector<bool> periodic_boundaries;
