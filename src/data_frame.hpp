@@ -6,7 +6,6 @@
 /** \file data_frame.hpp
  *  \brief This file contains the declarations of the DataFrame class,
  *  which is a certain data container class.
- *
  */
 #include <algorithm>
 #include <string>

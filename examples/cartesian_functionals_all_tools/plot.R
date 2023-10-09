@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: CC0-1.0
 # ______________________________________________________________________________
 # This script creates a heat map of two slices of the 3D density profile created
-# the example program.
+# by the example program.
 # ______________________________________________________________________________
 rm(list = ls())
 library(tidyverse)
@@ -16,8 +16,8 @@ my_plot1 <- ggplot(data_plot, aes(x = z, y = x, fill = density)) +
     scale_fill_viridis(option = "turbo")
 dev.new()
 print(my_plot1)
-# Second plot
 ggsave("3d_profile1.pdf", my_plot1, width = 3, height = 3)
+# Second plot
 data_plot <- data %>% filter(y == 0.) %>% filter(density != 0.)
 my_plot2 <- ggplot(data_plot, aes(x = z, y = x, fill = density)) +
     geom_tile() +
