@@ -49,8 +49,7 @@ int main(int argc, char** args) {
    * step lies exactly between two bins.
    */
 // _____________________________________________________________________________
-  //std::vector<size_t> grid_counts{128, 128, 128};  // (x, y, z)
-  std::vector<size_t> grid_counts{64, 64, 64};  // (x, y, z)
+  std::vector<size_t> grid_counts{128, 128, 128};  // (x, y, z)
   std::vector<double> system_lengths{2., 2., 2.};  // in nm (x, y, z)
   std::vector<double> periodic_boundaries{true, true, false};  // (x, y, z)
   double bjerrum_length = 1.;  // in nm
@@ -112,17 +111,15 @@ int main(int argc, char** args) {
   }
   // Create an FMT Functional object. For this we specify the
   // species which are interacting via this functional in affected_species.
-  std::vector<size_t> affected_species_fmt{0, 2};  // selected species 0
+  std::vector<size_t> affected_species_fmt{0, 2};
   FunctionalFMTCartesian my_fmt_functional(
       &density_profiles, species_properties, system_properties,
       affected_species_fmt);
   // Create an ES functional object.
-  std::vector<size_t> affected_species_es{0, 2};  // selected species 0 and 2
+  std::vector<size_t> affected_species_es{0, 2};
   FunctionalESMFCartesian my_es_functional(
       &density_profiles, species_properties, system_properties,
       affected_species_es);
-  //FunctionalESDeltaCartesian my_es_functional(&density_profiles,
-  //    species_properties, system_properties, affected_species_es);
 // _____________________________________________________________________________
   // Picard iterations
   /* For the Picard iterations the Iterator class is used. For that we define
@@ -165,9 +162,7 @@ int main(int argc, char** args) {
     density_profiles.at(i) *= exp_ext_potential.at(i);
   }
   // Set external electrostatic potential
-  //extpot::electrostatic_planar(system_properties, species_properties,
-  //    affected_species_es, &exp_ext_potential);
-  extpot::electrostatic_wavelike(system_properties, species_properties,
+  extpot::electrostatic_planar(system_properties, species_properties,
       affected_species_es, &exp_ext_potential);
   // Create iterator and run iterations
   Iterator my_iterator(&density_profiles, exp_ext_potential,
@@ -190,7 +185,7 @@ int main(int argc, char** args) {
    * [M. Bültmann and A. Härtel 2022 J. Phys.: Condens. Matter 34 235101].
    */
 // _____________________________________________________________________________
-  // Write density profile to file
+  // Write density profile of the first species to file
   double x{0.}, y{0.}, z{0.};
   double dx{system_lengths.at(0) / static_cast<double>(grid_counts.at(0))};
   double dy{system_lengths.at(1) / static_cast<double>(grid_counts.at(1))};
@@ -211,13 +206,5 @@ int main(int argc, char** args) {
     }
   }
   out_stream.close();
-  // Obtain grand potential of the system
-  double energy;
-  energy = my_fmt_functional.calc_energy();
-  std::cout << "Excess free energy of the FMT functional: ";
-  std::cout << energy << std::endl;
-  //energy = my_es_functional.calc_energy();
-  //std::cout << "Excess free energy of mean-field electrostatic functional: ";
-  //std::cout << energy << std::endl;
   return 0;
 }
