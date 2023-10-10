@@ -14,7 +14,6 @@ The project started in 2008 with a research project by Andreas Härtel in the co
 Further details will be found on capdft.org soon. 
 
 
-
 ## Install
 
 First, check that the required libraries are installed:
@@ -38,12 +37,9 @@ make
 See doc/html/index.html for further details. 
 
 
-
 ## Examples
 
 Examples are given in the examples directory.
-
-
 
 
 ## Maintainers
@@ -52,15 +48,10 @@ Examples are given in the examples directory.
 - Moritz Bültmann - <mbueltmann_uni@posteo.net>
 
 
-
-
 ## Contribute
 
 Any pull requests or suggestions are welcome at 
 <https://github.com/andreashaertel/capdft> or via e-mail to one of the maintainers. 
-
-Explain how to contribute ... . 
-
 
 
 ## License
