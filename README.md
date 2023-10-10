@@ -21,7 +21,7 @@ First, check that the required libraries are installed:
 1. GNU Scientific Library, e.g. `gsl-devel`
 2. FFTW3, e.g. `fftw3-devel`
 
-To download and install the project, you need to clone from github and to run make install and make: 
+To download and install the project, you need to clone the project from github and to run `make init` and `make`: 
 ```bash
 git clone git@github.com:andreashaertel/capdft.git
 cd capdft/
@@ -41,7 +41,7 @@ See doc/html/index.html for further details.
 
 ## Examples
 
-Examples are given in the examples directory. 
+Examples are given in the examples directory.
 
 
 
@@ -49,6 +49,8 @@ Examples are given in the examples directory.
 ## Maintainers
 
 - Andreas Härtel - <andreas.haertel@anno1982.de>
+- Moritz Bültmann - <mbueltmann_uni@posteo.net>
+
 
 
 
