@@ -10,6 +10,7 @@
 // Includes
 #include <list>
 #include <vector>
+#include <cstddef>
 /** \brief This class represents a general sparse matrix
  *
  *  This class represents a general sparse matrix.

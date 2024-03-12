@@ -8,6 +8,7 @@
  *  The file contains the class declarations of the BandedMatrix class.
  */
 // Includes
+#include <cstddef>
 #include <vector>
 /** \brief This class represents a banded matrix
  *
