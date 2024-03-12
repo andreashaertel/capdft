@@ -22,7 +22,7 @@ First, check that the required libraries are installed:
 
 To download and install the project, you need to clone the project from github and to run `make init` and `make`: 
 ```bash
-git clone git@github.com:andreashaertel/capdft.git
+git clone https://github.com/andreashaertel/capdft.git
 cd capdft/
 make init
 make
