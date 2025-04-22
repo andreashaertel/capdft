@@ -192,7 +192,23 @@ int main(int argc, char** args) {
   double dz{system_lengths.at(2) / static_cast<double>(grid_counts.at(2))};
   std::fstream out_stream;
   out_stream.open("3d_profile.dat", std::ios::out);
+  // Print header
+  out_stream << "# Density profiles\n";
+  out_stream << "# Parameters: ________________________________________________"
+	  "__________________\n";
+  out_stream << "# System properties:\n";
+  out_stream << "# ";
+  system_properties.print(out_stream);
+  out_stream << "\n# Species properties:\n";
+  for (size_t j = 0; j < species_properties.size(); ++j) {
+    out_stream << "# species " << j << ": ";
+    species_properties.at(j).print(out_stream);
+    out_stream << std::endl;
+  }
+  out_stream << "# ____________________________________________________________"
+	  "__________________\n";
   out_stream << "# [x] [y] [z] [density profile]" << std::endl;
+  // Print data
   for (size_t i = 0; i < grid_counts.at(0); ++i) {
     x = dx * static_cast<double>(i);
     for (size_t j = 0; j < grid_counts.at(1); ++j) {

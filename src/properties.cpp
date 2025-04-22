@@ -29,5 +29,11 @@ bool Properties::contains_property(const std::string& property_name) const {
   }
 }
 // _____________________________________________________________________________
+void Properties::print(std::ostream& out) const {
+  for (const std::pair<std::string, Data*> property : properties) {
+    out << property.first << ": " << property.second->to_string() << ", ";
+  }
+}
+// _____________________________________________________________________________
 // Some template functions are implemented in the header.
 // _____________________________________________________________________________

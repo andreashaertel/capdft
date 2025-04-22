@@ -80,6 +80,11 @@ class Properties {
       return false;
     }
   }
+  /** \brief Print names and values of all properties.
+   *
+   * This assumes that the properties are all of fundamental numeric types.
+   */
+  void print(std::ostream& out) const;
   /** \brief Data class is a universal type class. 
    *
    *  The Data class is used to derive a TemplateData class that stores data of
@@ -93,6 +98,7 @@ class Properties {
    public:
     virtual ~Data() {}
     const std::type_info *type;
+    virtual std::string to_string() const = 0;
   };
   /** \brief TemplateData class is a container to hold an object of arbitrary 
    *         type. 
@@ -116,6 +122,12 @@ class Properties {
      *
      */
     T value;
+    /** \brief Return value as string.
+     *
+     * This assumes that the underlying data type can be handled by
+     * std::to_string, like the numeric fundamental types.
+     */
+    std::string to_string() const override { return std::to_string(value); }
   };
   /** \brief Contains all properties.
    *

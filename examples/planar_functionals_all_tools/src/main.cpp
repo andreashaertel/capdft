@@ -64,7 +64,7 @@ int main(int argc, char** args) {
   system_properties.add_property<double>("bjerrum length", bjerrum_length);
   system_properties.add_property<double>("temperature", temperature);
   system_properties.add_property<size_t>("grid count", grid_count);
-  system_properties.add_property<size_t>("voltage", voltage);
+  system_properties.add_property<double>("voltage", voltage);
   // First species
   properties.add_property<double>("diameter", .4);
   properties.add_property<double>("bulk density", 3.);
@@ -190,6 +190,23 @@ int main(int argc, char** args) {
   // Write density profile to file
   std::fstream out_stream;
   out_stream.open("planar_profile.dat", std::ios::out);
+  // Print header
+  out_stream << "# Density profiles\n";
+  out_stream << "# Parameters: ________________________________________________"
+	  "__________________\n";
+  out_stream << "# System properties:\n";
+  out_stream << "# ";
+  system_properties.print(out_stream);
+  out_stream << "\n# Species properties:\n";
+  for (size_t j = 0; j < species_properties.size(); ++j) {
+    out_stream << "# species " << j << ": ";
+    species_properties.at(j).print(out_stream);
+    out_stream << std::endl;
+  }
+  out_stream << "# ____________________________________________________________"
+	  "__________________\n";
+  out_stream << "# [z] [density profile]" << std::endl;
+  // Print data
   for (size_t i = 0; i < grid_count; ++i) {
     z = dz * static_cast<double>(i);
     out_stream << z << " ";

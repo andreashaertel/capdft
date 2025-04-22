@@ -186,6 +186,23 @@ int main(int argc, char** args) {
   // Write density profile to file
   std::fstream out_stream;
   out_stream.open("spherical_profile.dat", std::ios::out);
+  // Print header
+  out_stream << "# Density profiles\n";
+  out_stream << "# Parameters: ________________________________________________"
+	  "__________________\n";
+  out_stream << "# System properties:\n";
+  out_stream << "# ";
+  system_properties.print(out_stream);
+  out_stream << "\n# Species properties:\n";
+  for (size_t j = 0; j < species_properties.size(); ++j) {
+    out_stream << "# species " << j << ": ";
+    species_properties.at(j).print(out_stream);
+    out_stream << std::endl;
+  }
+  out_stream << "# ____________________________________________________________"
+	  "__________________\n";
+  out_stream << "# [r] [density profile]" << std::endl;
+  // Print data
   for (size_t i = 0; i < grid_count; ++i) {
     r = dr * static_cast<double>(i+1);
     out_stream << r << " ";
