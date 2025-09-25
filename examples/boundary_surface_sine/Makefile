@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 # Binary name ##################################################################
 BNAMES = main
-BNAMES += cylinder_charge
+BNAMES += surface_charge
 # Compiler #####################################################################
 CXX=g++
 # Libraries to be linked #######################################################
@@ -16,11 +16,10 @@ SDIR = src/
 # All files from the normal repository that are used in this example ###########
 REPOSDIR = ../../src/
 REPOFILE =
+REPOFILE += surface_charge_distribution
 REPOFILE += system
 REPOFILE += boundary_surface
-REPOFILE += boundary_surface_cylinder
-REPOFILE += boundary_surface_planar
-REPOFILE += surface_charge_distribution
+REPOFILE += boundary_surface_sine
 REPOFILE += boundaries
 REPOFILE += poisson_solver_cartesian
 REPOFILE += cartesian_poisson_solver_any
@@ -101,7 +100,7 @@ clean:
 	rm -f $(BOFF)*
 
 compile: $(addprefix $(BOFF), $(BNAMES))
-# compile: $(BNAME)
+#compile: $(BOFF)$(BNAME)
 
 # $<  first dependency
 # $@  targets

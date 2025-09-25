@@ -186,6 +186,7 @@ int main(int argc, char** args) {
   // Write density profile to file
   std::fstream out_stream;
   out_stream.open("spherical_profile.dat", std::ios::out);
+  out_stream << "# [r] [density profiles]\n";
   for (size_t i = 0; i < grid_count; ++i) {
     r = dr * static_cast<double>(i+1);
     out_stream << r << " ";
