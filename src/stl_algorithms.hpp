@@ -68,5 +68,16 @@ void erase(std::vector<size_t>& indices, std::vector<T>& v) {
   v.resize(v.size() - indices.size());
 }
 // _____________________________________________________________________________
+/** \brief Calculate the norm of a std::vector
+ */
+template <typename T>
+T vector_norm(std::vector<T>& vector) {
+  T square = 0.;
+  for (T val : vector) {
+    square += val * val;
+  }
+  return sqrt(square);
+}
+// _____________________________________________________________________________
 }
 #endif  // SRC_STL_ALGORITHMS_HPP_

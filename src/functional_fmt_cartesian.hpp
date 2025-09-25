@@ -17,6 +17,7 @@
 #include "data_frame.hpp"  // NOLINT
 #include "functional.hpp"  // NOLINT
 #include "properties.hpp"  // NOLINT
+#include "system.hpp"
 // Class forward declarations
 // _____________________________________________________________________________
 /** \brief FunctionalFMTCartesian calculates the FMT functional in the 3D
@@ -33,7 +34,13 @@ class FunctionalFMTCartesian : public Functional {
    *
    */
   FunctionalFMTCartesian();
-  /** \brief Manual Constructor
+  /** \brief Constructor (using System object)
+   *
+   */
+  FunctionalFMTCartesian(
+      const std::vector<DataFrame<3, double>>* density_profiles,
+      System<3>& system);
+  /** \brief Manual Constructor (without System object)
    *
    * This constructor chooses the particle species that are supplied from the
    * affected_species vector.
@@ -44,7 +51,7 @@ class FunctionalFMTCartesian : public Functional {
       const std::vector<Properties>& species_properties,
       const Properties& system_properties,
       const std::vector<size_t>& affected_species);
-  /** \brief Automated Constructor
+  /** \brief Automated Constructor (without System object)
    *
    * This constructor chooses the particle species that are interacting via this
    * functional by checking if the hard sphere diameter exists.
@@ -208,10 +215,12 @@ class FunctionalFMTCartesian : public Functional {
   /** \brief From the system object extract the system properties
    */
   void extract_system_properties(const Properties& system_properties);
+  void extract_system_properties(System<3>& system);
   /** \brief From the system object extract the species properties
    */
   void extract_species_properties(
       const std::vector<Properties>& species_properties);
+  void extract_species_properties(System<3>& system);
   /** \brief Initialize all data frame vectors
    */
   void initialize_all_data_frames();

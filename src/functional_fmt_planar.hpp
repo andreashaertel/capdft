@@ -17,6 +17,7 @@
 #include "data_frame.hpp"  // NOLINT
 #include "functional.hpp"  // NOLINT
 #include "properties.hpp"  // NOLINT
+#include "system.hpp"
 // Class forward declarations
 // _____________________________________________________________________________
 /** \brief FunctionalFMTPlanar calculates the FMT functional in the planar

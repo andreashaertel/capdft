@@ -52,6 +52,6 @@ class ConvergenceCriterionSteps : public ConvergenceCriterion {
   /** \brief Number of steps, i.e. number of times check()
    *
    */
-  int step_count;
+  int step_count = 0;
 };
 #endif  // SRC_CONVERGENCE_CRITERION_STEPS_HPP_

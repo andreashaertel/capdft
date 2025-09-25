@@ -6,8 +6,27 @@
 #include "constants.hpp"  // NOLINT
 #include "data_frame.hpp"  // NOLINT
 #include "integration.hpp"  // NOLINT
+#include "poisson_solver_cartesian.hpp"  // NOLINT
+#include "cartesian_poisson_solver.hpp"  // NOLINT
+#include "system.hpp"
 // _____________________________________________________________________________
 FunctionalESMFCartesian::FunctionalESMFCartesian() {
+}
+// _____________________________________________________________________________
+FunctionalESMFCartesian::FunctionalESMFCartesian(
+    std::vector<DataFrame<3, double>>* density_profiles,
+    System<3>& system, PoissonSolverCartesian* poisson_solver)
+  : density_profiles_pointer(density_profiles) {
+  // Get system properties
+  extract_system_properties(system);
+  // Get species properties
+  affected_species = system.affected_species_es;
+  extract_species_properties(system);
+  // Initialize all data frames and update charge densities
+  initialize_all_data_frames();
+  calc_charge_densities();
+  // Initialize PoissonSolver
+  this->poisson_solver = poisson_solver;
 }
 // _____________________________________________________________________________
 FunctionalESMFCartesian::FunctionalESMFCartesian(
@@ -24,6 +43,7 @@ FunctionalESMFCartesian::FunctionalESMFCartesian(
   // Initialize all data frames and update charge densities
   initialize_all_data_frames();
   calc_charge_densities();
+  // Initialize PoissonSolver
   initialize_poisson_solver();
 }
 // _____________________________________________________________________________
@@ -75,6 +95,23 @@ double FunctionalESMFCartesian::calc_energy() {
   return integral;
 }
 // _____________________________________________________________________________
+void FunctionalESMFCartesian::get_potential(System<3>& system,
+		DataFrame<3, double>* data) const {
+  size_t index;
+  std::vector<size_t> coordinates(3);
+  for (size_t i = 0; i < grid_counts.at(0); i++) {
+    coordinates.at(0) = i;
+    for (size_t j = 0; j < grid_counts.at(1); j++) {
+      coordinates.at(1) = j;
+      for (size_t k = 0; k < grid_counts.at(2); k++) {
+        coordinates.at(2) = k;
+	index = system.coordinates_to_index(coordinates);
+	data->at(i, j, k) = potential.at(index);
+      }
+    }
+  }
+}
+// _____________________________________________________________________________
 void FunctionalESMFCartesian::extract_system_properties(
     const Properties& system_properties) {
   bool dummy{false};  // std::vector<bool> has a bug, thus we need a workaround
@@ -101,6 +138,19 @@ void FunctionalESMFCartesian::extract_system_properties(
   }
   // Calculate electrical properties of the system
   extract_electrical_properties(system_properties);
+}
+// _____________________________________________________________________________
+void FunctionalESMFCartesian::extract_system_properties(System<3>& system) {
+  // Extract properties
+  lengths = system.system_lengths;
+  grid_counts = system.grid_counts;
+  periodic_boundaries = system.periodic_boundaries;
+  voxel_count = grid_counts.at(0) * grid_counts.at(1) * grid_counts.at(2);
+  bin_sizes = system.bin_sizes;
+  // Extract electrical properties of the system
+  bjerrum = system.bjerrum;
+  temperature = system.temperature;
+  dielectric = system.dielectric;
 }
 // _____________________________________________________________________________
 void FunctionalESMFCartesian::extract_electrical_properties(
@@ -181,6 +231,17 @@ void FunctionalESMFCartesian::extract_species_properties(
   species_count = affected_species.size();
 }
 // _____________________________________________________________________________
+void FunctionalESMFCartesian::extract_species_properties(System<3>& system) {
+  double valency;
+  // Get valencies
+  for (auto& species : affected_species) {
+    system.species_properties.at(species).get_property("valency", &valency);
+    valencies.push_back(valency);
+  }
+  // Count species that interact via the electrostatic forces
+  species_count = affected_species.size();
+}
+// _____________________________________________________________________________
 void FunctionalESMFCartesian::initialize_all_data_frames() {
   // The initialization of the variables (header) called the empty constructor.
   // The following construction initializes the std::vectors correctly.
@@ -212,11 +273,11 @@ void FunctionalESMFCartesian::calc_charge_densities() {
 }
 // _____________________________________________________________________________
 void FunctionalESMFCartesian::calc_potential() {
-  // All six sides have vanishing boundary conditions (Dirichlet),
-  // since there is no external potential involved inside the functional.
-  std::vector<std::vector<double>> boundary_values{
-    {0., 0.}, {0., 0.}, {0., 0.}};
+//  // All six sides have vanishing boundary conditions (Dirichlet),
+//  // since there is no external potential involved inside the functional.
+//  std::vector<std::vector<double>> boundary_values{
+//    {0., 0.}, {0., 0.}, {0., 0.}};
   // Solve the Poisson equation numerically
-  poisson_solver->solve(poisson_rhs, boundary_values, potential);
+  poisson_solver->solve(poisson_rhs, potential);
 }
 // _____________________________________________________________________________

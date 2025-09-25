@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 // Template class forward declarations
+template class DataFrame<3, bool>; // limited specialization: only "at(i, j, k)"
 template class DataFrame<1, double>;
 template class DataFrame<2, double>;
 template class DataFrame<3, double>;
@@ -60,6 +61,10 @@ T& DataFrame<dim, T>::at(size_t i, size_t j, size_t k) {
   std::cerr << std::endl;
   exit(1);
   return data[0];  // prevents compiler warning
+}
+template <>
+bool& DataFrame<3, bool>::at(size_t i, size_t j, size_t k) {
+  return this->at(coordinates_to_index(std::vector<size_t>{i, j, k}));
 }
 template <>
 double& DataFrame<3, double>::at(size_t i, size_t j, size_t k) {
@@ -567,6 +572,21 @@ DataFrame<dim, T>& DataFrame<dim, T>::operator*=(
   return *this;
 }
 template <>
+DataFrame<3, bool>& DataFrame<3, bool>::operator*=(
+    const DataFrame<3, bool>& other) {
+  if (this->same_size(other)) {
+    for (size_t i = 0; i < this->array_size; ++i) {
+      this->at(i) = this->at(i) && other.element(i);
+    }
+  } else {
+    std::cerr << "DataFrame::operator*=():";
+    std::cerr << " \"ERROR: Dimensions do not match. Cannot multiply.\"";
+    std::cerr << std::endl;
+    exit(1);
+  }
+  return *this;
+}
+template <>
 DataFrame<1, fftw_complex>& DataFrame<1, fftw_complex>::operator*=(
     const DataFrame<1, fftw_complex>& other) {
   fftw_complex old_this{0., 0.};
@@ -715,6 +735,14 @@ DataFrame<3, fftw_complex>& DataFrame<3, fftw_complex>::operator/=(
   return *this;
 }
 // _____________________________________________________________________________
+template <>
+DataFrame<3, bool>& DataFrame<3, bool>::operator*=(const double other) {
+  std::cerr << "DataFrame::operator*=(const double other):";
+  std::cerr << " \"ERROR: This operator doesn't work for boolean dataframes.\"";
+  std::cerr << std::endl;
+  exit(1);
+  return *this;
+}
 template <size_t dim, typename T>
 DataFrame<dim, T>& DataFrame<dim, T>::operator*=(const double other) {
   for (size_t i = 0; i < this->array_size; ++i) {

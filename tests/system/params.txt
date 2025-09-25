@@ -1,0 +1,19 @@
+# Parameter file
+# System properties:
+
+0_grid_count 10
+1_grid_count 10
+2_grid_count 10
+0_length 2
+1_length 2
+2_length 2
+0_PBC true
+1_PBC true
+2_PBC false
+temperature 300
+bjerrum_length 1
+# (or dielectric constant)
+
+# External potential parameters:
+
+potential 0.1

@@ -6,33 +6,50 @@
  *  The file contains the definitions of the CartesianPoissonSolverAny class.
  */
 #include "cartesian_poisson_solver_any.hpp"  // NOLINT
+#include "boundary_surface.hpp"
+#include "boundaries.hpp"
+#include "system.hpp"
 #include <cmath>
 #include <iostream>
 #include <limits>
 #include <vector>
+#include <stdexcept>
 #include "stl_algorithms.hpp"
 // _____________________________________________________________________________
 CartesianPoissonSolverAny::CartesianPoissonSolverAny() {
-  //
 }
 // _____________________________________________________________________________
-CartesianPoissonSolverAny::CartesianPoissonSolverAny(
-    std::vector<size_t> bin_count,
-    std::vector<double> bin_size,
-    std::vector<bool> periodic_boundaries,
-    std::vector<std::vector<std::vector<std::vector<size_t>>>>& boundary_positions,  // NOLINT
-    std::vector<std::vector<std::vector<double>>>& boundary_values)
-  : SparseMatrix(bin_count.at(0) * bin_count.at(1) * bin_count.at(2)),
-    bin_count(bin_count),
-    bin_size(bin_size),
-    periodic_boundaries(periodic_boundaries) {
+CartesianPoissonSolverAny::CartesianPoissonSolverAny(System<3>& system,
+    BoundarySurface<3>* boundary_surface) : SparseMatrix(
+    system.grid_counts.at(0) * system.grid_counts.at(1) * system.grid_counts.at(2)) {
+  this->system = system;
+  this->bin_count = system.grid_counts;
+  this->bin_size = system.bin_sizes;
+  this->periodic_boundaries = system.periodic_boundaries;
   // Calculate the square of the bin sizes
   bin_size_squared.resize(bin_size.size());
   for (size_t i = 0; i < bin_size.size(); ++i) {
     bin_size_squared.at(i) = bin_size.at(i) * bin_size.at(i);
   }
   set_laplacian();
-  set_boundary_values(boundary_positions, boundary_values);
+  set_boundary_values(boundary_surface);
+}
+// _____________________________________________________________________________
+CartesianPoissonSolverAny::CartesianPoissonSolverAny(System<3>& system,
+    Boundaries<3>* boundaries)
+  : SparseMatrix(
+    system.grid_counts.at(0) * system.grid_counts.at(1) * system.grid_counts.at(2)) {
+  this->system = system;
+  this->bin_count = system.grid_counts;
+  this->bin_size = system.bin_sizes;
+  this->periodic_boundaries = system.periodic_boundaries;
+  // Calculate the square of the bin sizes
+  bin_size_squared.resize(bin_size.size());
+  for (size_t i = 0; i < bin_size.size(); ++i) {
+    bin_size_squared.at(i) = bin_size.at(i) * bin_size.at(i);
+  }
+  set_laplacian();
+  set_boundary_values(boundaries);
 }
 // _____________________________________________________________________________
 CartesianPoissonSolverAny::~CartesianPoissonSolverAny() {
@@ -51,10 +68,10 @@ void CartesianPoissonSolverAny::solve(
   add_boundary_values(rhs);
   std::vector<double> rhs_dummy(rhs);
   remove_boundary_values(rhs);
-  stl_algorithm::erase(rows_to_remove, rhs_dummy);
+  stl_algorithm::erase(boundary_positions, rhs_dummy);
   // Dummy solution with reduced size
   std::vector<double> solution_dummy(solution);
-  stl_algorithm::erase(rows_to_remove, solution_dummy);
+  stl_algorithm::erase(boundary_positions, solution_dummy);
   // Solver loop
   while (!SparseMatrix::solve(
       rhs_dummy, solution_dummy, max_iterations, accuracy, &deviation)) {
@@ -65,12 +82,37 @@ void CartesianPoissonSolverAny::solve(
     std::cout << std::endl << "\033[A\033[K";
   }
   // Add the known potential values at the right place
-  for (size_t i = 0; i < cols_to_remove.size(); ++i) {
+  for (size_t i = 0; i < boundary_points.size(); ++i) {
     solution_dummy.insert(
-        solution_dummy.begin() + cols_to_remove.at(i).first,
-        cols_to_remove.at(i).second);
+        solution_dummy.begin() + boundary_points.at(i).first,
+        boundary_points.at(i).second);
   }
   solution = solution_dummy;
+}
+// _____________________________________________________________________________
+void CartesianPoissonSolverAny::solve(DataFrame<3, double>& rhs,
+		DataFrame<3, double>& solution) {
+  size_t voxel_count = bin_count.at(0) * bin_count.at(1) * bin_count.at(2);
+  std::vector<double> rhs_vector(voxel_count);
+  std::vector<double> solution_vector(voxel_count);
+  size_t index;
+  for (size_t i = 0; i < bin_count.at(0); i++) {
+    for (size_t j = 0; j < bin_count.at(1); j++) {
+      for (size_t k = 0; k < bin_count.at(2); k++) {
+	coordinates_to_index(i, j, k, &index);
+	rhs_vector.at(index) = rhs.at(i, j, k);
+      }
+    }
+  }
+  solve(rhs_vector, solution_vector);
+  for (size_t i = 0; i < bin_count.at(0); i++) {
+    for (size_t j = 0; j < bin_count.at(1); j++) {
+      for (size_t k = 0; k < bin_count.at(2); k++) {
+	coordinates_to_index(i, j, k, &index);
+	solution.at(i, j, k) = solution_vector.at(index);
+      }
+    }
+  }
 }
 // _____________________________________________________________________________
 void CartesianPoissonSolverAny::set_laplacian() {
@@ -178,72 +220,297 @@ bool CartesianPoissonSolverAny::coordinates_to_index(
   return coordinates_to_index(pos.at(0), pos.at(1), pos.at(2), index);
 }
 // _____________________________________________________________________________
+void CartesianPoissonSolverAny::coordinates_to_position(
+    std::vector<size_t> pos, std::vector<double>* position) {
+  *position = system.coordinates_to_position(pos);
+}
+// _____________________________________________________________________________
 void CartesianPoissonSolverAny::set_boundary_values(
-    std::vector<std::vector<std::vector<std::vector<size_t>>>>& boundary_positions,  // NOLINT
-    std::vector<std::vector<std::vector<double>>>& boundary_values) {
-  std::vector<size_t> position1, position2;
-  std::vector<size_t> col_indices;
-  std::vector<double> col_values;
-  double boundary_value1, boundary_value2;
-  size_t index1{0}, index2{0};  // matrix indices
+		Boundaries<3>* boundaries) {
   // Reset global variables
-  cols_to_remove.clear();
-  rows_to_remove.clear();
+  boundary_points.clear();
+  boundary_positions.clear();
   rhs_addition.clear();
   rhs_addition.resize(bin_count.at(0) * bin_count.at(1) * bin_count.at(2), 0.);
-  for (size_t dir = 0; dir < boundary_positions.size(); ++dir) {
-    for (size_t i = 0; i < boundary_positions.at(dir).size(); ++i) {
-      // Convert coordinate pair to indices
-      position1 = boundary_positions.at(dir).at(i).at(0);
-      position2 = boundary_positions.at(dir).at(i).at(1);
-      boundary_value1 = boundary_values.at(dir).at(i).at(0);
-      boundary_value2 = boundary_values.at(dir).at(i).at(1);
-      coordinates_to_index(position1, &index1);
-      coordinates_to_index(position2, &index2);
-      cols_to_remove.push_back(std::make_pair(index1, boundary_value1));
-      cols_to_remove.push_back(std::make_pair(index2, boundary_value2));
-      // The first and last entry of that direction are removed
-      if (dir == 0) { 
-        coordinates_to_index(0, position1.at(1), position1.at(2), &index1);
-        coordinates_to_index(
-            bin_count.at(0) - 1, position1.at(1), position1.at(2), &index2);
-      } else if (dir == 1) {
-        coordinates_to_index(position1.at(0), 0, position1.at(2), &index1);
-        coordinates_to_index(
-            position1.at(0), bin_count.at(1) - 1, position1.at(2), &index2);
-      } else if (dir == 2) {
-        coordinates_to_index(position1.at(0), position1.at(1), 0, &index1);
-        coordinates_to_index(
-            position1.at(0), position1.at(1), bin_count.at(2) - 1, &index2);
-      }
-      rows_to_remove.push_back(index1);
-      rows_to_remove.push_back(index2);
+  // Calculate modifications (cols/boundary_positions and rhs_addition) for all
+  // boundary objects
+  for (auto it = boundaries->begin(); it != boundaries->end(); it++) {
+    if ((*it)->is_electrostatic()) {
+      calc_boundary_values(*it);
     }
   }
-  // The voxels where we know the values are transferred to the rhs and the
-  // respective matrix columns are removed (in reverse index order).
-  std::sort(cols_to_remove.begin(), cols_to_remove.end());
-  std::vector<size_t> cols_to_remove_indices(cols_to_remove.size());
-  for (int i = cols_to_remove.size() - 1; i >= 0; --i) {
-    // For removal save only the column indices
-    cols_to_remove_indices.at(i) = cols_to_remove.at(i).first;
-    // Calculate the modified rhs
-    col_indices = SparseMatrix::get_col_indices(cols_to_remove.at(i).first);
-    col_values = SparseMatrix::get_col_values(cols_to_remove.at(i).first);
-    for (size_t j = 0; j < col_indices.size(); ++j) {
-      rhs_addition.at(col_indices.at(j)) -=
-          col_values.at(j) * cols_to_remove.at(i).second;
-    }
+  // Sort rows/boundary_points by index
+  std::sort(boundary_points.begin(), boundary_points.end());
+  std::sort(boundary_positions.begin(), boundary_positions.end());
+  // Remove dublicates
+  boundary_positions.erase(std::unique(boundary_positions.begin(), boundary_positions.end()),
+		  boundary_positions.end());
+  boundary_points.erase(std::unique(boundary_points.begin(), boundary_points.end()),
+		  boundary_points.end());
+  std::cout << "CartesianPoissonSolverAny: " << boundary_points.size()
+	  << " surface points\n";
+  // What about colliding obj. with different boundary values?
+  // There will be more dublicates among the boundary positions than among the
+  // position-value pairs.
+  if (boundary_positions.size() != boundary_points.size()) {
+    std::cerr << "CartesianPoissonSolverAny::set_boundary_values: Error: "
+	    "boundary values not well defined - Surfaces with different "
+	    "boundary values overlap at " <<
+	    boundary_points.size() - boundary_positions.size() << " positions.\n";
   }
-  SparseMatrix::remove_columns(cols_to_remove_indices);
-  // The first and last position in a direction with boundary condition are now
-  // redundant, and are hence removed to keep a square matrix.
-  // Rows are removed by removing columns from the transpose.
-  std::sort(rows_to_remove.begin(), rows_to_remove.end());
+  // Remove rows and columns corresponding to any points outside the boundary
+  SparseMatrix::remove_columns(boundary_positions);
   SparseMatrix::transpose();
-  SparseMatrix::remove_columns(rows_to_remove);
+  SparseMatrix::remove_columns(boundary_positions);
   SparseMatrix::transpose();
 }
+// _____________________________________________________________________________
+void CartesianPoissonSolverAny::set_boundary_values(
+		BoundarySurface<3>* boundary_surface) {
+  // Reset global variables
+  boundary_points.clear();
+  boundary_positions.clear();
+  rhs_addition.clear();
+  rhs_addition.resize(bin_count.at(0) * bin_count.at(1) * bin_count.at(2), 0.);
+  // Calculate modifications (cols/boundary_positions and rhs_addition) for all
+  // boundary objects
+  if (boundary_surface->is_electrostatic()) {
+    calc_boundary_values(boundary_surface);
+  }
+  // Remove rows and columns corresponding to any points outside the boundary
+  SparseMatrix::remove_columns(boundary_positions);
+  SparseMatrix::transpose();
+  SparseMatrix::remove_columns(boundary_positions);
+  SparseMatrix::transpose();
+}
+//// _____________________________________________________________________________
+//void CartesianPoissonSolverAny::calc_boundary_values(
+//		BoundarySurface<3>* boundary_surface) {
+//  // Iterate over all grid points outside the boundaries
+//  std::vector<double> position = {0., 0., 0.};
+//  std::vector<size_t> coordinates = {0, 0, 0};
+//  size_t index = 0;
+//  double value = boundary_surface->get_boundary_value();
+//  for (size_t i = 0; i < bin_count.at(0); ++i) {
+//    position.at(0) = static_cast<double>(i) * bin_size.at(0);
+//    for (size_t j = 0; j < bin_count.at(1); ++j) {
+//      position.at(1) = static_cast<double>(j) * bin_size.at(1);
+//      for (size_t k = 0; k < bin_count.at(2); ++k) {
+//        position.at(2) = static_cast<double>(k) * bin_size.at(2);
+//	bool is_in_boundaries = boundary_surface->is_within_boundary(position);
+//	if (!is_in_boundaries) {
+//	  coordinates = {i, j, k};
+//	  coordinates_to_index(coordinates, &index);
+//	  // Modify rhs and (off-)diagonal values of adjacent grid points, 
+//	  // if they lie within boundaries
+//	  modify_rhs(boundary_surface, coordinates);
+//	  // Remove corresponding row and column. The removed indices and
+//	  // values are stored so that they can be filled back in to the final
+//	  // solution vector.
+//	  boundary_points.push_back(std::make_pair(index, value));
+//	  boundary_positions.push_back(index);
+//	}
+//      }
+//    }
+//  }
+//}
+// _____________________________________________________________________________
+void CartesianPoissonSolverAny::calc_boundary_values(
+		BoundarySurface<3>* boundary_surface) {
+  // Iterate over all grid points outside the boundaries
+  std::vector<double> position = {0., 0., 0.};
+  std::vector<size_t> coordinates = {0, 0, 0};
+  size_t index = 0;
+  double value = boundary_surface->get_boundary_value();
+  for (size_t i = 0; i < bin_count.at(0); ++i) {
+    position.at(0) = static_cast<double>(i) * bin_size.at(0);
+    for (size_t j = 0; j < bin_count.at(1); ++j) {
+      position.at(1) = static_cast<double>(j) * bin_size.at(1);
+      for (size_t k = 0; k < bin_count.at(2); ++k) {
+        position.at(2) = static_cast<double>(k) * bin_size.at(2);
+	coordinates = {i, j, k};
+	bool is_in_boundaries = boundary_surface->is_within_boundary(position);
+	if (!is_in_boundaries) {
+	  // Remove corresponding row and column. The removed column indices and
+	  // values are stored so that they can be filled back in to the final
+	  // solution vector.
+	  coordinates_to_index(coordinates, &index);
+	  boundary_points.push_back(std::make_pair(index, value));
+	  boundary_positions.push_back(index);
+      } else {
+	  // Modify rhs and matrix elements associated with this grid point
+	  // depending on its neighbors
+	  modify_matrix_elements(boundary_surface, coordinates);
+	}
+      }
+    }
+  }
+}
+// _____________________________________________________________________________
+void CartesianPoissonSolverAny::modify_matrix_elements(
+		BoundarySurface<3>* boundary_surface,
+		std::vector<size_t>& coordinates) {
+  double value = boundary_surface->get_boundary_value();
+  std::vector<double> position = system.coordinates_to_position(coordinates);
+  size_t index;
+  size_t index_neighbor;
+  std::vector<size_t> coordinates_neighbor(3);
+  // Check whether the given coordinate is in direct vicinity (closer than bin
+  // size) to the surface
+  double distance_left;
+  double distance_right;
+  double rhs;
+  for (size_t dir = 0; dir < 3; dir++) {
+    distance_left = boundary_surface->distance_directed(position, dir, false);
+    distance_right = boundary_surface->distance_directed(position, dir, true);
+    /* We are only interested in whether the distance is smaller than the bin
+     * size. If it is larger than that, we set it to -1, meaning there is no
+     * surface in vicinity.
+     */
+    if (distance_left > bin_size.at(dir)) {
+      distance_left = -1.;
+    }
+    if (distance_right > bin_size.at(dir)) {
+      distance_right = -1.;
+    }
+    // Initialize rhs addition
+    rhs = 0.;
+    if (distance_left < 0. && distance_right < 0.) {
+      // No surface nearby: do nothing, check other directions
+    } else {
+      // Surface adjacent to this point: modify matrix elements in this row
+      coordinates_to_index(coordinates, &index);
+      coordinates_neighbor = coordinates;
+      if (distance_left > 0.) {
+	// Modify rhs
+	rhs += 1. / distance_left;
+      } else {
+	// Set default value for distance to neighbor (for calculation of rhs &
+	// diagonal matrix element (index, index)); do not change anything else
+	distance_left = bin_size.at(dir);
+      }
+      if (distance_right > 0.) {
+	// Modify rhs
+	rhs += 1. / distance_right;
+      } else {
+	// Set default value for distance to neighbor
+	distance_right = bin_size.at(dir);
+      }
+      /** Modify rhs and matrix elements in the row corresponding to this point
+       */
+      /* Right hand side modification:
+       * TODO: generalize for overlapping surfaces - this here would count it twice
+       */
+      rhs_addition.at(index) -=
+		  value * 2. / (distance_left + distance_right) * rhs;
+      /* Diagonal matrix element (index, index):
+       */
+      double old_value = -2. / bin_size_squared.at(dir);
+      double new_value = -2. / (distance_left * distance_right);
+      SparseMatrix::set(index, index,
+			SparseMatrix::get(index, index) - old_value + new_value);
+      /* Off-diagonal matrix elements (index, index_neighbor):
+       * Zero if there's a boundary inbetween the two points, else nonzero.
+       */
+      try { // left neighbor
+        coordinates_neighbor = coordinates;
+        coordinates_neighbor.at(dir) = system.increase(coordinates.at(dir), dir, -1);
+        coordinates_to_index(coordinates_neighbor, &index_neighbor);
+        if (distance_left < bin_size.at(dir)) {
+          SparseMatrix::set(index, index_neighbor, 0.);
+        } else {
+	  SparseMatrix::set(index, index_neighbor,
+		2. / (distance_left * (distance_left + distance_right)));
+	}
+      } catch (const std::out_of_range&) {
+        // do nothing if there is no neighbor in this direction
+      }
+      try { // right neighbor
+        coordinates_neighbor = coordinates;
+        coordinates_neighbor.at(dir) = system.increase(coordinates.at(dir), dir, +1);
+        coordinates_to_index(coordinates_neighbor, &index_neighbor);
+        if (distance_right < bin_size.at(dir)) {
+          SparseMatrix::set(index, index_neighbor, 0.);
+        } else {
+	  SparseMatrix::set(index, index_neighbor,
+		2. / (distance_right * (distance_left + distance_right)));
+	}
+      } catch (const std::out_of_range&) {
+        // do nothing if there is no neighbor in this direction
+      }
+    }
+  }
+}
+//// _____________________________________________________________________________
+//void CartesianPoissonSolverAny::modify_rhs(
+//		BoundarySurface<3>* boundary_surface,
+//		std::vector<size_t>& coordinates1) {
+//  // index & boundary value at given point (must be a point outside boundaries!)
+//  size_t index1;
+//  coordinates_to_index(coordinates1, &index1);
+//  double value = boundary_surface->get_boundary_value();
+//  // indices & coordinates of next & next-to-next neighbors in the grid
+//  size_t index2, index3;
+//  std::vector<size_t> coordinates2(3);
+//  std::vector<size_t> coordinates3(3);
+//  std::vector<double> position2(3);
+//  // Iterate over the six next neighbors
+//  for (size_t dir = 0; dir < 3; dir++) {
+//    for (int step : {-1, 1}) {
+//      try {
+//        // Calculate neighbor coordinates position2
+//        coordinates2 = coordinates1;
+//        coordinates2.at(dir) = system.increase(coordinates1.at(dir), dir, step);
+//        coordinates_to_position(coordinates2, &position2);
+//        // Calculate distance to boundary in the direction position2 -> position1
+//	// (forward if step was backwards, i.e. if step==-1)
+//	bool forward = (step == -1) ? true : false;
+//        double distance = boundary_surface->distance_directed(position2, dir,
+//				forward);
+//	// If this neighbor is also within the boundaries, distance_directed returns
+//	// zero. In that case, we don't have to do anything. Else:
+//        if (distance > 0.) {
+//	  // Modify rhs and matrix elements in the row corresponding to index2
+//    	  coordinates_to_index(coordinates2, &index2);
+//	  // Assuming there is no directly adjacent boundary in the opposite 
+//	  // direction (else different old_value & new_value):
+//	  // TODO: generalize for cases where two surfaces are closer than 2*bin_size
+//          // Matrix element at (index2, index2):
+//	  double old_value = -2. / bin_size_squared.at(dir);
+//	  double new_value = -2. / (bin_size.at(dir) * distance);
+//	  SparseMatrix::set(index2, index2,
+//			SparseMatrix::get(index2, index2) - old_value + new_value);
+//	  // Matrix element at (index2, index1) is moved to right hand side:
+//	  // - old_value(rhs) ~ density at index2
+//	  // - old_value(matrix element) = 1. / bin_sizes_squared.at(dir);
+//	  // TODO: generalize for overlapping surfaces - this here would count it twice
+//          rhs_addition.at(index2) -=
+//		  value * 2. / (distance * (bin_size.at(dir) + distance));
+//          // Matrix element at (index2, index3):
+//	  try {
+//	    // Calculate the coordinates of the next-to-next neighbor index3
+//            coordinates3 = coordinates2;
+//            coordinates3.at(dir) = system.increase(coordinates2.at(dir), dir, step);
+//	    coordinates_to_index(coordinates3, &index3);
+//	    // - old_value = 1. / bin_size_squared.at(dir)
+//	    SparseMatrix::set(index2, index3,
+//		2. / (bin_size.at(dir) * (bin_size.at(dir) + distance)));
+//	  } catch (const std::out_of_range&) {
+//            // do nothing if there is no next-to-next neighbor in this direction
+//	  } catch (...) {
+//	    std::cout << "CartesianPoissonSolverAny::modify_rhs: Error\n";
+//	    exit(1);
+//          }
+//        }
+//      } catch (const std::out_of_range&) {
+//        // do nothing if there is no next neighbor in this direction
+//      } catch (...) {
+//	std::cout << "CartesianPoissonSolverAny::modify_rhs: Error\n";
+//	exit(1);
+//      }
+//    }
+//  }
+//}
 // _____________________________________________________________________________
 void CartesianPoissonSolverAny::add_boundary_values(
     std::vector<double>& rhs) {

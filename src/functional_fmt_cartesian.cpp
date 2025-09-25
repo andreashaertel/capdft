@@ -9,9 +9,28 @@
 #include <iostream>
 #include "data_frame.hpp"  // NOLINT
 #include "integration.hpp"  // NOLINT
+#include "system.hpp"
 // _____________________________________________________________________________
 FunctionalFMTCartesian::FunctionalFMTCartesian() {
   //
+}
+// _____________________________________________________________________________
+FunctionalFMTCartesian::FunctionalFMTCartesian(
+    const std::vector<DataFrame<3, double>>* density_profiles,
+    System<3>& system) : density_profiles_pointer(density_profiles) {
+  // Clear all std::vectors
+  diameters.clear();
+  bulk_densities.clear();
+  // Get system properties
+  extract_system_properties(system);
+  // Get species properties; excludes all species without diameter property
+  affected_species = system.affected_species_fmt;
+  extract_species_properties(system);
+  // Initialize all data frames
+  initialize_all_data_frames();
+  update_density_profiles();
+  // Calculate weights
+  calc_weights();
 }
 // _____________________________________________________________________________
 FunctionalFMTCartesian::FunctionalFMTCartesian(
@@ -74,6 +93,24 @@ void FunctionalFMTCartesian::extract_system_properties(
   grid_counts_four.push_back(grid_counts.at(2) / 2 + 1);
 }
 // _____________________________________________________________________________
+void FunctionalFMTCartesian::extract_system_properties(System<3>& system) {
+  // Extract properties
+  lengths = system.system_lengths;
+  grid_counts = system.grid_counts;
+  voxel_count = grid_counts.at(0) * grid_counts.at(1) * grid_counts.at(2);
+  bin_sizes = system.bin_sizes;
+  // Since we only do real-->complex Fourier transforms (or vice versa),
+  // we only need half of the Fourier space (see FFTW docs).
+  // In 3D that means that the first two dimensions have the regular number of
+  // grid points and the last one has half the grid points.
+  grid_counts_four.push_back(grid_counts.at(0));
+  grid_counts_four.push_back(grid_counts.at(1));
+  grid_counts_four.push_back(grid_counts.at(2) / 2 + 1);
+  for (size_t i = 0; i < 3; i++) {
+    bin_sizes_four.push_back(2. * M_PI / lengths.at(i));
+  }
+}
+// _____________________________________________________________________________
 void FunctionalFMTCartesian::extract_species_properties(
     const std::vector<Properties>& species_properties) {
   // Sort the affected species numbers
@@ -108,6 +145,21 @@ void FunctionalFMTCartesian::extract_species_properties(
       std::cerr << std::endl;
       exit(1);
     }
+    diameters.push_back(diameter);
+    bulk_densities.push_back(bulk_density);
+  }
+  // Count species that interact via the hard sphere potential
+  species_count = affected_species.size();
+}
+// _____________________________________________________________________________
+void FunctionalFMTCartesian::extract_species_properties(System<3>& system) {
+  double diameter{0.};
+  double bulk_density{0.};
+  // Extract properties
+  for (auto& species : affected_species) {
+    system.species_properties.at(species).get_property("diameter", &diameter);
+    system.species_properties.at(species).get_property("bulk density",
+		      &bulk_density);
     diameters.push_back(diameter);
     bulk_densities.push_back(bulk_density);
   }

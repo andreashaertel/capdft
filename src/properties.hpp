@@ -16,6 +16,7 @@
 #include <string>
 #include <unordered_map>
 #include <typeinfo>
+#include "../../parameter_handler/src/parameter_handler.hpp"
 // Class forward declarations
 // _____________________________________________________________________________
 /** \brief Properties class is a container for species or system properties
@@ -38,6 +39,7 @@ class Properties {
    *
    */
   Properties();
+  Properties(ParameterHandler* parameters);
   Properties(const Properties& other);
   /** \brief Destructor
    *
@@ -60,6 +62,28 @@ class Properties {
     TemplateData<T>* new_property = new TemplateData<T>(property_value);
     properties[property_name] = new_property;
   }
+  /** \brief Add an indexed property
+   */
+  template<typename T>
+  void add_property(
+      const std::string& property_name, T property_value, size_t index) {
+    add_property(indexed(property_name, index), property_value);
+  }
+// -   /** \brief Extract system properties from a parameter file
+// -    *
+// -    * following a hard-coded list of required system parameters
+// -    */
+// -   void extract_system_properties(std::string& filename);
+// -   /** \brief Extract one species' properties from a parameter file
+// -    */
+// -   void extract_species_properties(std::string& filename, size_t index);
+// -   /** \brief Extract all properties from a parameter file automatically
+// -    *
+// -    * Extract properties from each line of the file (except comments "# ...")
+// -    * following the format "property_name property_value"; decide automatically
+// -    * on data type (double or std::vector<double> or string?).
+// -    */
+// -   void extract_properties(std::string& filename);
   /** \brief Returns a property with an arbitrary data type
    *
    */
@@ -68,7 +92,8 @@ class Properties {
     if (contains_property(property_name)) {
       if (typeid(T) != *(properties.at(property_name)->type)) {
         std::cerr << "Properties::get_property(): \"";
-        std::cerr << "Error: Requested type and property type not the same.\"";
+        std::cerr << "Error: Requested type and property type not the same for ";
+	std::cerr << "property '" << property_name << "'.\"";
         std::cerr << std::endl;
         exit(1);
       }
@@ -76,10 +101,64 @@ class Properties {
           properties.at(property_name)))->value;
       return true;
     } else {
+      std::cout << "Properties: " << property_name << " not specified.\n";
       throw &missing_property_error;
       return false;
     }
   }
+  /** \brief Returns a property, possibly extracting it from parameter_handler
+   *
+   * Note that the ParameterHandler usually needs parameter names without spaces
+   * therefore this function also attempts to find the parameter by an
+   * alternative name without spaces.
+   */
+  template<typename T>
+  bool get_property(const std::string& property_name, T* property_value) {
+    if (contains_property(property_name)) {
+      // extract property from properties
+      if (typeid(T) != *(properties.at(property_name)->type)) {
+        std::cerr << "Properties::get_property(): \"";
+        std::cerr << "Error: Requested type and property type not the same for ";
+	std::cerr << "property '" << property_name << "'.\"";
+        std::cerr << std::endl;
+        exit(1);
+      }
+      *property_value = (dynamic_cast<TemplateData<T>*>(
+          properties.at(property_name)))->value;
+      return true;
+    } else if (parameter_handler != nullptr) {
+      // extract property from parameter handler & add it to properties for
+      // future reuse
+      if (extract_property(property_name, property_value)) {
+	add_property(property_name, *property_value);
+        return true;
+      // try the same with alternative name
+      } else if (extract_property(parameter_name(property_name),
+			          property_value)) {
+	add_property(property_name, *property_value);
+        return true;
+      }
+    }
+    // else:
+    std::cout << "Properties: " << property_name << " not specified.\n";
+    throw &missing_property_error;
+    return false;
+  }
+  /** \brief Returns an indexed property
+   */
+  template<typename T>
+  bool get_property(const std::string& property_name, T* property_value,
+		  size_t index) const {
+    return get_property(indexed(property_name, index), property_value);
+  }
+  template<typename T>
+  bool get_property(const std::string& property_name, T* property_value,
+		  size_t index) {
+    return get_property(indexed(property_name, index), property_value);
+  }
+  /** \brief Specifies labeling convention for indexed properties
+   */
+  std::string indexed(const std::string& property_name, size_t index) const;
   /** \brief Data class is a universal type class. 
    *
    *  The Data class is used to derive a TemplateData class that stores data of
@@ -121,6 +200,13 @@ class Properties {
    *
    */
   std::unordered_map<std::string, Data*> properties;
+  /** \brief Associated ParameterHandler
+   *
+   * If this is well defined, the Properties class can extract parameters
+   * directly from the ParameterHandler (only on explicit request via
+   * get_property or extract_property).
+   */
+  ParameterHandler* parameter_handler = nullptr;
   /** \brief std::exception MissingPropertyException.
    */
   class MissingPropertyException : public std::exception {
@@ -166,5 +252,13 @@ class Properties {
       this->add_property<T>(property_name, property_value);
     }
   }
+  /** \brief Extract a property from the parameter handler
+   */
+  template<typename T>
+  bool extract_property(const std::string& property_name, T* property_value);
+  /** \brief Account for the different name conventions between ParameterHandler
+   * and Property
+   */
+  std::string parameter_name(const std::string& property_name) const;
 };
 #endif  // SRC_PROPERTIES_HPP_

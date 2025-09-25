@@ -1,0 +1,96 @@
+# Adapted from:
+# SPDX-FileCopyrightText: 2021 Moritz Bültmann <moritz.bueltmann@physik.uni-freiburg.de>
+# SPDX-License-Identifier: LGPL-3.0-or-later
+# Binary name ##################################################################
+BNAME=main
+# Compiler #####################################################################
+CXX=g++
+# Libraries to be linked #######################################################
+LIBS=-lm -lfftw3 -lgsl -lgslcblas
+# Compiler flags ###############################################################
+CXXFLAGS=-g -pedantic -std=c++2a -O2 -Wall
+# Directories for binaries, objects and sources ################################
+BDIR = bin/
+ODIR = obj/
+SDIR = src/
+# All files from the normal repository that are used in this example ###########
+REPOSDIR = ../../
+#REPOSDIR = ../../src/
+REPOFILE =
+REPOFILE += system
+REPOFILE += data_frame
+REPOFILE += properties
+# Additional file from parameter_handler #######################################
+REPOSDIR2 = ../../../parameter_handler/
+#REPOSDIR2 = ../../../parameter_handler/src/
+REPOFILE2 = parameter_handler
+# Get host name ################################################################
+HOST = $(shell hostname)
+# Offsets for binaries, objects and source/header files ########################
+BOFF = $(BDIR)$(HOST).
+OOFF = $(ODIR)$(HOST).
+SOFF = $(SDIR)
+# Create empty file collection variables #######################################
+SOURCE =
+HEADERS =
+OBJECTS =
+REPOSOURCE =
+REPOHEADERS =
+REPOOBJECTS =
+# Header files  and object files from main repo ################################
+REPOSOURCE += $(addprefix $(REPOSDIR)$(SOFF), $(addsuffix .cpp, $(REPOFILE)))
+REPOSOURCE += $(addprefix $(REPOSDIR2)$(SOFF), $(addsuffix .cpp, $(REPOFILE2)))
+REPOHEADERS += $(addprefix $(REPOSDIR)$(SOFF), $(addsuffix .hpp, $(REPOFILE)))
+REPOHEADERS += $(addprefix $(REPOSDIR2)$(SOFF), $(addsuffix .hpp, $(REPOFILE2)))
+REPOOBJECTS += $(addprefix $(OOFF), $(addsuffix .o, $(REPOFILE)))
+REPOOBJECTS2 = $(addprefix $(OOFF), $(addsuffix .o, $(REPOFILE2)))
+# Standard header files and object files #######################################
+HEADERS += $(wildcard $(SDIR)*.h)
+HEADERS += $(wildcard $(SDIR)*.hpp)
+SOURCE += $(wildcard $(SDIR)*.cpp)
+OBJECTS += $(patsubst $(SDIR)%.cpp,$(OOFF)%.o,$(SOURCE))
+# TARGETS ######################################################################
+
+.PHONY: default all init todo checkstyle clean compile
+
+default: init compile
+
+all: checkstyle init compile todo
+
+init:
+	@mkdir -p bin
+	@mkdir -p obj
+
+todo:
+	@echo "================================ TODO ================================"
+	@grep -n "TODO[(]*.*[)]*[:]*.*" $(SOURCE) $(HEADERS) $(REPOSOURCE) $(REPOHEADERS)
+
+
+# Google C++ style checker:
+# Install cpplint with
+# $pip3 install cpplint
+# And add ~/.local/bin to PATH variable.
+# Checks all files in the src directory.
+checkstyle:
+	@cpplint $(SOURCE) $(HEADERS) $(REPOSOURCE) $(REPOHEADERS)
+
+clean:
+	rm -f $(OOFF)*.o
+	rm -f $(BOFF)*
+
+compile: $(BOFF)$(BNAME)
+
+# $<  first dependency
+# $@  targets
+# $+  list of all dependencies
+# $^  list of all dependencies, no doubles
+
+$(BOFF)$(BNAME): $(OBJECTS) $(REPOOBJECTS) $(REPOOBJECTS2)
+	$(CXX) -o $@ $^ $(LIBS)
+
+$(OOFF)%.o: $(SDIR)%.cpp $(HEADERS) $(REPOHEADERS)
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+$(REPOOBJECTS): $(REPOSOURCE) $(HEADERS) $(REPOHEADERS)
+	$(CXX) $(CXXFLAGS) -c -o $@ $(REPOSDIR)src/$(subst .,,$(suffix $(basename $@))).cpp
+$(REPOOBJECTS2): $(REPOSOURCE) $(HEADERS) $(REPOHEADERS)
+	$(CXX) $(CXXFLAGS) -c -o $@ $(REPOSDIR2)src/$(subst .,,$(suffix $(basename $@))).cpp

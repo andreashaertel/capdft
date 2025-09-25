@@ -28,6 +28,9 @@ REPOFILE += integration
 REPOFILE += iterator
 REPOFILE += properties
 REPOFILE += radial_poisson_solver
+# ParameterHandler files #######################################################
+REPOSDIR2 = ../../../parameter_handler/src/
+REPOFILE2 = parameter_handler
 # Get host name ################################################################
 HOST = $(shell hostname)
 # Offsets for binaries and objects #############################################
@@ -42,8 +45,11 @@ REPOHEADERS =
 REPOOBJECTS =
 # Header files and object files from main repo #################################
 REPOSOURCE += $(addprefix $(REPOSDIR), $(addsuffix .cpp, $(REPOFILE)))
+REPOSOURCE2 = $(addprefix $(REPOSDIR2), $(addsuffix .cpp, $(REPOFILE2)))
 REPOHEADERS += $(addprefix $(REPOSDIR), $(addsuffix .hpp, $(REPOFILE)))
+REPOHEADERS2 = $(addprefix $(REPOSDIR2), $(addsuffix .hpp, $(REPOFILE2)))
 REPOOBJECTS += $(patsubst $(REPOSDIR)%.cpp,$(OOFF)%.o, $(REPOSOURCE))
+REPOOBJECTS2 = $(patsubst $(REPOSDIR2)%.cpp,$(OOFF)%.o, $(REPOSOURCE2))
 # Standard header files and object files #######################################
 HEADERS += $(wildcard $(SDIR)*.h)
 HEADERS += $(wildcard $(SDIR)*.hpp)
@@ -90,11 +96,14 @@ compile: $(BOFF)$(BNAME)
 # $+  list of all dependencies
 # $^  list of all dependencies, no doubles
 
-$(BOFF)$(BNAME): $(OBJECTS) $(REPOOBJECTS)
+$(BOFF)$(BNAME): $(OBJECTS) $(REPOOBJECTS) $(REPOOBJECTS2)
 	$(CXX) -o $@ $^ $(LIBS)
 
-$(OOFF)%.o: $(SDIR)%.cpp $(HEADERS) $(REPOHEADERS)
+$(OOFF)%.o: $(SDIR)%.cpp $(HEADERS) $(REPOHEADERS) $(REPOHEADERS2)
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 $(REPOOBJECTS): $(REPOSOURCE) $(HEADERS) $(REPOHEADERS)
 	$(CXX) $(CXXFLAGS) -c -o $@ $(REPOSDIR)$(subst .,,$(suffix $(basename $@))).cpp
+$(REPOOBJECTS2): $(REPOSOURCE2) $(HEADER2)
+	$(CXX) $(CXXFLAGS) -c -o $@ $(REPOSDIR2)$(subst .,,$(suffix $(basename $@))).cpp
+
 

@@ -35,7 +35,6 @@ CartesianPoissonSolver::~CartesianPoissonSolver() {
 // _____________________________________________________________________________
 void CartesianPoissonSolver::solve(
     std::vector<double>& rhs,
-    std::vector<std::vector<double>> boundary_values,
     std::vector<double>& solution) {
   // Termination condition: maximum allowed residual norm
   double accuracy = pow(std::numeric_limits<double>::epsilon(), 1. / 3.);
@@ -44,7 +43,6 @@ void CartesianPoissonSolver::solve(
   size_t max_iterations{25};
   size_t iteration_count{0};
   double deviation{0.};
-  add_boundary_values(boundary_values, rhs);
   while (!SparseMatrix::solve(
       rhs, solution, max_iterations, accuracy, &deviation)) {
     iteration_count += max_iterations;
@@ -53,6 +51,14 @@ void CartesianPoissonSolver::solve(
     std::cout << "; deviation: " << deviation << " > " << accuracy << "\"";
     std::cout << std::endl << "\033[A\033[K";
   }
+}
+// _____________________________________________________________________________
+void CartesianPoissonSolver::solve(
+    std::vector<double>& rhs,
+    std::vector<std::vector<double>> boundary_values,
+    std::vector<double>& solution) {
+  add_boundary_values(boundary_values, rhs);
+  solve(rhs, solution);
   remove_boundary_values(boundary_values, rhs);
 }
 // _____________________________________________________________________________

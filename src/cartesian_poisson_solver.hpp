@@ -11,6 +11,7 @@
 #include <cstddef>
 #include <vector>
 #include "sparse_matrix.hpp"  // NOLINT
+#include "poisson_solver_cartesian.hpp"  // NOLINT
 /** \brief This class contians tools to solve the cartesian (3D)
  *         poisson equation
  * 
@@ -19,7 +20,8 @@
  *  These kind of matrices can be solved via the GMRES algorithm rather
  *  efficiently.
  */
-class CartesianPoissonSolver : public SparseMatrix {
+class CartesianPoissonSolver : public PoissonSolverCartesian,
+	public SparseMatrix {
  public:
   /** \brief Empty Constructor
    */
@@ -40,6 +42,16 @@ class CartesianPoissonSolver : public SparseMatrix {
    *  
    *  The GMRES solver of the SparseMatrix class is used to find an iterative
    *  solution.
+   */
+  void solve(
+      std::vector<double>& rhs,
+      std::vector<double>& solution) override;
+  /** \brief Solve the linear equation system with given boundary values
+   *  
+   *  This version overwrites the boundary values specified in the constructor.
+   * It is here for backwards compability with the older version of 
+   * CartesianPoissonSolver, where the boundary values were always specified in
+   * the constructor.
    */
   void solve(
       std::vector<double>& rhs,
