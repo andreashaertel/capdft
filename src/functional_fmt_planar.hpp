@@ -43,7 +43,7 @@ class FunctionalFMTPlanar : public Functional {
   FunctionalFMTPlanar(
       const std::vector<DataFrame<1, double>>* density_profiles,
       const std::vector<Properties>& species_properties,
-      const Properties& system_properties,
+      Properties& system_properties,
       const std::vector<size_t>& affected_species);
   /** \brief Automated Constructor
    *
@@ -54,7 +54,7 @@ class FunctionalFMTPlanar : public Functional {
   FunctionalFMTPlanar(
       const std::vector<DataFrame<1, double>>* density_profiles,
       const std::vector<Properties>& species_properties,
-      const Properties& system_properties);
+      Properties& system_properties);
   /** \brief Destructor
    *
    */
@@ -205,7 +205,7 @@ class FunctionalFMTPlanar : public Functional {
   double calc_local_energy_density(size_t position);
   /** \brief From the system object extract the system properties
    */
-  void extract_system_properties(const Properties& system_properties);
+  void extract_system_properties(Properties& system_properties);
   /** \brief From the system object extract the species properties
    */
   void extract_species_properties(

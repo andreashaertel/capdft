@@ -47,7 +47,8 @@ void Boundaries<dim>::set_all_boundary_values(double value) {
 // _____________________________________________________________________________
 template <size_t dim>
 void Boundaries<dim>::exp_external_potential_hs(System<dim>& system,
-		std::vector<DataFrame<dim, double>>* result) {
+		std::vector<DataFrame<dim, double>>* result,
+		double resolution) {
   std::vector<size_t> grid_counts = result->at(0).size_dim();
   // if there are no boundary objects, set all to 1.
   if (this->size() == 0) {
@@ -60,14 +61,22 @@ void Boundaries<dim>::exp_external_potential_hs(System<dim>& system,
   } else {
     auto it = this->begin();
     // initialize with first boundary's potential
-    (*it)->exp_external_potential_hs(system, result);
+    if (resolution > 0.) {
+      (*it)->exp_external_potential_hs(system, result, resolution);
+    } else {
+      (*it)->exp_external_potential_hs(system, result);
+    }
     // multiply with all remaining boundaries' potentials
     std::vector<DataFrame<dim, double>> dummy(result->size(), 
 		    DataFrame<dim, double>(grid_counts));
     it++;
     std::cout << "HS of first surface\n";
     while (it != this->end()) {
-      (*it)->exp_external_potential_hs(system, &dummy);
+      if (resolution > 0.) {
+        (*it)->exp_external_potential_hs(system, &dummy, resolution);
+      } else {
+        (*it)->exp_external_potential_hs(system, &dummy);
+      }
       for (size_t j = 0; j < result->size(); j++) {
         result->at(j) *= dummy.at(j);
       }

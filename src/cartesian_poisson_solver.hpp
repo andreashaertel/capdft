@@ -10,6 +10,7 @@
 // Includes
 #include <cstddef>
 #include <vector>
+#include "data_frame.hpp"  // NOLINT
 #include "sparse_matrix.hpp"  // NOLINT
 #include "poisson_solver_cartesian.hpp"  // NOLINT
 /** \brief This class contians tools to solve the cartesian (3D)
@@ -30,7 +31,7 @@ class CartesianPoissonSolver : public PoissonSolverCartesian,
    *
    *  \param bin_count grid points in all three dimensions
    *  \param bin_size is the size of the bins in the three dimensions
-   *  \param pariodic_boundaries contains wether a dimension has PBC
+   *  \param periodic_boundaries contains wether a dimension has PBC
    */
   CartesianPoissonSolver(
       std::vector<size_t> bin_count, std::vector<double> bin_size,
@@ -41,22 +42,25 @@ class CartesianPoissonSolver : public PoissonSolverCartesian,
   /** \brief Solve the linear equation system
    *  
    *  The GMRES solver of the SparseMatrix class is used to find an iterative
-   *  solution.
+   *  solution. The boundary values are by default zero.
    */
   void solve(
       std::vector<double>& rhs,
       std::vector<double>& solution) override;
   /** \brief Solve the linear equation system with given boundary values
-   *  
-   *  This version overwrites the boundary values specified in the constructor.
-   * It is here for backwards compability with the older version of 
-   * CartesianPoissonSolver, where the boundary values were always specified in
-   * the constructor.
+   *
+   * There are six boundary values on the six faces of the system. They are
+   * stored in vector format as following:
+   * boundary_values = {{x_left, x_right}, {y_left, y_right}, {z_left, z_right}}
    */
   void solve(
       std::vector<double>& rhs,
       std::vector<std::vector<double>> boundary_values,
       std::vector<double>& solution);
+  void solve(
+      DataFrame<3, double>& rhs,
+      std::vector<std::vector<double>> boundary_values,
+      DataFrame<3, double>& solution);
 
  private:
   /** \brief Number of bins in every dimension

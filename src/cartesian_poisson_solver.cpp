@@ -6,6 +6,7 @@
  *  The file contains the definitions of the CartesianPoissonSolver class.
  */
 #include "cartesian_poisson_solver.hpp"  // NOLINT
+#include "data_frame.hpp"  // NOLINT
 #include <cmath>
 #include <iostream>
 #include <limits>
@@ -60,6 +61,32 @@ void CartesianPoissonSolver::solve(
   add_boundary_values(boundary_values, rhs);
   solve(rhs, solution);
   remove_boundary_values(boundary_values, rhs);
+}
+void CartesianPoissonSolver::solve(
+    DataFrame<3, double>& rhs,
+    std::vector<std::vector<double>> boundary_values,
+    DataFrame<3, double>& solution) {
+  size_t voxel_count = bin_count.at(0) * bin_count.at(1) * bin_count.at(2);
+  std::vector<double> rhs_vector(voxel_count);
+  std::vector<double> solution_vector(voxel_count);
+  size_t index;
+  for (size_t i = 0; i < bin_count.at(0); i++) {
+    for (size_t j = 0; j < bin_count.at(1); j++) {
+      for (size_t k = 0; k < bin_count.at(2); k++) {
+	coordinates_to_index(i, j, k, &index);
+	rhs_vector.at(index) = rhs.at(i, j, k);
+      }
+    }
+  }
+  solve(rhs_vector, boundary_values, solution_vector);
+  for (size_t i = 0; i < bin_count.at(0); i++) {
+    for (size_t j = 0; j < bin_count.at(1); j++) {
+      for (size_t k = 0; k < bin_count.at(2); k++) {
+	coordinates_to_index(i, j, k, &index);
+	solution.at(i, j, k) = solution_vector.at(index);
+      }
+    }
+  }
 }
 // _____________________________________________________________________________
 void CartesianPoissonSolver::set_laplacian() {

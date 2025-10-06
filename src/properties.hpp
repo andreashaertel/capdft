@@ -69,21 +69,6 @@ class Properties {
       const std::string& property_name, T property_value, size_t index) {
     add_property(indexed(property_name, index), property_value);
   }
-// -   /** \brief Extract system properties from a parameter file
-// -    *
-// -    * following a hard-coded list of required system parameters
-// -    */
-// -   void extract_system_properties(std::string& filename);
-// -   /** \brief Extract one species' properties from a parameter file
-// -    */
-// -   void extract_species_properties(std::string& filename, size_t index);
-// -   /** \brief Extract all properties from a parameter file automatically
-// -    *
-// -    * Extract properties from each line of the file (except comments "# ...")
-// -    * following the format "property_name property_value"; decide automatically
-// -    * on data type (double or std::vector<double> or string?).
-// -    */
-// -   void extract_properties(std::string& filename);
   /** \brief Returns a property with an arbitrary data type
    *
    */

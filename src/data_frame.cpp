@@ -12,6 +12,7 @@
 #include <vector>
 // Template class forward declarations
 template class DataFrame<3, bool>; // limited specialization: only "at(i, j, k)"
+template class DataFrame<1, bool>; // limited specialization: only "at(i)"
 template class DataFrame<1, double>;
 template class DataFrame<2, double>;
 template class DataFrame<3, double>;

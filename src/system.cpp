@@ -15,8 +15,9 @@
 #include <fstream>
 #include <cmath>
 
-// Explicit instantiation for 3d
+// Explicit instantiation for 3d and 1d
 template class System<3>;
+template class System<1>;
 
 // _____________________________________________________________________________
 template <size_t dim>
@@ -58,14 +59,24 @@ void System<dim>::extract_system_dimensions() {
   double length;
   size_t grid_count;
   bool PBC;
-  for (size_t dir = 0; dir < dim; dir++) {
-    get_property("length", &length, dir);
-    get_property("grid_count", &grid_count, dir);
-    get_property("PBC", &PBC, dir);
+  if (dim == 1) { // parameters without indexing
+    get_property("length", &length);
+    get_property("grid_count", &grid_count);
+    get_property("PBC", &PBC);
     system_lengths.push_back(length);
     grid_counts.push_back(grid_count);
     periodic_boundaries.push_back(PBC);
     bin_sizes.push_back(length / static_cast<double>(grid_count));
+  } else { // indices indicate direction
+    for (size_t dir = 0; dir < dim; dir++) {
+      get_property("length", &length, dir);
+      get_property("grid_count", &grid_count, dir);
+      get_property("PBC", &PBC, dir);
+      system_lengths.push_back(length);
+      grid_counts.push_back(grid_count);
+      periodic_boundaries.push_back(PBC);
+      bin_sizes.push_back(length / static_cast<double>(grid_count));
+    }
   }
 }
 // _____________________________________________________________________________
@@ -185,7 +196,12 @@ void System<dim>::extract_species_properties() {
   }
 }
 // _____________________________________________________________________________
-template <> // TODO: generalize
+template <size_t dim> // TODO: generalize
+std::vector<size_t> System<dim>::index_to_coordinates(size_t index) const {
+  std::cerr << "System::index_to_coordinates: This function is only implemented in 3d.\n";
+  exit(1);
+}
+template <>
 std::vector<size_t> System<3>::index_to_coordinates(size_t index) const {
   std::vector<size_t> coordinates(3);
   coordinates.at(2) = index % grid_counts.at(2);
@@ -270,6 +286,13 @@ size_t System<dim>::decrease(size_t index, size_t direction,
   }
 }
 // _____________________________________________________________________________
+template <size_t dim>
+double System<dim>::interpolate(DataFrame<dim, double>& values,
+		  std::vector<double>& position) {
+  std::cerr << "System::interpolate: This function is only implemented in 3d.\n";
+  exit(1);
+}
+  // Initialize: dimension, result, mid- & interpolation-point coordinates
 template <>
 double System<3>::interpolate(DataFrame<3, double>& values,
 		  std::vector<double>& position) {
@@ -410,6 +433,12 @@ void System<dim>::print_data(DataFrame<dim, double>& values,
   std::vector<DataFrame<dim, double>> vector = {values};
   print_data(vector, out_stream);
 }
+template <size_t dim>
+void System<dim>::print_data(std::vector<DataFrame<dim, double>>& values,
+		std::ostream& out_stream) {
+  std::cerr << "System::print_data: This function is only implemented in 3d.\n";
+  exit(1);
+}
 template <>
 void System<3>::print_data(std::vector<DataFrame<3, double>>& values,
 		std::ostream& out_stream) {
@@ -443,6 +472,12 @@ void System<dim>::print_data(DataFrame<dim, bool>& values,
   std::vector<DataFrame<dim, bool>> vector = {values};
   print_data(vector, out_stream);
 }
+template <size_t dim>
+void System<dim>::print_data(std::vector<DataFrame<dim, bool>>& values,
+		std::ostream& out_stream) {
+  std::cerr << "System::print_data: This function is only implemented in 3d.\n";
+  exit(1);
+}
 template <>
 void System<3>::print_data(std::vector<DataFrame<3, bool>>& values,
 		std::ostream& out_stream) {
@@ -475,6 +510,12 @@ void System<3>::print_data(std::vector<DataFrame<3, bool>>& values,
   }
 }
 //_____________________________________________________________________________
+template <size_t dim>
+bool System<dim>::load_data(std::string filename, std::vector<size_t>& col_nums,
+	std::vector<DataFrame<dim,double>>* data) {
+  std::cerr << "System::load_data: This function is only implemented in 3d.\n";
+  exit(1);
+}
 template <>
 bool System<3>::load_data(std::string filename, std::vector<size_t>& col_nums,
 	std::vector<DataFrame<3,double>>* data) {

@@ -17,7 +17,7 @@ FunctionalFMTPlanar::FunctionalFMTPlanar() {
 FunctionalFMTPlanar::FunctionalFMTPlanar(
     const std::vector<DataFrame<1, double>>* density_profiles,
     const std::vector<Properties>& species_properties,
-    const Properties& system_properties,
+    Properties& system_properties,
     const std::vector<size_t>& affected_species)
   : affected_species(affected_species),
     density_profiles_pointer(density_profiles) {
@@ -38,7 +38,7 @@ FunctionalFMTPlanar::FunctionalFMTPlanar(
 FunctionalFMTPlanar::FunctionalFMTPlanar(
       const std::vector<DataFrame<1, double>>* density_profiles,
       const std::vector<Properties>& species_properties,
-      const Properties& system_properties)
+      Properties& system_properties)
   : FunctionalFMTPlanar(
       density_profiles, species_properties, system_properties,
       std::vector<size_t>(0)) {
@@ -49,7 +49,7 @@ FunctionalFMTPlanar::~FunctionalFMTPlanar() {
 }
 // _____________________________________________________________________________
 void FunctionalFMTPlanar::extract_system_properties(
-    const Properties& system_properties) {
+    Properties& system_properties) {
   system_properties.get_property("length", &length);
   system_properties.get_property("grid count", &grid_count);
   // Calculate bin sizes

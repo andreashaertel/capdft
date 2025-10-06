@@ -152,9 +152,11 @@ class BoundarySurface {
      * \param system: specifies all particle species' properties
      * \param potential: pointer to return value; needs to be initialized with
      * 		desired grid dimensions
+     * \param resolution: spatial resolution of surface discretization, in units
+     * 		of the smallest ion diameter
      */
     void exp_external_potential_hs(System<dim>& system,
-    		std::vector<DataFrame<dim, double>>* potential);
+    	std::vector<DataFrame<dim, double>>* potential, double resolution = 0.25);
   protected:
     /** \brief System dimensions
      */

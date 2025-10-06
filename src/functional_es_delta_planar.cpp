@@ -20,7 +20,7 @@ FunctionalESDeltaPlanar::FunctionalESDeltaPlanar() {
 FunctionalESDeltaPlanar::FunctionalESDeltaPlanar(
     std::vector<DataFrame<1, double>>* density_profiles,
     const std::vector<Properties>& species_properties,
-    const Properties& system_properties,
+    Properties& system_properties,
     std::vector<size_t> affected_species)
   : affected_species(affected_species),
     density_profiles_pointer(density_profiles) {
@@ -39,7 +39,7 @@ FunctionalESDeltaPlanar::FunctionalESDeltaPlanar(
 FunctionalESDeltaPlanar::FunctionalESDeltaPlanar(
     std::vector<DataFrame<1, double>>* density_profiles,
     const std::vector<Properties>& species_properties,
-    const Properties& system_properties)
+    Properties& system_properties)
   : FunctionalESDeltaPlanar(
       density_profiles, species_properties, system_properties,
       std::vector<size_t>(0)) {
@@ -97,7 +97,7 @@ double FunctionalESDeltaPlanar::calc_energy() {
 }
 // _____________________________________________________________________________
 void FunctionalESDeltaPlanar::extract_system_properties(
-    const Properties& system_properties) {
+    Properties& system_properties) {
   // Extract system properties directly
   system_properties.get_property("length", &length);
   system_properties.get_property("grid count", &grid_count);
@@ -108,7 +108,7 @@ void FunctionalESDeltaPlanar::extract_system_properties(
 }
 // _____________________________________________________________________________
 void FunctionalESDeltaPlanar::extract_electrical_properties(
-    const Properties& system_properties) {
+    Properties& system_properties) {
   // This variable saves a number representing, which of the el. variables are
   // available.
   int cases{0};

@@ -156,7 +156,7 @@ void BoundarySurface<3>::minimal_distances(DataFrame<3, double>* result,
 // _____________________________________________________________________________
 template <>
 void BoundarySurface<3>::exp_external_potential_hs(System<3>& system,
-		std::vector<DataFrame<3, double>>* potential) {
+	std::vector<DataFrame<3, double>>* potential, double resolution) {
   // Initialize
   std::vector<size_t> grid_counts = potential->at(0).size_dim();
   potential->resize(system.species_properties.size());
@@ -177,9 +177,8 @@ void BoundarySurface<3>::exp_external_potential_hs(System<3>& system,
   }
   // Calculate distance to boundary from each grid point in the system
   DataFrame<3, double> distances(grid_counts);
-  // TODO: surface resolution arbitrarily hardcoded?
-  double resolution = 0.25 * 
-	  *std::min_element(diameters.begin(), diameters.end());
+  // calculate resolution in nanometers
+  resolution *= *std::min_element(diameters.begin(), diameters.end());
   // upper limit: all distances above the largest ion's radius are irrelevant
   double upper_limit = 0.5 * 
 	  *std::max_element(diameters.begin(), diameters.end());

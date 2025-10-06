@@ -283,37 +283,13 @@ void CartesianPoissonSolverAny::set_boundary_values(
   SparseMatrix::remove_columns(boundary_positions);
   SparseMatrix::transpose();
 }
-//// _____________________________________________________________________________
-//void CartesianPoissonSolverAny::calc_boundary_values(
-//		BoundarySurface<3>* boundary_surface) {
-//  // Iterate over all grid points outside the boundaries
-//  std::vector<double> position = {0., 0., 0.};
-//  std::vector<size_t> coordinates = {0, 0, 0};
-//  size_t index = 0;
-//  double value = boundary_surface->get_boundary_value();
-//  for (size_t i = 0; i < bin_count.at(0); ++i) {
-//    position.at(0) = static_cast<double>(i) * bin_size.at(0);
-//    for (size_t j = 0; j < bin_count.at(1); ++j) {
-//      position.at(1) = static_cast<double>(j) * bin_size.at(1);
-//      for (size_t k = 0; k < bin_count.at(2); ++k) {
-//        position.at(2) = static_cast<double>(k) * bin_size.at(2);
-//	bool is_in_boundaries = boundary_surface->is_within_boundary(position);
-//	if (!is_in_boundaries) {
-//	  coordinates = {i, j, k};
-//	  coordinates_to_index(coordinates, &index);
-//	  // Modify rhs and (off-)diagonal values of adjacent grid points, 
-//	  // if they lie within boundaries
-//	  modify_rhs(boundary_surface, coordinates);
-//	  // Remove corresponding row and column. The removed indices and
-//	  // values are stored so that they can be filled back in to the final
-//	  // solution vector.
-//	  boundary_points.push_back(std::make_pair(index, value));
-//	  boundary_positions.push_back(index);
-//	}
-//      }
-//    }
-//  }
-//}
+// _____________________________________________________________________________
+// This method iterates over all points outside the boundaries, searches their
+// nearest neighbor points and modifies the associated matrix elements and rhs
+// appropriately. Problem here: This requires that the surface is sufficiently
+// well defined by the set of all grid points outside the boundaries. Very
+// fine surface structures or double-sided boundaries (e.g. of a thin-walled
+// hollow cylinder) can't be resolved with this method.
 // _____________________________________________________________________________
 void CartesianPoissonSolverAny::calc_boundary_values(
 		BoundarySurface<3>* boundary_surface) {
@@ -328,185 +304,226 @@ void CartesianPoissonSolverAny::calc_boundary_values(
       position.at(1) = static_cast<double>(j) * bin_size.at(1);
       for (size_t k = 0; k < bin_count.at(2); ++k) {
         position.at(2) = static_cast<double>(k) * bin_size.at(2);
-	coordinates = {i, j, k};
 	bool is_in_boundaries = boundary_surface->is_within_boundary(position);
 	if (!is_in_boundaries) {
-	  // Remove corresponding row and column. The removed column indices and
+	  coordinates = {i, j, k};
+	  coordinates_to_index(coordinates, &index);
+	  // Modify rhs and (off-)diagonal values of adjacent grid points, 
+	  // if they lie within boundaries
+	  modify_rhs(boundary_surface, coordinates);
+	  // Remove corresponding row and column. The removed indices and
 	  // values are stored so that they can be filled back in to the final
 	  // solution vector.
-	  coordinates_to_index(coordinates, &index);
 	  boundary_points.push_back(std::make_pair(index, value));
 	  boundary_positions.push_back(index);
-      } else {
-	  // Modify rhs and matrix elements associated with this grid point
-	  // depending on its neighbors
-	  modify_matrix_elements(boundary_surface, coordinates);
 	}
       }
     }
   }
 }
 // _____________________________________________________________________________
-void CartesianPoissonSolverAny::modify_matrix_elements(
+void CartesianPoissonSolverAny::modify_rhs(
 		BoundarySurface<3>* boundary_surface,
-		std::vector<size_t>& coordinates) {
+		std::vector<size_t>& coordinates1) {
+  // index & boundary value at given point (must be a point outside boundaries!)
+  size_t index1;
+  coordinates_to_index(coordinates1, &index1);
   double value = boundary_surface->get_boundary_value();
-  std::vector<double> position = system.coordinates_to_position(coordinates);
-  size_t index;
-  size_t index_neighbor;
-  std::vector<size_t> coordinates_neighbor(3);
-  // Check whether the given coordinate is in direct vicinity (closer than bin
-  // size) to the surface
-  double distance_left;
-  double distance_right;
-  double rhs;
+  // indices & coordinates of next & next-to-next neighbors in the grid
+  size_t index2, index3;
+  std::vector<size_t> coordinates2(3);
+  std::vector<size_t> coordinates3(3);
+  std::vector<double> position2(3);
+  // Iterate over the six next neighbors
   for (size_t dir = 0; dir < 3; dir++) {
-    distance_left = boundary_surface->distance_directed(position, dir, false);
-    distance_right = boundary_surface->distance_directed(position, dir, true);
-    /* We are only interested in whether the distance is smaller than the bin
-     * size. If it is larger than that, we set it to -1, meaning there is no
-     * surface in vicinity.
-     */
-    if (distance_left > bin_size.at(dir)) {
-      distance_left = -1.;
-    }
-    if (distance_right > bin_size.at(dir)) {
-      distance_right = -1.;
-    }
-    // Initialize rhs addition
-    rhs = 0.;
-    if (distance_left < 0. && distance_right < 0.) {
-      // No surface nearby: do nothing, check other directions
-    } else {
-      // Surface adjacent to this point: modify matrix elements in this row
-      coordinates_to_index(coordinates, &index);
-      coordinates_neighbor = coordinates;
-      if (distance_left > 0.) {
-	// Modify rhs
-	rhs += 1. / distance_left;
-      } else {
-	// Set default value for distance to neighbor (for calculation of rhs &
-	// diagonal matrix element (index, index)); do not change anything else
-	distance_left = bin_size.at(dir);
-      }
-      if (distance_right > 0.) {
-	// Modify rhs
-	rhs += 1. / distance_right;
-      } else {
-	// Set default value for distance to neighbor
-	distance_right = bin_size.at(dir);
-      }
-      /** Modify rhs and matrix elements in the row corresponding to this point
-       */
-      /* Right hand side modification:
-       * TODO: generalize for overlapping surfaces - this here would count it twice
-       */
-      rhs_addition.at(index) -=
-		  value * 2. / (distance_left + distance_right) * rhs;
-      /* Diagonal matrix element (index, index):
-       */
-      double old_value = -2. / bin_size_squared.at(dir);
-      double new_value = -2. / (distance_left * distance_right);
-      SparseMatrix::set(index, index,
-			SparseMatrix::get(index, index) - old_value + new_value);
-      /* Off-diagonal matrix elements (index, index_neighbor):
-       * Zero if there's a boundary inbetween the two points, else nonzero.
-       */
-      try { // left neighbor
-        coordinates_neighbor = coordinates;
-        coordinates_neighbor.at(dir) = system.increase(coordinates.at(dir), dir, -1);
-        coordinates_to_index(coordinates_neighbor, &index_neighbor);
-        if (distance_left < bin_size.at(dir)) {
-          SparseMatrix::set(index, index_neighbor, 0.);
-        } else {
-	  SparseMatrix::set(index, index_neighbor,
-		2. / (distance_left * (distance_left + distance_right)));
-	}
+    for (int step : {-1, 1}) {
+      try {
+        // Calculate neighbor coordinates position2
+        coordinates2 = coordinates1;
+        coordinates2.at(dir) = system.increase(coordinates1.at(dir), dir, step);
+        coordinates_to_position(coordinates2, &position2);
+        // Calculate distance to boundary in the direction position2 -> position1
+	// (forward if step was backwards, i.e. if step==-1)
+	bool forward = (step == -1) ? true : false;
+        double distance = boundary_surface->distance_directed(position2, dir,
+				forward);
+	// If this neighbor is also within the boundaries, distance_directed returns
+	// zero. In that case, we don't have to do anything. Else:
+        if (distance > 0.) {
+	  // Modify rhs and matrix elements in the row corresponding to index2
+    	  coordinates_to_index(coordinates2, &index2);
+	  // Assuming there is no directly adjacent boundary in the opposite 
+	  // direction (else different old_value & new_value):
+	  // TODO: generalize for cases where two surfaces are closer than 2*bin_size
+          // Matrix element at (index2, index2):
+	  double old_value = -2. / bin_size_squared.at(dir);
+	  double new_value = -2. / (bin_size.at(dir) * distance);
+	  SparseMatrix::set(index2, index2,
+			SparseMatrix::get(index2, index2) - old_value + new_value);
+	  // Matrix element at (index2, index1) is moved to right hand side:
+	  // - old_value(rhs) ~ density at index2
+	  // - old_value(matrix element) = 1. / bin_sizes_squared.at(dir);
+	  // TODO: generalize for overlapping surfaces - this here would count it twice
+          rhs_addition.at(index2) -=
+		  value * 2. / (distance * (bin_size.at(dir) + distance));
+          // Matrix element at (index2, index3):
+	  try {
+	    // Calculate the coordinates of the next-to-next neighbor index3
+            coordinates3 = coordinates2;
+            coordinates3.at(dir) = system.increase(coordinates2.at(dir), dir, step);
+	    coordinates_to_index(coordinates3, &index3);
+	    // - old_value = 1. / bin_size_squared.at(dir)
+	    SparseMatrix::set(index2, index3,
+		2. / (bin_size.at(dir) * (bin_size.at(dir) + distance)));
+	  } catch (const std::out_of_range&) {
+            // do nothing if there is no next-to-next neighbor in this direction
+	  } catch (...) {
+	    std::cout << "CartesianPoissonSolverAny::modify_rhs: Error\n";
+	    exit(1);
+          }
+        }
       } catch (const std::out_of_range&) {
-        // do nothing if there is no neighbor in this direction
-      }
-      try { // right neighbor
-        coordinates_neighbor = coordinates;
-        coordinates_neighbor.at(dir) = system.increase(coordinates.at(dir), dir, +1);
-        coordinates_to_index(coordinates_neighbor, &index_neighbor);
-        if (distance_right < bin_size.at(dir)) {
-          SparseMatrix::set(index, index_neighbor, 0.);
-        } else {
-	  SparseMatrix::set(index, index_neighbor,
-		2. / (distance_right * (distance_left + distance_right)));
-	}
-      } catch (const std::out_of_range&) {
-        // do nothing if there is no neighbor in this direction
+        // do nothing if there is no next neighbor in this direction
+      } catch (...) {
+	std::cout << "CartesianPoissonSolverAny::modify_rhs: Error\n";
+	exit(1);
       }
     }
   }
 }
-//// _____________________________________________________________________________
-//void CartesianPoissonSolverAny::modify_rhs(
-//		BoundarySurface<3>* boundary_surface,
-//		std::vector<size_t>& coordinates1) {
-//  // index & boundary value at given point (must be a point outside boundaries!)
-//  size_t index1;
-//  coordinates_to_index(coordinates1, &index1);
+// _____________________________________________________________________________
+// Alternative method: Does not require the boundary to be representable by a
+// set of grid points. Just uses distance to the boundary to decide which points
+// need modification of the matrix elements. Problem here: Sometimes a boundary
+// point isn't recognized by this method, especially if it lies exactly on a
+// grid point. (Probably due to a numerical issue: If the distance to the
+// nearest neighboring grid point is just slightly larger than the bin size -
+// which might happen by numerical uncertainty, if it is actually equal to bin
+// size - this neighboring point is not registered as a boundary-adjacent point
+// and thus gets the default boundary value zero.)
+// _____________________________________________________________________________
+//void CartesianPoissonSolverAny::calc_boundary_values(
+//		BoundarySurface<3>* boundary_surface) {
+//  // Iterate over all grid points outside the boundaries
+//  std::vector<double> position = {0., 0., 0.};
+//  std::vector<size_t> coordinates = {0, 0, 0};
+//  size_t index = 0;
 //  double value = boundary_surface->get_boundary_value();
-//  // indices & coordinates of next & next-to-next neighbors in the grid
-//  size_t index2, index3;
-//  std::vector<size_t> coordinates2(3);
-//  std::vector<size_t> coordinates3(3);
-//  std::vector<double> position2(3);
-//  // Iterate over the six next neighbors
+//  for (size_t i = 0; i < bin_count.at(0); ++i) {
+//    position.at(0) = static_cast<double>(i) * bin_size.at(0);
+//    for (size_t j = 0; j < bin_count.at(1); ++j) {
+//      position.at(1) = static_cast<double>(j) * bin_size.at(1);
+//      for (size_t k = 0; k < bin_count.at(2); ++k) {
+//        position.at(2) = static_cast<double>(k) * bin_size.at(2);
+//	coordinates = {i, j, k};
+//	bool is_in_boundaries = boundary_surface->is_within_boundary(position);
+//	if (!is_in_boundaries) {
+//	  // Remove corresponding row and column. The removed column indices and
+//	  // values are stored so that they can be filled back in to the final
+//	  // solution vector.
+//	  coordinates_to_index(coordinates, &index);
+//	  boundary_points.push_back(std::make_pair(index, value));
+//	  boundary_positions.push_back(index);
+//      } else {
+//	  // Modify rhs and matrix elements associated with this grid point
+//	  // depending on its neighbors
+//	  modify_matrix_elements(boundary_surface, coordinates);
+//	}
+//      }
+//    }
+//  }
+//}
+//// _____________________________________________________________________________
+//void CartesianPoissonSolverAny::modify_matrix_elements(
+//		BoundarySurface<3>* boundary_surface,
+//		std::vector<size_t>& coordinates) {
+//  double value = boundary_surface->get_boundary_value();
+//  std::vector<double> position = system.coordinates_to_position(coordinates);
+//  size_t index;
+//  size_t index_neighbor;
+//  std::vector<size_t> coordinates_neighbor(3);
+//  // Check whether the given coordinate is in direct vicinity (closer than bin
+//  // size) to the surface
+//  double distance_left;
+//  double distance_right;
+//  double rhs;
 //  for (size_t dir = 0; dir < 3; dir++) {
-//    for (int step : {-1, 1}) {
-//      try {
-//        // Calculate neighbor coordinates position2
-//        coordinates2 = coordinates1;
-//        coordinates2.at(dir) = system.increase(coordinates1.at(dir), dir, step);
-//        coordinates_to_position(coordinates2, &position2);
-//        // Calculate distance to boundary in the direction position2 -> position1
-//	// (forward if step was backwards, i.e. if step==-1)
-//	bool forward = (step == -1) ? true : false;
-//        double distance = boundary_surface->distance_directed(position2, dir,
-//				forward);
-//	// If this neighbor is also within the boundaries, distance_directed returns
-//	// zero. In that case, we don't have to do anything. Else:
-//        if (distance > 0.) {
-//	  // Modify rhs and matrix elements in the row corresponding to index2
-//    	  coordinates_to_index(coordinates2, &index2);
-//	  // Assuming there is no directly adjacent boundary in the opposite 
-//	  // direction (else different old_value & new_value):
-//	  // TODO: generalize for cases where two surfaces are closer than 2*bin_size
-//          // Matrix element at (index2, index2):
-//	  double old_value = -2. / bin_size_squared.at(dir);
-//	  double new_value = -2. / (bin_size.at(dir) * distance);
-//	  SparseMatrix::set(index2, index2,
-//			SparseMatrix::get(index2, index2) - old_value + new_value);
-//	  // Matrix element at (index2, index1) is moved to right hand side:
-//	  // - old_value(rhs) ~ density at index2
-//	  // - old_value(matrix element) = 1. / bin_sizes_squared.at(dir);
-//	  // TODO: generalize for overlapping surfaces - this here would count it twice
-//          rhs_addition.at(index2) -=
-//		  value * 2. / (distance * (bin_size.at(dir) + distance));
-//          // Matrix element at (index2, index3):
-//	  try {
-//	    // Calculate the coordinates of the next-to-next neighbor index3
-//            coordinates3 = coordinates2;
-//            coordinates3.at(dir) = system.increase(coordinates2.at(dir), dir, step);
-//	    coordinates_to_index(coordinates3, &index3);
-//	    // - old_value = 1. / bin_size_squared.at(dir)
-//	    SparseMatrix::set(index2, index3,
-//		2. / (bin_size.at(dir) * (bin_size.at(dir) + distance)));
-//	  } catch (const std::out_of_range&) {
-//            // do nothing if there is no next-to-next neighbor in this direction
-//	  } catch (...) {
-//	    std::cout << "CartesianPoissonSolverAny::modify_rhs: Error\n";
-//	    exit(1);
-//          }
-//        }
+//    distance_left = boundary_surface->distance_directed(position, dir, false);
+//    distance_right = boundary_surface->distance_directed(position, dir, true);
+//    /* We are only interested in whether the distance is smaller than the bin
+//     * size. If it is larger than that, we set it to -1, meaning there is no
+//     * surface in vicinity.
+//     */
+//    if (distance_left > bin_size.at(dir)) {
+//      distance_left = -1.;
+//    }
+//    if (distance_right > bin_size.at(dir)) {
+//      distance_right = -1.;
+//    }
+//    // Initialize rhs addition
+//    rhs = 0.;
+//    if (distance_left < 0. && distance_right < 0.) {
+//      // No surface nearby: do nothing, check other directions
+//    } else {
+//      // Surface adjacent to this point: modify matrix elements in this row
+//      coordinates_to_index(coordinates, &index);
+//      coordinates_neighbor = coordinates;
+//      if (distance_left > 0.) {
+//	// Modify rhs
+//	rhs += 1. / distance_left;
+//      } else {
+//	// Set default value for distance to neighbor (for calculation of rhs &
+//	// diagonal matrix element (index, index)); do not change anything else
+//	distance_left = bin_size.at(dir);
+//      }
+//      if (distance_right > 0.) {
+//	// Modify rhs
+//	rhs += 1. / distance_right;
+//      } else {
+//	// Set default value for distance to neighbor
+//	distance_right = bin_size.at(dir);
+//      }
+//      /** Modify rhs and matrix elements in the row corresponding to this point
+//       */
+//      /* Right hand side modification:
+//       * TODO: generalize for overlapping surfaces - this here would count it twice
+//       */
+//      rhs_addition.at(index) -=
+//		  value * 2. / (distance_left + distance_right) * rhs;
+//      /* Diagonal matrix element (index, index):
+//       */
+//      double old_value = -2. / bin_size_squared.at(dir);
+//      double new_value = -2. / (distance_left * distance_right);
+//      SparseMatrix::set(index, index,
+//			SparseMatrix::get(index, index) - old_value + new_value);
+//      /* Off-diagonal matrix elements (index, index_neighbor):
+//       * Zero if there's a boundary inbetween the two points, else nonzero.
+//       */
+//      try { // left neighbor
+//        coordinates_neighbor = coordinates;
+//        coordinates_neighbor.at(dir) = system.increase(coordinates.at(dir), dir, -1);
+//        coordinates_to_index(coordinates_neighbor, &index_neighbor);
+//        if (distance_left < bin_size.at(dir)) {
+//          SparseMatrix::set(index, index_neighbor, 0.);
+//        } else {
+//	  SparseMatrix::set(index, index_neighbor,
+//		2. / (distance_left * (distance_left + distance_right)));
+//	}
 //      } catch (const std::out_of_range&) {
-//        // do nothing if there is no next neighbor in this direction
-//      } catch (...) {
-//	std::cout << "CartesianPoissonSolverAny::modify_rhs: Error\n";
-//	exit(1);
+//        // do nothing if there is no neighbor in this direction
+//      }
+//      try { // right neighbor
+//        coordinates_neighbor = coordinates;
+//        coordinates_neighbor.at(dir) = system.increase(coordinates.at(dir), dir, +1);
+//        coordinates_to_index(coordinates_neighbor, &index_neighbor);
+//        if (distance_right < bin_size.at(dir)) {
+//          SparseMatrix::set(index, index_neighbor, 0.);
+//        } else {
+//	  SparseMatrix::set(index, index_neighbor,
+//		2. / (distance_right * (distance_left + distance_right)));
+//	}
+//      } catch (const std::out_of_range&) {
+//        // do nothing if there is no neighbor in this direction
 //      }
 //    }
 //  }

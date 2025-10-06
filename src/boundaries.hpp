@@ -60,8 +60,14 @@ class Boundaries : public std::list<BoundarySurface<dim>*> {
      */
     void set_all_boundary_values(double value);
     /** \brief Calculate total external potential
+     *
+     * \param resolution: If value is larger than zero, this specifies the
+     * 		surface resolution (in units of the smallest ion diameter) as
+     * 		defined in BoundarySurface::exp_external_potential. Else, the
+     * 		default resolution settings are used.
      */
     void exp_external_potential_hs(System<dim>& system,
-		    std::vector<DataFrame<dim, double>>* result);
+		    std::vector<DataFrame<dim, double>>* result,
+		    double resolution = 0.);
 };
 #endif // SRC_BOUNDARIES_HPP_

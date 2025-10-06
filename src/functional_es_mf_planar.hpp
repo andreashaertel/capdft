@@ -31,14 +31,14 @@ class FunctionalESMFPlanar : public Functional {
   FunctionalESMFPlanar(
       std::vector<DataFrame<1, double>>* density_profiles,
       const std::vector<Properties>& species_properties,
-      const Properties& system_properties,
+      Properties& system_properties,
       std::vector<size_t> affected_species);
   /** \brief Automated Constructor
    */
   FunctionalESMFPlanar(
       std::vector<DataFrame<1, double>>* density_profiles,
       const std::vector<Properties>& species_properties,
-      const Properties& system_properties);
+      Properties& system_properties);
   /** \brief Destructor
    */
   ~FunctionalESMFPlanar();
@@ -113,11 +113,11 @@ class FunctionalESMFPlanar : public Functional {
    */
   PlanarPoissonSolver* poisson_solver;
   /** \brief Extract the system Properties required for this functional */
-  void extract_system_properties(const Properties& system_properties);
+  void extract_system_properties(Properties& system_properties);
   /** \brief From two of the three electrical properties, the third on can be
    *         calculated.
    */
-  void extract_electrical_properties(const Properties& system_properties);
+  void extract_electrical_properties(Properties& system_properties);
   /** \brief Extract the species specific Properties required for this
    *         functional
    */
