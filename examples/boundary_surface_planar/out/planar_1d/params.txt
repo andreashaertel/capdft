@@ -1,0 +1,27 @@
+# Parameter file
+# System properties:
+
+grid_count 400
+length 8
+PBC false
+temperature 300
+bjerrum_length 1.5
+# (or dielectric constant)
+
+# External potential parameters:
+
+potential 0.1 # [Volt]
+
+# Species properties:
+
+affected_ES 0,1
+affected_FMT 0,1
+0_bulk_density 0.9 # 1.5 M
+1_bulk_density 0.9
+0_valency 1.
+1_valency -1.
+0_diameter 0.7
+1_diameter 0.3
+
+# Optional iterator parameters: mixing and memory
+mixing 0.01
