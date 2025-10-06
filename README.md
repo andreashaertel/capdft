@@ -61,7 +61,9 @@ into the system by using the PoissonSolvers with appendix 'any' and BoundarySurf
 
 ## Examples
 
-Examples are given in the examples directory.
+Extensive examples are given in the examples directory. Code snippets demonstrating the
+usage of single classes and functions and tests that can be used to check their
+correct functioning can be found in the tests directory.
 
 
 ## Maintainers
