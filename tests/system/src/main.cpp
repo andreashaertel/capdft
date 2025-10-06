@@ -56,9 +56,9 @@ int main(int argc, char** argv) {
   DataFrame<3,double> total_ES(grid_counts);
   double x, z, value;
   for (size_t k = 0; k < grid_counts.at(2); ++k) {
-    z = static_cast<double>(k) / static_cast<double>(grid_counts.at(2) - 1);
+    z = static_cast<double>(k) * bin_sizes.at(2);
     for (size_t i = 0; i < grid_counts.at(0); ++i) {
-      x = static_cast<double>(i) / static_cast<double>(grid_counts.at(0) - 1);
+      x = static_cast<double>(i) * bin_sizes.at(0);
       value = function(potential, x, z); 
       for (size_t j = 0; j < grid_counts.at(1); ++j) {
 	total_ES.at(i,j,k) = value;
