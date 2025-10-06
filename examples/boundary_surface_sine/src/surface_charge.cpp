@@ -76,13 +76,13 @@ int main(int argc, char** argv) {
 // _____________________________________________________________________________
   std::vector<std::pair<std::vector<double>, double>> charge_left(0);
   std::vector<std::pair<std::vector<double>, double>> charge_right(0);
-  double total_charge_left;
-  double total_charge_right;
-  std::cout << "calculate charge distr\n";
+  double total_charge_left, area_left;
+  double total_charge_right, area_right;
+  std::cout << "calculate charge distribution\n";
   charge_distribution(surface_left, system, total_ES,
-		  &charge_left, &total_charge_left, resolution);
+		  &charge_left, &total_charge_left, resolution, &area_left);
   charge_distribution(surface_right, system, total_ES,
-		  &charge_right, &total_charge_right, resolution);
+		  &charge_right, &total_charge_right, resolution, &area_right);
 // _____________________________________________________________________________
   /* Write results to file
    * Since the surface points yielded by BoundarySurfaceSine::discretize_surface
@@ -95,9 +95,19 @@ int main(int argc, char** argv) {
    */
 // _____________________________________________________________________________
   std::cout << "print results\n";
-  std::cout << "total charge: ";
-  std::cout << total_charge_left << " (left), " << total_charge_right << " (right)";
-  std::cout << "\n";
+  // Integrated over the whole surface
+  std::fstream file_total;
+  file_total.open("electrode_charge_total.dat", std::ios::out);
+  file_total << "total charge [e]: ";
+  file_total << total_charge_left << " (left), "
+	     << total_charge_right << " (right)\n";
+  file_total << "total area [nm²]: ";
+  file_total << area_left << " (left), "
+	     << area_right << " (right)\n";
+  file_total << "mean charge per surface area [e/nm²]: ";
+  file_total << total_charge_left / area_left << " (left), "
+	     << total_charge_right / area_right << " (right)\n";
+  // Spatial distribution on the surface
   std::fstream file;
   // left surface
   file.open("electrode_charge_left.dat", std::ios::out);
@@ -133,7 +143,6 @@ int main(int argc, char** argv) {
 //____________________________________________________________________________
   // get species properties
   size_t species_count = system.species_properties.size();
-  std::cout << species_count << std::endl;
   std::vector<DataFrame<3,double>> densities(species_count,
 		  DataFrame<3,double>(grid_counts));
   std::vector<size_t> data_columns(species_count);
@@ -152,13 +161,14 @@ int main(int argc, char** argv) {
     ion_count = integration_3d_closed(densities.at(s), system.bin_sizes);
     total_ion_charge += ion_count * valencies.at(s);
   }
-  std::cout << "total ion charge: " << total_ion_charge << std::endl;
+  file_total << "total ion charge: " << total_ion_charge << std::endl;
 // _____________________________________________________________________________
   /* Check consistency of the two methods' results
    */
 // _____________________________________________________________________________
-  std::cout << "total charge in system: ";
-  std::cout << total_ion_charge + total_charge_left + total_charge_right;
-  std::cout << std::endl;
+  file_total << "total charge in system: ";
+  file_total << total_ion_charge + total_charge_left + total_charge_right;
+  file_total << std::endl;
+  file_total.close();
   return 0;
 }

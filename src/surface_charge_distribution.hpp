@@ -39,12 +39,15 @@ double charge_density(BoundarySurface<dim>& boundary, System<dim>& system,
  * 	system lengths
  * \param distribution: pointer to return value for the charge distribution
  * \param total_charge: pointer to return value for the total surface charge
+ * \param resolution: spatial resolution of the surface discretization (as in
+ * 		BoundarySurface::discretize_surface)
+ * \param total_area: pointer to return value for the total surface area
  */
 template <size_t dim>
 void charge_distribution(BoundarySurface<dim>& boundary, System<dim>& system,
    DataFrame<dim, double>& potential,
    std::vector<std::pair<std::vector<double>, double>>* distribution,
-   double* total_charge, double resolution);
+   double* total_charge, double resolution, double* total_area = nullptr);
 ///** \brief Calculate the surface charge distribution from a potential profile
 // *
 // * Warning: The implementation of system::laplace isn't finished, therefore

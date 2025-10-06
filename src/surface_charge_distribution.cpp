@@ -36,8 +36,10 @@ double charge_density(BoundarySurface<3>& boundary, System<3>& system,
   // calculate normal derivative and from that the charge density
 //  double normal_derivative = (system.interpolate(potential, position_bulk) 
 //		    	 - boundary_potential) / boundary_distance;
+  // alternative version of normal derivative: exponential instead of linear
+  // interpolation:
   double bulk_potential = system.interpolate(potential, position_bulk);
-  double normal_derivative = std::log(bulk_potential / boundary_potential) * 
+  double normal_derivative = std::log(bulk_potential / boundary_potential) *
 			     boundary_potential / boundary_distance;
   return prefactor * normal_derivative;
 }
@@ -55,9 +57,8 @@ template <>
 void charge_distribution(BoundarySurface<3>& boundary, System<3>& system,
 	DataFrame<3, double>& potential,
 	std::vector<std::pair<std::vector<double>, double>>* distribution,
-   	double* total_charge, double resolution) {
+   	double* total_charge, double resolution, double* total_area) {
   // initialize
-  std::cout << "init\n";
   distribution->clear();
   *total_charge = 0.;
   std::vector<double> bins = system.bin_sizes;
@@ -66,7 +67,7 @@ void charge_distribution(BoundarySurface<3>& boundary, System<3>& system,
   std::vector<double> position_boundary(3);
   std::vector<double> normal(3);
   std::pair<std::vector<double>, double> result;
-  std::cout << "calc\n";
+  // calculate
   double norm;
   double charge;
   double area = 0.;
@@ -91,7 +92,12 @@ void charge_distribution(BoundarySurface<3>& boundary, System<3>& system,
     *total_charge += charge * norm;
     area += norm;
   }
-  std::cout << "total area: " << area << std::endl;
+  // return the total area either by pointer or via std::cout
+  if (total_area != nullptr) {
+    *total_area = area;
+  } else {
+    std::cout << "total area: " << area << std::endl;
+  }
 }
 // alternative method:
 //// _____________________________________________________________________________

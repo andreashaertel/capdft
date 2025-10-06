@@ -81,7 +81,10 @@ int main(int argc, char** args) {
   std::cout << "Calculate external potential\n";
   std::vector<DataFrame<3, double>> exp_ext_potential_hs(
       species_properties.size(), DataFrame<3, double>(grid_counts));
-  surfaces.exp_external_potential_hs(system, &exp_ext_potential_hs);
+  double surface_resolution = params.get_double("surface_resolution", 0.25);
+  // the surface resolution is given in units of the smallest ion diameter
+  surfaces.exp_external_potential_hs(system, &exp_ext_potential_hs,
+		  surface_resolution);
   // Calculate external electrostatic potential
   DataFrame<3, double> ext_potential_es(grid_counts);
   CartesianPoissonSolverAny poisson_solver(system, &surfaces);
