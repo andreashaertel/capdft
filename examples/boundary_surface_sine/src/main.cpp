@@ -32,6 +32,45 @@
 #include "../../../src/system.hpp"
 #include "../../../src/stl_algorithms.hpp"
 // _____________________________________________________________________________
+// Extract initial guess from data files
+bool get_initial_guess(System<3>& system, std::string parameter_name,
+		       std::vector<DataFrame<3, double>>* data) {
+  try {
+    std::string filename;
+    system.get_property(parameter_name, &filename);
+    std::cout << "Initial guess: " << filename << std::endl;
+    // Extract data from file
+    std::vector<size_t> data_columns(0);
+    for (size_t i = 0; i < data->size(); ++i) {
+      data_columns.push_back(i + 3);
+    }
+    if (!system.load_data(filename, data_columns, data)) {
+      std::cerr << "Error: File not found!\n";
+      exit(1);
+    }
+    return true;
+  } catch (const Properties::MissingPropertyException*) {
+    return false;
+  }
+}  
+bool get_initial_guess(System<3>& system, std::string parameter_name,
+		       DataFrame<3, double>* data) {
+  try {
+    std::string filename;
+    system.get_property(parameter_name, &filename);
+    std::cout << "Initial guess: " << filename << std::endl;
+    // Extract data from file
+    size_t data_column = 3;
+    if (!system.load_data(filename, data_column, data)) {
+      std::cerr << "Error: File not found!\n";
+      exit(1);
+    }
+    return true;
+  } catch (const Properties::MissingPropertyException*) {
+    return false;
+  }
+}  
+// _____________________________________________________________________________
 // Main function
 int main(int argc, char** args) {
 // _____________________________________________________________________________
@@ -87,6 +126,10 @@ int main(int argc, char** args) {
 		  surface_resolution);
   // Calculate external electrostatic potential
   DataFrame<3, double> ext_potential_es(grid_counts);
+  // get initial guess from external data file, optional rescale
+  get_initial_guess(system, "initial_guess_es", &ext_potential_es);
+  ext_potential_es *= params.get_double("rescale_es", 1.);
+  // solve Poisson equation
   CartesianPoissonSolverAny poisson_solver(system, &surfaces);
   DataFrame<3, double> rhs(grid_counts);
   rhs.set_all_elements_to(0.);
@@ -151,36 +194,32 @@ int main(int argc, char** args) {
 // _____________________________________________________________________________
   std::cout << "Calculate density profiles\n";
   // Initial guess for the density profiles
-  try {
-    std::string filename = params.get_string("initial_guess_densities");
-    std::cout << "Initial guess: " << filename << std::endl;
-    // Extract data from file
-    std::vector<size_t> data_columns(0);
-    for (size_t i = 0; i < species_properties.size(); ++i) {
-      data_columns.push_back(i + 3);
-    }
-    if (!system.load_data(filename, data_columns, &density_profiles)) {
-      std::cerr << "Error: File not found!\n";
-      exit(1);
-    }
-  } catch (const ParameterHandler::BadParamException*) {
+  // either from external data file...
+  if (!get_initial_guess(system, "initial_guess_densities", &density_profiles)) {
+  // ...or uniform with bulk densities:
     std::cout << "Initial guess: uniform distribution\n";
     double bulk_density{0.};
-    // Set densities to bulk value (inside boundaries) or to zero (outside)
     for (size_t i = 0; i < species_properties.size(); ++i) {
       species_properties.at(i).get_property("bulk density", &bulk_density);
       density_profiles.at(i).set_all_elements_to(bulk_density);
-      density_profiles.at(i) *= exp_ext_potential_hs.at(i);
     }
+  }
+  // Set to densities to zero outside boundaries:
+  for (size_t i = 0; i < species_properties.size(); ++i) {
+    density_profiles.at(i) *= exp_ext_potential_hs.at(i);
   }
   std::fstream out;
   out.open("initial_densities.dat", std::ios::out);
   out << "# [x] [y] [z] [density profiles]\n";
   system.print_data(density_profiles, out);
   out.close();
-  out.open("extpot.dat", std::ios::out);
+  out.open("extpot_hs.dat", std::ios::out);
   out << "# [x] [y] [z] [exp. extpot profiles]\n";
   system.print_data(exp_ext_potential_hs, out);
+  out.close();
+  out.open("extpot_es.dat", std::ios::out);
+  out << "# [x] [y] [z] [extpot profile]\n";
+  system.print_data(ext_potential_es, out);
   out.close();
   out.open("extpot_total.dat", std::ios::out);
   out << "# [x] [y] [z] [exp. extpot profiles]\n";

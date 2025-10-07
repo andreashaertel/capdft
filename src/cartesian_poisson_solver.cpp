@@ -75,6 +75,7 @@ void CartesianPoissonSolver::solve(
       for (size_t k = 0; k < bin_count.at(2); k++) {
 	coordinates_to_index(i, j, k, &index);
 	rhs_vector.at(index) = rhs.at(i, j, k);
+	solution_vector.at(index) = solution.at(i, j, k);
       }
     }
   }
