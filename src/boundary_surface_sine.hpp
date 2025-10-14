@@ -62,7 +62,7 @@ class BoundarySurfaceSine : public BoundarySurface<3> {
     *
     * The points are distributed equidistantly in x and y direction.
     *
-    * \param resolution: bin size in x and y direction
+    * \param resolution: maximum distance between two neighboring points
     */
    void discretize_surface(
 	    std::vector<std::vector<std::vector<double>>>* distribution,

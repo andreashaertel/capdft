@@ -113,13 +113,16 @@ double BoundarySurfaceSine::distance_directed(std::vector<double>& position,
 void BoundarySurfaceSine::discretize_surface(std::vector<std::vector<double>>* 
 		positions, double resolution) const {
   positions->clear();
-  // discrete points distributed equidistantly in x and y direction
-//  double dx = system_lengths.at(0) / static_cast<double>(resolution);
-//  double dy = system_lengths.at(1) / static_cast<double>(resolution);
-  double dx = resolution;
+  /* Discrete points distributed equidistantly in x and y direction:
+   * We want a maximum distance between any two neighboring points given by
+   * 'resolution'. Therefore, we choose dx such that in the steepest surface
+   * region, the distance ds = sqrt(dx² + dz²) between two surface points is
+   * equal to the given resolution.
+   */
+  double dx = resolution / std::sqrt(1 + pow(amplitude * wave_vector / 2., 2));
   double dy = resolution;
-  size_t grid_count_x = static_cast<size_t>(system_lengths.at(0) / resolution);
-  size_t grid_count_y = static_cast<size_t>(system_lengths.at(1) / resolution);
+  size_t grid_count_x = static_cast<size_t>(system_lengths.at(0) / dx);
+  size_t grid_count_y = static_cast<size_t>(system_lengths.at(1) / dy);
   std::vector<double> position(3);
   for (size_t i = 0; i < grid_count_x; i++) {
     position.at(0) = dx * static_cast<double>(i);
