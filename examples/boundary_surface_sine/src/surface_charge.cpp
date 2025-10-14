@@ -95,18 +95,6 @@ int main(int argc, char** argv) {
    */
 // _____________________________________________________________________________
   std::cout << "print results\n";
-  // Integrated over the whole surface
-  std::fstream file_total;
-  file_total.open("electrode_charge_total.dat", std::ios::out);
-  file_total << "total charge [e]: ";
-  file_total << total_charge_left << " (left), "
-	     << total_charge_right << " (right)\n";
-  file_total << "total area [nm²]: ";
-  file_total << area_left << " (left), "
-	     << area_right << " (right)\n";
-  file_total << "mean charge per surface area [e/nm²]: ";
-  file_total << total_charge_left / area_left << " (left), "
-	     << total_charge_right / area_right << " (right)\n";
   // Spatial distribution on the surface
   std::fstream file;
   // left surface
@@ -140,7 +128,7 @@ int main(int argc, char** argv) {
    * Use total charge neutrality of the system and integrate over all ion
    * charges.
   */
-//____________________________________________________________________________
+// _____________________________________________________________________________
   // get species properties
   size_t species_count = system.species_properties.size();
   std::vector<DataFrame<3,double>> densities(species_count,
@@ -152,23 +140,71 @@ int main(int argc, char** argv) {
     system.species_properties.at(s).get_property("valency", &valencies.at(s));
   }
   // get density profiles
-  std::string densities_file = params.get_string("density_profiles", "3d_profiles.dat");
+  std::string densities_file = 
+	  params.get_string("density_profiles", "3d_profiles.dat");
   system.load_data(densities_file, data_columns, &densities);
   // integrate charge densities
-  double ion_count;
-  double total_ion_charge = 0.;
+  double ion_count_left;
+  double ion_count_right;
+  double ion_charge_left = 0.;
+  double ion_charge_right = 0.;
   for (size_t s = 0; s < species_count; s++) {
-    ion_count = integration_3d_closed(densities.at(s), system.bin_sizes);
-    total_ion_charge += ion_count * valencies.at(s);
+    ion_count_left = 0.;
+    ion_count_right = 0.;
+    for (size_t i = 0; i < grid_counts.at(0); i++) {
+      for (size_t j = 0; j < grid_counts.at(1); j++) {
+        for (size_t k = 0; k < grid_counts.at(2); k++) {
+	  if (k <= grid_counts.at(2) / 2) {
+	    ion_count_left += densities.at(s).at(i, j, k);
+	  } else {
+	    ion_count_right += densities.at(s).at(i, j, k);
+	  }
+	}
+      }
+    }
+    ion_charge_left += ion_count_left * valencies.at(s);
+    ion_charge_right += ion_count_right * valencies.at(s);
   }
-  file_total << "total ion charge: " << total_ion_charge << std::endl;
+  for (double bin : system.bin_sizes) {
+    ion_charge_left *= bin;
+    ion_charge_right *= bin;
+  }
+  // alternative: just calculate total ion charge
+//  double ion_count;
+//  double total_ion_charge = 0.;
+//  for (size_t s = 0; s < species_count; s++) {
+//    ion_count = integration_3d_closed(densities.at(s), system.bin_sizes);
+//    total_ion_charge += ion_count * valencies.at(s);
+//  }
 // _____________________________________________________________________________
-  /* Check consistency of the two methods' results
+  /* Print result overview (integrated results)
    */
 // _____________________________________________________________________________
-  file_total << "total charge in system: ";
-  file_total << total_ion_charge + total_charge_left + total_charge_right;
-  file_total << std::endl;
+  std::fstream file_total;
+  file_total.open("electrode_charge_total.dat", std::ios::out);
+  file_total << "# total charge:\n";
+  file_total << "electrode charge [e]: ";
+  file_total << total_charge_left << " (left), "
+	     << total_charge_right << " (right)\n";
+  file_total << "ion charge in left/right half of system [e]: " <<
+	  ion_charge_left << " (left), " << ion_charge_right << " (right)\n";
+  file_total << "# consistency check:\n";
+  file_total << "total charge in left/right half of system [e]: ";
+  file_total << ion_charge_left + total_charge_left << " (left), " <<
+	  	ion_charge_right + total_charge_right << " (right)\n";
+  file_total << "# charge per surface area:\n";
+  file_total << "total area A_s [nm²]: ";
+  file_total << area_left << " (left), "
+	     << area_right << " (right)\n";
+  file_total << "mean charge per surface area A_s [e/nm²]: ";
+  file_total << total_charge_left / area_left << " (left), "
+	     << total_charge_right / area_right << " (right)\n";
+  file_total << "total area A_x [nm²]: ";
+  double area_projected = system_lengths.at(0) * system_lengths.at(1);
+  file_total << area_projected << " (left), " << area_projected << " (right)\n";
+  file_total << "mean charge per surface area A_x [e/nm²]: ";
+  file_total << total_charge_left / area_projected << " (left), "
+	     << total_charge_right / area_projected << " (right)\n";
   file_total.close();
   return 0;
 }

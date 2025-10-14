@@ -1,4 +1,4 @@
-# Parameter file
+# Parameter file for ../src/main.cpp
 # System properties:
 
 0_grid_count 10
@@ -14,6 +14,5 @@ temperature 300
 bjerrum_length 1
 # (or dielectric constant)
 
-# External potential parameters:
-
+# Test function parameters:
 potential 0.1

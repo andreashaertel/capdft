@@ -177,20 +177,7 @@ int main(int argc, char** args) {
   std::fstream out_stream;
   out_stream.open("3d_profiles.dat", std::ios::out);
   out_stream << "# [x] [y] [z] [density profiles]" << std::endl;
-  for (size_t i = 0; i < grid_counts.at(0); ++i) {
-    x = dx * static_cast<double>(i);
-    for (size_t j = 0; j < grid_counts.at(1); ++j) {
-      y = dy * static_cast<double>(j);
-      for (size_t k = 0; k < grid_counts.at(2); ++k) {
-        z = dz * static_cast<double>(k);
-        out_stream << x << " " << y << " " << z << " ";
-	for (size_t s = 0; s < species_properties.size(); s++) {
-          out_stream << density_profiles.at(s).at(i, j, k) << " ";
-	}
-        out_stream << std::endl;
-      }
-    }
-  }
+  system.print_data(density_profiles, out_stream);
   out_stream.close();
   return 0;
 }

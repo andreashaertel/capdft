@@ -1,0 +1,22 @@
+# Parameter file for ../src/interpolate_data.cpp
+# System properties:
+
+0_grid_count 17
+1_grid_count 17
+2_grid_count 17
+0_length 2
+1_length 2
+2_length 2
+0_PBC true
+1_PBC true
+2_PBC false
+temperature 300
+bjerrum_length 1
+# (or dielectric constant)
+
+input interpolation.dat
+0_new_grid_count 37
+1_new_grid_count 37
+2_new_grid_count 37
+col_nums 3
+output interpolation2.dat
