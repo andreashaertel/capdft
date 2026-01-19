@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2025 Fabienne Dressler <fab.dressler@web.de>
+// SPDX-FileCopyrightText: 2026 Fabienne Dressler <fab.dressler@web.de>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #ifndef SRC_BOUNDARY_SURFACE_SPHERE_HPP_
 #define SRC_BOUNDARY_SURFACE_SPHERE_HPP_
@@ -6,8 +6,6 @@
  * \brief Header file for the BoundarySurfaceSphere class.
  *
  *  The file contains the declarations of the BoundarySurfaceSphere class.
- *  The implementation is not yet complete (discretize_surface method not yet
- *  implemented).
  */
 // Includes
 #include "boundary_surface.hpp"
@@ -69,17 +67,17 @@ class BoundarySurfaceSphere : public BoundarySurface<3> {
     /** \brief Position of sphere centre
      */
     double x_mid, y_mid, z_mid;
-   /** \brief Return a set of points (and normal vectors) on the surface
-    *
+    /** \brief Return a set of points (and normal vectors) on the surface
+    * 
     * \param resolution: bin size of the discretization
     */
-   void discretize_surface(
+    void discretize_surface(
 	    std::vector<std::vector<std::vector<double>>>* distribution,
 	    double resolution) const override;
-   void discretize_surface(
+    void discretize_surface(
 		std::vector<std::vector<double>>* points, double resolution)
 	   	const override;
-   /** \brief Return surface normal vector at given x and y
+    /** \brief Return surface normal vector at given x and y
     *
     * The returned vector is orthogonal to the surface, points away from the
     * wall into the bulk.
