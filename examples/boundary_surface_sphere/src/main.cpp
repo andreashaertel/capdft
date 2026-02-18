@@ -92,6 +92,9 @@ int main(int argc, char** args) {
   // Calculate external electrostatic potential
   DataFrame<3, double> ext_potential_es(grid_counts);
   try { // optional initial guess
+	// (Must have the same grid resolution! If you want to use a result
+	// from a lower-resolution calculation as an initial guess, first
+	// interpolate the data like in tests/system/src/interpolate_data.cpp.)
     std::string filename = params.get_string("initial_guess_ES");
     std::cout << "Initial guess: " << filename << std::endl;
     // Extract data from file
@@ -169,14 +172,19 @@ int main(int argc, char** args) {
   try {
     std::string filename = params.get_string("initial_guess_densities");
     std::cout << "Initial guess: " << filename << std::endl;
-    // Extract data from file
+    // Specify relevant data columns
     std::vector<size_t> data_columns(0);
     for (size_t i = 0; i < species_properties.size(); ++i) {
       data_columns.push_back(i + 3);
     }
+    // Extract data from file
     if (!system.load_data(filename, data_columns, &density_profiles)) {
       std::cerr << "Error: File not found!\n";
       exit(1);
+    }
+    // Set densities to zero outside the boundaries
+    for (size_t i = 0; i < species_properties.size(); ++i) {
+      density_profiles.at(i) *= exp_ext_potential_hs.at(i);
     }
   } catch (const ParameterHandler::BadParamException*) {
     std::cout << "Initial guess: uniform distribution\n";
@@ -200,6 +208,10 @@ int main(int argc, char** args) {
   out.open("extpot_total.dat", std::ios::out);
   out << "# [x] [y] [z] [exp. extpot profiles]\n";
   system.print_data(exp_ext_potential_total, out);
+  out.close();
+  out.open("ext_potential_ES.dat", std::ios::out);
+  out << "# [x] [y] [z] [electrostatic potential]\n";
+  system.print_data(ext_potential_es, out);
   out.close();
   // Create iterator and run iterations
   Iterator my_iterator(&density_profiles, exp_ext_potential_total,

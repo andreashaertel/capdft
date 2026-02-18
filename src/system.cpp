@@ -362,11 +362,6 @@ double System<3>::interpolate(DataFrame<3, double>& values,
     std::cerr << std::endl;
     exit(1);
   }
-//  // global rescaling for the interpolation weights:
-//  double weight_sum = 1.;
-//  for (size_t i = 0; i < dim; i++) {
-//    weight_sum *= widths.at(i);
-//  }
   return result / weight_sum;
 }
 //// _____________________________________________________________________________
@@ -528,11 +523,11 @@ bool System<3>::load_data(std::string filename, std::vector<size_t>& col_nums,
   std::vector<size_t> coord(dim); // corresponding coordinate indices i,j,k
   std::ifstream file(filename);
   if (!file.is_open()) {
-    std::cout << "load_data: file not found: " << filename << std::endl;
+    std::cout << "System::load_data: file not found: " << filename << std::endl;
     return false;
   }
   while (std::getline(file, line)) {
-    if (line.size() > 1 && line.at(0) != '#') { // filter
+    if (line.size() > 1 && line.at(0) != '#') { // filter out empty lines / comments
       coord = index_to_coordinates(row);
       size_t pos = 0; // position in line
       size_t col = 0; // corresponding column number
@@ -540,7 +535,7 @@ bool System<3>::load_data(std::string filename, std::vector<size_t>& col_nums,
 			    // - assuming col_nums is sorted
       while (col <= col_nums.back()) {
 	if (pos > line.size()) {
-	  std::cout << "load_data: found less values than expected in data line " << row;
+	  std::cout << "System::load_data: found less values than expected in data line " << row;
 	  std::cout << " (" << col << " values in " << pos << " characters)\n";
 	  exit(1);
 	}
@@ -550,7 +545,7 @@ bool System<3>::load_data(std::string filename, std::vector<size_t>& col_nums,
 	  col_index++;
 	}
 	// find next value in line
-	pos = line.find(' ', pos) + 1; // - syntax?
+	pos = line.find(' ', pos) + 1;
 	col++;
       }
       row++;
@@ -558,7 +553,7 @@ bool System<3>::load_data(std::string filename, std::vector<size_t>& col_nums,
       std::cout << line << std::endl;
     }
   }
-  std::cout << "load_data: found " << row << " data lines.\n";
+  std::cout << "System::load_data: found " << row << " data lines.\n";
   return true;
 }
 

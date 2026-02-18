@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 /** \file tests/system/src/interpolate_data.cpp
  * \brief Interpolate data from a given data file to a new grid
+ *
+ * Required input parameters are listed in ../params_interpolation.txt.
  */
 // _____________________________________________________________________________
 // Includes
