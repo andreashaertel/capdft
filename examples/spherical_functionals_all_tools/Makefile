@@ -7,7 +7,7 @@ CXX=g++
 # Libraries to be linked #######################################################
 LIBS=-lm -lfftw3 -lgsl -lgslcblas
 # Compiler flags ###############################################################
-CXXFLAGS=-pedantic -std=c++2a -O2 -Wall
+CXXFLAGS=-pg -pedantic -std=c++2a -O2 -Wall
 # Directories for binaries, objects and sources ################################
 BDIR = bin/
 ODIR = obj/
@@ -97,7 +97,7 @@ compile: $(BOFF)$(BNAME)
 # $^  list of all dependencies, no doubles
 
 $(BOFF)$(BNAME): $(OBJECTS) $(REPOOBJECTS) $(REPOOBJECTS2)
-	$(CXX) -o $@ $^ $(LIBS)
+	$(CXX) -pg -o $@ $^ $(LIBS)
 
 $(OOFF)%.o: $(SDIR)%.cpp $(HEADERS) $(REPOHEADERS) $(REPOHEADERS2)
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
