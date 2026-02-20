@@ -279,7 +279,8 @@ for (size_t surface : {1,2}) {
   }
 // _____________________________________________________________________________
   /* All done!
-   * Now we produce some output and view it in gnuplot.
+   * Now we produce some output and view it e.g. via gnuplot or python. We also
+   * supplied this example with a few pdfs that show these plots.
    */
 // _____________________________________________________________________________
   return 0;

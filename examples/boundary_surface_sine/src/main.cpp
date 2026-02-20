@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2025 Fabienne Dressler <fab.dressler@web.de>
+// SPDX-FileCopyrightText: 2026 Fabienne Dressler <fab.dressler@web.de>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 /** \file examples/boundary_surface_sine/src/main.cpp
  *  \brief This is an example for the usage of the BoundarySurface class.
@@ -240,9 +240,10 @@ int main(int argc, char** args) {
   my_iterator.run_anderson(mixing, memory);
 // _____________________________________________________________________________
   /* All done!
-   * Now we produce some output and view it in gnuplot.
-   * We also supplied this example with a pdf that shows the plot in case you do
-   * not use gnuplot.
+   * Now we produce some output and view it e.g. via gnuplot or python. We also
+   * supplied this example with a few pdfs that show these plots.
+   * Furthermore, we can calculate the charge distribution on the electrodes
+   * with the code from ./surface_charge.cpp.
    */
 // _____________________________________________________________________________
   // Write density profiles to file

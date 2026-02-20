@@ -1,31 +1,35 @@
-# system params
+# Example parameter file
+# This produces the data shown in the supplied plots.
+
+# System parameters
 bjerrum_length 1.
 temperature 300.
-0_grid_count 32
-1_grid_count 32
-2_grid_count 64
-0_length 2
-1_length 2
-2_length 4
+0_grid_count 128
+1_grid_count 128
+2_grid_count 128
+0_length 1.5
+1_length 1.5
+2_length 2
 0_PBC false
 1_PBC false
 2_PBC false
 
-# spheres
+# Spherical boundary surfaces
 potential 0.2 # volt
 0_hard_walls true
-0_radius 0.3
-0_z_mid 1
+0_radius 0.15
+0_z_mid 0.7
 1_hard_walls true
-1_radius 0.3
-1_z_mid 2
-# boundary box
+1_radius 0.15
+1_z_mid 1.3
+
+# Boundary box
 2_hard_walls false
 2_0_sides 3
 2_1_sides 3
 2_2_sides 3
 
-# ions
+# Ion properties
 affected_species_fmt 0,1
 affected_species_es 0,1
 0_diameter 0.3
@@ -35,5 +39,5 @@ affected_species_es 0,1
 0_valency +1.
 1_valency -1.
 
-# iteration
+# Iteration parameters
 mixing 0.05
