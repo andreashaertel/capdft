@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Fabienne Dressler <fab.dressler@web.de>
 // SPDX-License-Identifier: LGPL-3.0-or-later
-/** \file tests/boundaries/src/main.cpp
+/** \file tests/boundary_surface/src/main.cpp
  * \brief This file contains code that can be used to visualize and test the
  * boundary surface objects
  */
@@ -10,7 +10,6 @@
 #include "../../../src/data_frame.hpp"
 #include "../../../src/properties.hpp"
 #include "../../../src/constants.hpp"
-#include "../../../src/boundaries.hpp"
 #include "../../../src/boundary_surface.hpp"
 #include "../../../src/boundary_surface_sine.hpp"
 #include "../../../src/boundary_surface_planar.hpp"

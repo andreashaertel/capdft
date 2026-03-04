@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2025 Fabienne Dressler <fab.dressler@web.de>
 // SPDX-License-Identifier: LGPL-3.0-or-later
-/** \file tests/system/src/main.cpp
+/** \file tests/system/src/check_interpolation.cpp
  * \brief Test the interpolation methods of the System class
  */
 // _____________________________________________________________________________

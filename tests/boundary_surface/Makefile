@@ -1,36 +1,36 @@
-# Adapted from:
 # SPDX-FileCopyrightText: 2021 Moritz Bültmann <moritz.bueltmann@physik.uni-freiburg.de>
 # SPDX-License-Identifier: LGPL-3.0-or-later
 # Binary name ##################################################################
-BNAMES = check_interpolation
-BNAMES += interpolate_data
+BNAME=main
 # Compiler #####################################################################
 CXX=g++
 # Libraries to be linked #######################################################
 LIBS=-lm -lfftw3 -lgsl -lgslcblas
 # Compiler flags ###############################################################
-CXXFLAGS=-g -pedantic -std=c++2a -O2 -Wall
+CXXFLAGS=-pedantic -std=c++2a -O2 -Wall -g
 # Directories for binaries, objects and sources ################################
 BDIR = bin/
 ODIR = obj/
 SDIR = src/
 # All files from the normal repository that are used in this example ###########
-REPOSDIR = ../../
-#REPOSDIR = ../../src/
+REPOSDIR = ../../src/
 REPOFILE =
 REPOFILE += system
+REPOFILE += boundary_surface
+REPOFILE += boundary_surface_sine
+REPOFILE += boundary_surface_planar
+REPOFILE += boundary_surface_cylinder
+REPOFILE += boundary_surface_sphere
 REPOFILE += data_frame
 REPOFILE += properties
-# Additional file from parameter_handler #######################################
-REPOSDIR2 = ../../../parameter_handler/
-#REPOSDIR2 = ../../../parameter_handler/src/
+# ParameterHandler files #######################################################
+REPOSDIR2 = ../../../parameter_handler/src/
 REPOFILE2 = parameter_handler
 # Get host name ################################################################
 HOST = $(shell hostname)
-# Offsets for binaries, objects and source/header files ########################
+# Offsets for binaries and objects #############################################
 BOFF = $(BDIR)$(HOST).
 OOFF = $(ODIR)$(HOST).
-SOFF = $(SDIR)
 # Create empty file collection variables #######################################
 SOURCE =
 HEADERS =
@@ -38,18 +38,25 @@ OBJECTS =
 REPOSOURCE =
 REPOHEADERS =
 REPOOBJECTS =
-# Header files  and object files from main repo ################################
-REPOSOURCE += $(addprefix $(REPOSDIR)$(SOFF), $(addsuffix .cpp, $(REPOFILE)))
-REPOSOURCE += $(addprefix $(REPOSDIR2)$(SOFF), $(addsuffix .cpp, $(REPOFILE2)))
-REPOHEADERS += $(addprefix $(REPOSDIR)$(SOFF), $(addsuffix .hpp, $(REPOFILE)))
-REPOHEADERS += $(addprefix $(REPOSDIR2)$(SOFF), $(addsuffix .hpp, $(REPOFILE2)))
-REPOOBJECTS += $(addprefix $(OOFF), $(addsuffix .o, $(REPOFILE)))
-REPOOBJECTS2 = $(addprefix $(OOFF), $(addsuffix .o, $(REPOFILE2)))
+# Header files and object files from main repo #################################
+REPOSOURCE += $(addprefix $(REPOSDIR), $(addsuffix .cpp, $(REPOFILE)))
+REPOSOURCE2 = $(addprefix $(REPOSDIR2), $(addsuffix .cpp, $(REPOFILE2)))
+REPOHEADERS += $(addprefix $(REPOSDIR), $(addsuffix .hpp, $(REPOFILE)))
+REPOHEADERS2 = $(addprefix $(REPOSDIR2), $(addsuffix .hpp, $(REPOFILE2)))
+REPOOBJECTS += $(patsubst $(REPOSDIR)%.cpp,$(OOFF)%.o, $(REPOSOURCE))
+REPOOBJECTS2 = $(patsubst $(REPOSDIR2)%.cpp,$(OOFF)%.o, $(REPOSOURCE2))
+# - REPOOBJECTS += $(addprefix $(OOFF), $(addsuffix .o, $(REPOFILE)))
+# - REPOOBJECTS2 += $(addprefix $(OOFF), $(addsuffix .o, $(REPOFILE2)))
 # Standard header files and object files #######################################
 HEADERS += $(wildcard $(SDIR)*.h)
 HEADERS += $(wildcard $(SDIR)*.hpp)
 SOURCE += $(wildcard $(SDIR)*.cpp)
 OBJECTS += $(patsubst $(SDIR)%.cpp,$(OOFF)%.o,$(SOURCE))
+# Get host name ################################################################
+HOST = $(shell hostname)
+# Offsets for binaries and objects #############################################
+BOFF = $(BDIR)$(HOST).
+OOFF = $(ODIR)$(HOST).
 # TARGETS ######################################################################
 
 .PHONY: default all init todo checkstyle clean compile
@@ -79,19 +86,20 @@ clean:
 	rm -f $(OOFF)*.o
 	rm -f $(BOFF)*
 
-compile: $(addprefix $(BOFF), $(BNAMES))
+compile: $(BOFF)$(BNAME)
 
 # $<  first dependency
 # $@  targets
 # $+  list of all dependencies
 # $^  list of all dependencies, no doubles
 
-$(BOFF)%: $(OOFF)%.o $(REPOOBJECTS) $(REPOOBJECTS2)
+$(BOFF)$(BNAME): $(OBJECTS) $(REPOOBJECTS) $(REPOOBJECTS2)
 	$(CXX) -o $@ $^ $(LIBS)
 
-$(OOFF)%.o: $(SDIR)%.cpp $(HEADERS) $(REPOHEADERS)
+$(OOFF)%.o: $(SDIR)%.cpp $(HEADERS) $(REPOHEADERS) $(REPOHEADERS2)
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
-$(REPOOBJECTS): $(REPOSOURCE) $(HEADERS) $(REPOHEADERS)
-	$(CXX) $(CXXFLAGS) -c -o $@ $(REPOSDIR)src/$(subst .,,$(suffix $(basename $@))).cpp
-$(REPOOBJECTS2): $(REPOSOURCE) $(HEADERS) $(REPOHEADERS)
-	$(CXX) $(CXXFLAGS) -c -o $@ $(REPOSDIR2)src/$(subst .,,$(suffix $(basename $@))).cpp
+$(REPOOBJECTS): $(REPOSOURCE) $(HEADER)
+	$(CXX) $(CXXFLAGS) -c -o $@ $(REPOSDIR)$(subst .,,$(suffix $(basename $@))).cpp
+$(REPOOBJECTS2): $(REPOSOURCE2) $(HEADER2)
+	$(CXX) $(CXXFLAGS) -c -o $@ $(REPOSDIR2)$(subst .,,$(suffix $(basename $@))).cpp
+

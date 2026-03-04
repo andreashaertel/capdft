@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2025 Fabienne Dressler <fab.dressler@web.de>
 // SPDX-License-Identifier: LGPL-3.0-or-later
-/** \file examples/boundary_surface_planar/src/cartesian_any.cpp
+/** \file examples/boundary_surface_planar/src/cartesian_3d_any.cpp
  *  \brief This is an example for the usage of the BoundarySurfacePlanar class.
  */
 // _____________________________________________________________________________

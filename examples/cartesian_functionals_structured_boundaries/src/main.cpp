@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: 2025 Fabienne Dressler <fab.dressler@web.de>
 // SPDX-License-Identifier: LGPL-3.0-or-later
-/** \file examples/any_cartesian_functionals_some_tools/src/main.cpp
+/** \file examples/cartesian_functionals_structured_boundaries/src/main.cpp
  *  \brief This is an example for the usage of the BoundarySurface class.
  *
- *  This example is based on ../../cartesian_functionals_all_tools/src/main.cpp
+ *  This example is based on
+ *  ../../cartesian_functionals_planar_boundaries/src/main.cpp
  *  and adapted to demonstrate how those sinusoidal surfaces can be handled via
  *  the BoundarySurface class. More tools related to the BoundarySurface class
  *  (e.g. calculation of the charge distribution on the electrode) are shown

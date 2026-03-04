@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2021 Moritz Bültmann <moritz.bueltmann@gmx.de>
 // SPDX-License-Identifier: LGPL-3.0-or-later
-/** \file examples/cartesian_functionals_all_tools/src/main.cpp
+/** \file examples/cartesian_functionals_planar_boundaries/src/main.cpp
  *  \brief Main file of the example of the 3D cartesian functionals.
  *  
  *  This main file contains examples to show how Functional classes in the

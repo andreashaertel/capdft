@@ -1,8 +1,8 @@
 // SPDX-FileCopyrightText: 2022 Moritz Bültmann <moritz.bueltmann@gmx.de>
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#ifndef EXAMPLES_CARTESIAN_FUNCTIONALS_ALL_TOOLS_SRC_EXTPOT_HPP_
-#define EXAMPLES_CARTESIAN_FUNCTIONALS_ALL_TOOLS_SRC_EXTPOT_HPP_
-/** \file examples/cartesian_functionals_all_tools/src/extpot.hpp
+#ifndef EXAMPLES_CARTESIAN_FUNCTIONALS_PLANAR_BOUNDARIES_SRC_EXTPOT_HPP_
+#define EXAMPLES_CARTESIAN_FUNCTIONALS_PLANAR_BOUNDARIES_SRC_EXTPOT_HPP_
+/** \file examples/cartesian_functionals_planar_boundaries/src/extpot.hpp
  *  \brief Header file that contains functions to calculate external potentials.
  */
 // Includes
@@ -176,4 +176,4 @@ void electrostatic_planar(
 //}
 // _____________________________________________________________________________
 }
-#endif  // EXAMPLES_CARTESIAN_FUNCTIONALS_ALL_TOOLS_SRC_EXTPOT_HPP_
+#endif  // EXAMPLES_CARTESIAN_FUNCTIONALS_PLANAR_BOUNDARIES_SRC_EXTPOT_HPP_

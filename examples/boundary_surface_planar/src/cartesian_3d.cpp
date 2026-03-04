@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2021 Moritz Bültmann <moritz.bueltmann@gmx.de>
 // SPDX-License-Identifier: LGPL-3.0-or-later
-/** \file examples/boundary_surface_planar/src/cartesian.cpp
+/** \file examples/boundary_surface_planar/src/cartesian_3d.cpp
  *  \brief Main file of the example of the planar functionals in 3d.
  */
 // _____________________________________________________________________________
