@@ -17,7 +17,6 @@
 #include "../../../src/boundary_surface_sphere.hpp"
 #include "../../../src/boundary_surface_planar.hpp"
 #include "../../../src/boundaries.hpp"
-#include "../../../src/external_potential.hpp"
 #include "../../../src/cartesian_poisson_solver_any.hpp"
 #include "../../../src/constants.hpp"
 #include "../../../src/convergence_criterion.hpp"

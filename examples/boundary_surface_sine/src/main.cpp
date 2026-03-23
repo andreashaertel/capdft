@@ -16,7 +16,6 @@
 #include "../../../../parameter_handler/src/parameter_handler.hpp"
 #include "../../../src/boundary_surface_sine.hpp"
 #include "../../../src/boundaries.hpp"
-#include "../../../src/external_potential.hpp"
 #include "../../../src/cartesian_poisson_solver_any.hpp"
 #include "../../../src/constants.hpp"
 #include "../../../src/convergence_criterion.hpp"
