@@ -168,7 +168,7 @@ int main(int argc, char** args) {
   my_iterator.add_excess_functional(&my_fmt_functional);
   my_iterator.add_excess_functional(&my_es_functional);
   my_iterator.clear_convergence_criteria();
-  my_iterator.add_convergence_criterion<ConvergenceCriterionSteps>(2e3);
+  my_iterator.add_convergence_criterion<ConvergenceCriterionSteps>(2e5);
   my_iterator.add_convergence_criterion<ConvergenceCriterionMaxDev>(1.0e-4);
   my_iterator.add_convergence_criterion<ConvergenceCriterionNan>(0);
   my_iterator.run_picard(1.5e-4);
