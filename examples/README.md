@@ -27,10 +27,9 @@ boundary_surface_planar: Comparison between 1d planar and 3d Cartesian geometry
 	This example is equivalent to planar_functionals_all_tools, but contains
 	three different implementations for the same task:  
 	- cartesian_3d_any.cpp: BoundarySurfacePlanar, CartesianPoissonSolverAny  
-	- cartesian_3d_planar.cpp: CartesianPoissonSolver ------- DEPRECATED?  
+	- cartesian_3d_planar.cpp: CartesianPoissonSolver  
 	- planar_1d.cpp: PlanarPoissonSolver  
 cartesian_functionals_structured_boundaries and
 cartesian_functionals_planar_boundaries: Comparison between 3d Poisson solvers  
 	These two try to model the same thing, but one uses the
 	CartesianPoissonSolverAny, the other just CartesianPoissonSolver.
-	------- DEPRECATED?  
