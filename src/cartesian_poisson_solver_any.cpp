@@ -1,4 +1,5 @@
 // SPDX-FileCopyrightText: 2019 Moritz Bültmann <moritz.bueltmann@gmx.de>
+// 			   2026 Fabienne Dressler <fab.dressler@web.de>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 /** \file cartesian_poisson_solver_any.cpp
  *  \brief Source file for the CartesianPoissonSolverAny class.
@@ -311,7 +312,7 @@ void CartesianPoissonSolverAny::calc_boundary_values(
 	  coordinates_to_index(coordinates, &index);
 	  // Modify rhs and (off-)diagonal values of adjacent grid points, 
 	  // if they lie within boundaries
-	  modify_rhs(boundary_surface, coordinates);
+	  modify_boundary_point(boundary_surface, coordinates);
 	  // Remove corresponding row and column. The removed indices and
 	  // values are stored so that they can be filled back in to the final
 	  // solution vector.
@@ -323,7 +324,7 @@ void CartesianPoissonSolverAny::calc_boundary_values(
   }
 }
 // _____________________________________________________________________________
-void CartesianPoissonSolverAny::modify_rhs(
+void CartesianPoissonSolverAny::modify_boundary_point(
 		BoundarySurface<3>* boundary_surface,
 		std::vector<size_t>& coordinates1) {
   // index & boundary value at given point (must be a point outside boundaries!)
@@ -428,14 +429,14 @@ void CartesianPoissonSolverAny::modify_rhs(
 //      } else {
 //	  // Modify rhs and matrix elements associated with this grid point
 //	  // depending on its neighbors
-//	  modify_matrix_elements(boundary_surface, coordinates);
+//	  modify_grid_point(boundary_surface, coordinates);
 //	}
 //      }
 //    }
 //  }
 //}
 //// _____________________________________________________________________________
-//void CartesianPoissonSolverAny::modify_matrix_elements(
+//void CartesianPoissonSolverAny::modify_grid_point(
 //		BoundarySurface<3>* boundary_surface,
 //		std::vector<size_t>& coordinates) {
 //  double value = boundary_surface->get_boundary_value();

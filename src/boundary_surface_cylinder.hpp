@@ -42,8 +42,7 @@ class BoundarySurfaceCylinder : public BoundarySurface<3> {
 		    size_t direction, bool forward) const override;
     /** \brief Return distance to the nearest boundary point.
      *
-     * Returns zero if given point is outside boundaries. Returns upper_limit if
-     * the distance to the boundary is larger than that value.
+     * Returns zero if given point is outside boundaries.
      */
     double distance_minimal(std::vector<double>& position) const;
     /** \brief Return the minimal boundary distances of each point in a
@@ -51,13 +50,15 @@ class BoundarySurfaceCylinder : public BoundarySurface<3> {
      *
      * \param result: pointer to return value; needs to be initialized with
      * 		desired grid dimensions
-     * \param resolution: spatial resolution of surface (see distance_minimal)
-     * \param upper_limit: upper limit on distance (see distance_minimal) - By
-     * 		default, there is no limit except for the finite system size.
+     * \param resolution: dummy parameter, not relevant in this version
+     * \param upper_limit: dummy parameter, not relevant in this version
      */
     void minimal_distances(DataFrame<3, double>* result,
 		    double resolution, double upper_limit = -1.) override;
     /** \brief Convert cartesian coordinates to cylinder coordinates
+     *
+     * \param cartesian: {x, y, z}
+     * \param cylinder: {r, phi, z}
      */
     void cylinder_coordinates(std::vector<double>& cartesian,
 		    std::vector<double>* cylinder) const;
@@ -71,20 +72,26 @@ class BoundarySurfaceCylinder : public BoundarySurface<3> {
     /** \brief Position of cylinder centre
      */
     double x_mid, y_mid, z_mid;
-   /** \brief Return a set of points (and normal vectors) on the surface
+   /** \brief Return a set of points on the surface
     *
     * The points that lie on the cylinder caps are distributed on a square grid
     * in the x-y-plane. Those that lie on the cylinder mantle are distributed
     * on a square grid wrapped around the mantle.
     *
+    * \param distribution: pointer to return value
     * \param resolution: bin size of the discretization
+    */
+   void discretize_surface(
+		std::vector<std::vector<double>>* points, double resolution)
+	   	const override;
+   /** \brief Return a set of points and normal vectors on the surface
+    *
+    * Analogous to the above version, but also includes surface normal
+    * vectors (cf. documentation of base class BoundarySurface).
     */
    void discretize_surface(
 	    std::vector<std::vector<std::vector<double>>>* distribution,
 	    double resolution) const override;
-   void discretize_surface(
-		std::vector<std::vector<double>>* points, double resolution)
-	   	const override;
    /** \brief Return surface normal vector at given x and y
     *
     * The returned vector is orthogonal to the surface, points away from the
@@ -97,9 +104,4 @@ class BoundarySurfaceCylinder : public BoundarySurface<3> {
     */
    void extract_special_properties(System<3>& system, size_t index);
 };
-
-/** \example ../examples/boundary_surface_cylinder/src/main.cpp
- * This is an example for the BSCylinder.
- * A cylinder with fixed potential value...
- */
 #endif // SRC_BOUNDARY_SURFACE_CYLINDER_HPP_

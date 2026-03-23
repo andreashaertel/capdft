@@ -54,7 +54,7 @@ public:
   System(ParameterHandler* parameter_handler, std::vector<size_t>& species_indices);
   /** \brief Conversion between different coordinate formats
    *
-   * \param position (std::vector<double>): exact physical position, same unit as system_lengths
+   * \param position (std::vector<double>): physical position, same unit as system_lengths
    * \param coordinates (std::vector<size_t>): discretized coordinates (DataFrame indices)
    * \param index (size_t): one-dimensional super-index (vector / flattened out DataFrame)
    *
@@ -80,16 +80,6 @@ public:
    */
   double interpolate(DataFrame<dim, double>& values,
 		  std::vector<double>& position);
-//  /** \brief Calculate Laplacian of a field (DataFrame) of values at a given position
-//   * 
-//   * TODO: test whether results correct!
-//   *
-//   * \param values: underlying field of values
-//   * \param position: position at which the Laplacian shall be evaluated
-//   * \param mid_value: value at the given position
-//   */
-//  double laplace(DataFrame<dim, double>& values,
-//		  std::vector<double>& position, double mid_value) const;
   /** \brief Print DataFrame to specified output
    */
   void print_data(DataFrame<dim, double>& values, std::ostream& out);

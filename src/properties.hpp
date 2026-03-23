@@ -23,23 +23,22 @@
  *
  */
 class Properties {
-  /** \brief The System class has full access on the properties. 
+  public:
+  /** \brief Construct empty container
    *
-   *  In general, the properties must not been changed once they are defined to 
-   *  avoid manipulation of calculations during runtime. However, the System 
-   *  needs to have access on properties in order to, for instance, update the 
-   *  valancies of all species. For this reason, System is declared as a friend.
-   *
-   */
-  // TODO(Andreas): Keine gute idee, wenn System ein template ist.
-  //                Warum nicht die update-Funktion public machen?
-  // friend class System;
- public:
-  /** \brief Constructors
-   *
+   * Properties can be added after construction via Properties::add_property.
    */
   Properties();
+  /** \brief Construct from ParameterHandler
+   *
+   * This does not immediately read out all properties from the
+   * ParameterHandler, but extracts them dynamically, step by step, when they
+   * are called. For the user, this does not make any difference.
+   */
   Properties(ParameterHandler* parameters);
+  /** \brief Copy constructor
+   *
+   */
   Properties(const Properties& other);
   /** \brief Destructor
    *
@@ -63,6 +62,9 @@ class Properties {
     properties[property_name] = new_property;
   }
   /** \brief Add an indexed property
+   *
+   * The property is stored under the name <index>_<property_name> or similar,
+   * cf. Properties::indexed.
    */
   template<typename T>
   void add_property(
@@ -71,6 +73,15 @@ class Properties {
   }
   /** \brief Returns a property with an arbitrary data type
    *
+   * \return true if property is defined, false if not
+   * \param property_name: identifier of the desired property
+   * \param property_value: pointer to return value
+   *
+   * Warning:  
+   * This method is declared const, i.e. it will only consider properties that
+   * have already been added to the container. If a ParameterHandler is linked
+   * to the Properties object, this method might overlook some of the parameters
+   * there. In this case, use instead the non-const method below.
    */
   template<typename T>
   bool get_property(const std::string& property_name, T* property_value) const {
@@ -91,11 +102,16 @@ class Properties {
       return false;
     }
   }
-  /** \brief Returns a property, possibly extracting it from parameter_handler
+  /** \brief Returns a property, possibly extracting it from ParameterHandler
    *
-   * Note that the ParameterHandler usually needs parameter names without spaces
-   * therefore this function also attempts to find the parameter by an
-   * alternative name without spaces.
+   * \return true if property is defined, false if not
+   * \param property_name: identifier of the desired property
+   * \param property_value: pointer to return value
+   *
+   * If a property is defined within the container, this method simply returns
+   * this value. If it is only defined within the associated ParameterHandler,
+   * this methods adds the property to the container before returning the value.
+   *
    */
   template<typename T>
   bool get_property(const std::string& property_name, T* property_value) {
@@ -130,6 +146,7 @@ class Properties {
     return false;
   }
   /** \brief Returns an indexed property
+   *
    */
   template<typename T>
   bool get_property(const std::string& property_name, T* property_value,
@@ -142,6 +159,9 @@ class Properties {
     return get_property(indexed(property_name, index), property_value);
   }
   /** \brief Specifies labeling convention for indexed properties
+   *
+   * This is used to distinguish properties of the same name (e.g. the valencies
+   * of different particle species).
    */
   std::string indexed(const std::string& property_name, size_t index) const;
   /** \brief Data class is a universal type class. 
@@ -187,9 +207,8 @@ class Properties {
   std::unordered_map<std::string, Data*> properties;
   /** \brief Associated ParameterHandler
    *
-   * If this is well defined, the Properties class can extract parameters
-   * directly from the ParameterHandler (only on explicit request via
-   * get_property or extract_property).
+   * If this is well defined (not the nullptr), the Properties class can extract
+   * parameters directly from the ParameterHandler.
    */
   ParameterHandler* parameter_handler = nullptr;
   /** \brief std::exception MissingPropertyException.
@@ -243,6 +262,11 @@ class Properties {
   bool extract_property(const std::string& property_name, T* property_value);
   /** \brief Account for the different name conventions between ParameterHandler
    * and Property
+   *
+   * The ParameterHandler usually needs parameter names without spaces, the
+   * Properties class doesn't. To account for this, the get_property function
+   * also attempts to find the parameter by
+   * this alternative name, where spaces are replaced with underscores.
    */
   std::string parameter_name(const std::string& property_name) const;
 };

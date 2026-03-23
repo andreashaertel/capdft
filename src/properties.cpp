@@ -35,27 +35,7 @@ bool Properties::contains_property(const std::string& property_name) const {
     return false;
   }
 }
-//// _____________________________________________________________________________
-//void Properties::extract_system_properties(std::string& filename) {
-//  // extract system lengths, PBC, bjerrum or similar, grid counts
-//  // calculate remaining bjerrum or similar
-//}
-//// _____________________________________________________________________________
-//void Properties::extract_species_properties(std::string& filename,
-//		size_t index) {
-//  // extract diameter, valency, bulk density of species <index>
-//}
-//// _____________________________________________________________________________
-//void Properties::extract_properties(std::string& filename) {
-//  // decide on data type: check whether all are numbers or there's a comma or
-//  // there are letters...
-//}
-//template <typename T>
-//bool Properties::extract_property<T>(const std::string& property_name) {
-//  std::cerr << "Properties::extract_property: invalid data type\n";
-//  exit(1);
-//  return false;
-//}
+// _____________________________________________________________________________
 template <>
 bool Properties::extract_property<double>(const std::string& property_name, 
 		double* property_value) {

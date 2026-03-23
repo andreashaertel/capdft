@@ -151,7 +151,8 @@ void BoundarySurfaceSine::discretize_surface(
     // factor for conversion to the actual (curved) area is already included in
     // the return value of surface_normal.
     for (size_t i = 0; i < 3; i++) {
-      point.at(1).at(i) *= area;
+      point.at(1).at(i) *=
+	      area / std::sqrt(1 + pow(amplitude * wave_vector / 2., 2));
     }
     distribution->push_back(point);
   }

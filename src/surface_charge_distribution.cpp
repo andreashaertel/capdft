@@ -99,39 +99,3 @@ void charge_distribution(BoundarySurface<3>& boundary, System<3>& system,
     std::cout << "total area: " << area << std::endl;
   }
 }
-// alternative method:
-//// _____________________________________________________________________________
-//template <>
-//void charge_distribution_poisson(BoundarySurface<3>& boundary, System<3>& system,
-//	DataFrame<3, double>& potential,
-//	std::vector<std::pair<std::vector<double>, double>>* distribution,
-//   	double* total_charge, double resolution) {
-//  // initialize
-//  std::cout << "init\n";
-//  distribution->clear();
-//  *total_charge = 0.;
-//  double boundary_value = boundary.get_boundary_value();
-//  std::vector<double> bins = system.bin_sizes;
-//  double voxel_volume = bins.at(0) * bins.at(1) * bins.at(2);
-//  double prefactor = - voxel_volume / (4. * M_PI * system.bjerrum);
-//  std::vector<std::vector<std::vector<double>>> surface_points;
-//  boundary.discretize_surface(&surface_points, resolution);
-//  std::vector<double> position_boundary(3);
-//  std::vector<double> normal(3);
-//  std::pair<std::vector<double>, double> result;
-//  // calculate Laplacian of potential at each surface point
-//  std::cout << "calc\n";
-//  double norm;
-//  double charge;
-//  for (std::vector<std::vector<double>>& point : surface_points) {
-//    position_boundary = point.at(0);
-//    normal = point.at(1);
-//    norm = stl_algorithm::vector_norm(normal);
-//    charge = prefactor * system.laplace(
-//	      potential, position_boundary, boundary_value);
-//    result.first = position_boundary;
-//    result.second = charge / norm;
-//    distribution->push_back(result);
-//    *total_charge += charge;
-//  }
-//}

@@ -17,21 +17,6 @@ template class Boundaries<3>;
 template <size_t dim>
 Boundaries<dim>::Boundaries() {
 }
-//// _____________________________________________________________________________
-//template <size_t dim>
-//Boundaries<dim>::Boundaries(System<dim>& system, std::vector<size_t>& indices) {
-//  std::string type; 
-//  for (size_t i : indices) {
-//    system.get_property("type", &type, i);
-//    ...
-//}
-//// _____________________________________________________________________________
-//template <size_t dim>
-//Boundaries<dim>::~Boundaries() {
-//  for (auto i = this->begin(); i != this->end(); i++) {
-//    delete [] i;
-//    ...
-//}
 // _____________________________________________________________________________
 template <size_t dim>
 void Boundaries<dim>::add_surface(BoundarySurface<dim>* surface) {

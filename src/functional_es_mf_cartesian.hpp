@@ -30,6 +30,7 @@ class FunctionalESMFCartesian : public Functional {
   FunctionalESMFCartesian();
   /** \brief Constructor
    *
+   * \param density_profiles: vector of density profiles of all particle species
    * \param system: defines system and species properties
    * \param poisson_solver: Poisson solver, already initialized with required
    * 		boundary conditions (boundary value zero all over the boundary)
@@ -39,8 +40,7 @@ class FunctionalESMFCartesian : public Functional {
       System<3>& system, PoissonSolverCartesian* poisson_solver);
   /** \brief Constructor (without System, for planar boundaries)
    *
-   * Deprecated version, used in the example
-   * ../example/cartesian_functionals_all_tools
+   * Deprecated version, used in some examples
    */
   FunctionalESMFCartesian(
       std::vector<DataFrame<3, double>>* density_profiles,
@@ -49,7 +49,7 @@ class FunctionalESMFCartesian : public Functional {
       std::vector<size_t> affected_species);
   /** \brief Automated Constructor (without System, for planar boundaries)
    *
-   * Deprecated version, used in none of the examples here?
+   * Deprecated version, used in none of the examples here
    */
   FunctionalESMFCartesian(
       std::vector<DataFrame<3, double>>* density_profiles,

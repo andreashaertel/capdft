@@ -22,17 +22,20 @@
  * can be combined via the Boundaries class to define the entire boundary of a
  * system.
  *
- * Required parameters (given to constructor via System object):
- * \param system_lengths (member variable of System, no index required)
- * Optional parameters (given to constructor via System object):
- * \param boundary_value
- * \param hard_walls
+ * The following parameters must be defined in the System object from which the
+ * BoundarySurface is constructed:  
+ * Required parameters:
+ * \param system_lengths (member variable of System, no index required)  
+ * Optional parameters:
+ * \param boundary_value (double) - e.g. surface potential
+ * \param hard_walls (bool) - Is it a hard wall or can ions permeate it?  
  * ... plus the special parameters listed in the documentation of the
- * subclass of interest.
+ * subclass of interest.  
  * Unless specified otherwise, all these parameters need a common index which
- * distinguishes different boundary objects from each other (cf. constructor).
+ * distinguishes different boundary objects from each other (see description of
+ * constructor).
  * This indexing is only relevant for the BoundarySurface- (and -subclass-)
- * constructors, it does not have to follow any specific order and is in
+ * constructors. It does not have to follow any specific order and is in
  * particular independent from the ordering of these objects within a Boundaries
  * container.
  */
@@ -41,10 +44,10 @@ class BoundarySurface {
   public:
     /** \brief General constructor
      *
-     * Since the System object can contain parameters for multiple
+     * Since the System object can contain properties for multiple
      * BoundarySurface objects, these properties need to be indexed (indices are
-     * usually put in front of parameter names, cf. Properties::indexed). The 
-     * parameter 'index' specifies which of these parameters the Constructor
+     * usually put in front of property names, cf. Properties::indexed). The 
+     * parameter 'index' specifies which of these properties the Constructor
      * should use.
      *
      * \param system: specifies system dimensions (system lengths, maybe PBC),
@@ -55,6 +58,9 @@ class BoundarySurface {
      */
     BoundarySurface(System<dim>& system, size_t index);
     /** \brief Different types of boundary values
+     *
+     * PotentialES: electrostatic potential on the surface (Dirichlet)  
+     * None: no electrostatics
      */
     enum Type {PotentialES, None};
     /** \brief Set boundary value (uniform over whole surface)
@@ -66,6 +72,8 @@ class BoundarySurface {
     /** \brief Get boundary type
      */
     Type get_type() const;
+    /** \brief Check if electrostatics are relevant
+     */
     bool is_electrostatic() const;
     /** \brief Is this position within the boundaries?
      */
@@ -117,21 +125,31 @@ class BoundarySurface {
      */
     virtual double distance_directed(std::vector<double>& position,
 		    size_t direction, bool forward) const = 0;
-    /** \brief Return distance to the nearest boundary point.
+    /** \brief Return distance to the nearest boundary point. (version 1)
      *
      * \return zero if given point is outside boundaries. Returns upper_limit if
      * the distance to the boundary is larger than that value.
      *
-     * \param resolution (version 1): In case that the distance cannot be
-     * 		calculated exactly, the surface is approximated by a discrete set of points. This
-     * 		parameter defines the spatial resolution.
-     * \param surface_points (version 2): user-defined set of surface points to
-     * 		be used for the calculation
-     * \param upper_limit: might be used to reduce the amount of computation
+     * \param resolution: In case that the distance cannot be calculated
+     * 		exactly, the surface is approximated by a discrete set of
+     * 		points. This parameter defines the spatial resolution.
+     * \param upper_limit: might be useful to reduce the amount of computation
      * 		needed if only distances below a certain limit are of interest
      */
     double distance_minimal(std::vector<double>& position, double resolution,
 		    double upper_limit) const;
+    /** \brief Return distance to the nearest boundary point. (version 2)
+     *
+     * In this version, the user defines the set of surface points to be used
+     * in the calculation.
+     *
+     * \return zero if given point is outside boundaries. Returns upper_limit if
+     * the distance to the boundary is larger than that value.
+     *
+     * \param surface_points: set of surface points
+     * \param upper_limit: might be useful to reduce the amount of computation
+     * 		needed if only distances below a certain limit are of interest
+     */
     double distance_minimal(std::vector<double>& position,
 		    std::vector<std::vector<double>>& surface_points,
 	            double upper_limit) const;
@@ -149,6 +167,10 @@ class BoundarySurface {
 		    double resolution, double upper_limit = -1.);
     /** \brief Calculate the (exponentiated) external potential for hard spheres
      *
+     * This calculates exp(-potential/(kB*T)) for a hard repulsion between 
+     * particles and surface, i.e. it is 0 where particle and surface overlap 
+     * and 1 everywhere else. If hard_walls is false, it is 1 everywhere.
+     *
      * \param system: specifies all particle species' properties
      * \param potential: pointer to return value; needs to be initialized with
      * 		desired grid dimensions
@@ -161,10 +183,6 @@ class BoundarySurface {
     /** \brief System dimensions
      */
     std::vector<double> system_lengths;
-    // periodic boundary conditions not always relevant?
-//    /** \brief Periodic boundary conditions
-//     */
-//    std::vector<bool> periodic_boundaries;
     /** \brief Type of the boundary value
      * 
      * Per default, there is no boundary value. This is changed only when
@@ -175,8 +193,8 @@ class BoundarySurface {
     /** \brief Type of the boundary surface: Hard wall or permeable for particles?
      *
      * Per default, boundary surfaces are defined as hard walls. This can be
-     * deactivated via an optional parameter in the constructor. It is relevant
-     * for the exp_external_potential_hs function.
+     * deactivated via an optional parameter hard_walls=false in the
+     * constructor. It is relevant for the exp_external_potential_hs function.
      */
     bool hard_walls = true;
     /** \brief Boundary value on the surface (electrostatic potential)

@@ -17,15 +17,15 @@
 /** \brief Class for a sinusoidal boundary structure in a 3d system.
  *
  * The surface lies either at z=0 or at the opposite side of the system and is
- * invariant in y-direction, i.e. the sinusoidal structure is in the x-z-plane.
+ * invariant in y-direction and sinusoidal in x-direction.
  * At both ends of the x-axis, the surface height is zero. The number of maxima
  * inbetween those points as well as their amplitude are chosen by the user.
  * Periodic boundary conditions in x and y direction are assumed.
  *
  * Required parameters (given to constructor via System object):
- * \param amplitude
- * \param maxima_count
- * \param side_inversed
+ * \param amplitude (double) - height from minimum to maximum in z-direction
+ * \param maxima_count (size_t) - number of maxima within one system length Lx
+ * \param side_inversed (bool) - Put surface at z=0 or z=Lz?
  * ... plus the standard parameters listed in the documentation of the base
  * class BoundarySurface.
  */
@@ -58,18 +58,23 @@ class BoundarySurfaceSine : public BoundarySurface<3> {
      * that (i.e. at z = system_height)
      */
     bool side_inversed;
-   /** \brief Return a set of points (and normal vectors) on the surface
+   /** \brief Return a set of points on the surface
     *
     * The points are distributed equidistantly in x and y direction.
     *
     * \param resolution: maximum distance between two neighboring points
     */
    void discretize_surface(
-	    std::vector<std::vector<std::vector<double>>>* distribution,
-	    double resolution) const override;
-   void discretize_surface(
 		std::vector<std::vector<double>>* points, double resolution)
 	   	const override;
+   /** \brief Return a set of points and normal vectors on the surface
+    *
+    * Analogous to above version, but also includes surface normal vectors
+    * (cf. documentation of base class BoundarySurface).
+    */
+   void discretize_surface(
+	    std::vector<std::vector<std::vector<double>>>* distribution,
+	    double resolution) const override;
    /** \brief Return boundaries' z position at given x and y
     *
     * \param position: specifies x and y position (may also contain a z

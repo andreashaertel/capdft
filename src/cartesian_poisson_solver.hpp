@@ -13,13 +13,19 @@
 #include "data_frame.hpp"  // NOLINT
 #include "sparse_matrix.hpp"  // NOLINT
 #include "poisson_solver_cartesian.hpp"  // NOLINT
-/** \brief This class contians tools to solve the cartesian (3D)
- *         poisson equation
+/** \brief This class contains tools to solve the cartesian (3D)
+ *         Poisson equation with planar boundaries
  * 
  *  The numerical Poisson equation can be rewritten into a matrix equation
  *  containing a sparse matrix, that mostly contains zeros.
  *  These kind of matrices can be solved via the GMRES algorithm rather
  *  efficiently.
+ *
+ *  Note: Since the introduction of the CartesianPoissonSolverAny, the usage of
+ *  this class is not recommended except for demonstration and testing purposes.
+ *  For solving problems with planar boundaries, the faster PlanarPoissonSolver
+ *  is recommended. For other boundary shapes, the CartesianPoissonSolverAny
+ *  or RadialPoissonSolver must be used.
  */
 class CartesianPoissonSolver : public PoissonSolverCartesian,
 	public SparseMatrix {

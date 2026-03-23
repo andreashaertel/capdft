@@ -41,8 +41,7 @@ class BoundarySurfaceSphere : public BoundarySurface<3> {
 		    size_t direction, bool forward) const override;
     /** \brief Return distance to the nearest boundary point.
      *
-     * Returns zero if given point is outside boundaries. Returns upper_limit if
-     * the distance to the boundary is larger than that value.
+     * Returns zero if given point is outside boundaries.
      */
     double distance_minimal(std::vector<double>& position) const;
     /** \brief Return the minimal boundary distances of each point in a
@@ -50,9 +49,8 @@ class BoundarySurfaceSphere : public BoundarySurface<3> {
      *
      * \param result: pointer to return value; needs to be initialized with
      * 		desired grid dimensions
-     * \param resolution: spatial resolution of surface (see distance_minimal)
-     * \param upper_limit: upper limit on distance (see distance_minimal) - By
-     * 		default, there is no limit except for the finite system size.
+     * \param resolution: dummy parameter, not required in this version
+     * \param upper_limit: dummy parameter, not required in this version
      */
     void minimal_distances(DataFrame<3, double>* result,
 		    double resolution, double upper_limit = -1.) override;
@@ -67,16 +65,26 @@ class BoundarySurfaceSphere : public BoundarySurface<3> {
     /** \brief Position of sphere centre
      */
     double x_mid, y_mid, z_mid;
-    /** \brief Return a set of points (and normal vectors) on the surface
+    /** \brief Return a set of points on the surface
+     *
+     * The points are distributed equidistantly along each line of latitude with
+     * an approximate distance of <resolution>. The separation between two
+     * latitudinal lines is also equal to <resolution>.
     * 
+    * \param points: pointer to return value
     * \param resolution: bin size of the discretization
     */
     void discretize_surface(
-	    std::vector<std::vector<std::vector<double>>>* distribution,
-	    double resolution) const override;
-    void discretize_surface(
 		std::vector<std::vector<double>>* points, double resolution)
 	   	const override;
+    /** \brief Return a set of points and normal vectors on the surface
+     *
+     * Analogous to above version, but also includes surface normal vectors
+     * (cf. documentation of base class BoundarySurface).
+     */
+    void discretize_surface(
+	    std::vector<std::vector<std::vector<double>>>* distribution,
+	    double resolution) const override;
     /** \brief Return surface normal vector at given x and y
     *
     * The returned vector is orthogonal to the surface, points away from the

@@ -67,7 +67,7 @@ class RadialPoissonSolver {
    *
    */
   size_t dim;
-  /** Radial bin size (not needed in carthesian case)
+  /** Radial bin size (not needed in cartesian case)
    *
    */
   double dr;

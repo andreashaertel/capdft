@@ -573,6 +573,21 @@ DataFrame<dim, T>& DataFrame<dim, T>::operator*=(
   return *this;
 }
 template <>
+DataFrame<1, bool>& DataFrame<1, bool>::operator*=(
+    const DataFrame<1, bool>& other) {
+  if (this->same_size(other)) {
+    for (size_t i = 0; i < this->array_size; ++i) {
+      this->at(i) = this->at(i) && other.element(i);
+    }
+  } else {
+    std::cerr << "DataFrame::operator*=():";
+    std::cerr << " \"ERROR: Dimensions do not match. Cannot multiply.\"";
+    std::cerr << std::endl;
+    exit(1);
+  }
+  return *this;
+}
+template <>
 DataFrame<3, bool>& DataFrame<3, bool>::operator*=(
     const DataFrame<3, bool>& other) {
   if (this->same_size(other)) {
@@ -736,6 +751,14 @@ DataFrame<3, fftw_complex>& DataFrame<3, fftw_complex>::operator/=(
   return *this;
 }
 // _____________________________________________________________________________
+template <>
+DataFrame<1, bool>& DataFrame<1, bool>::operator*=(const double other) {
+  std::cerr << "DataFrame::operator*=(const double other):";
+  std::cerr << " \"ERROR: This operator doesn't work for boolean dataframes.\"";
+  std::cerr << std::endl;
+  exit(1);
+  return *this;
+}
 template <>
 DataFrame<3, bool>& DataFrame<3, bool>::operator*=(const double other) {
   std::cerr << "DataFrame::operator*=(const double other):";

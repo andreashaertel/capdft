@@ -364,63 +364,6 @@ double System<3>::interpolate(DataFrame<3, double>& values,
   }
   return result / weight_sum;
 }
-//// _____________________________________________________________________________
-//template <>
-//double System<3>::laplace(DataFrame<3, double>& values,
-//		  std::vector<double>& position, double mid_value) const {
-//  size_t dim = 3;
-//  std::vector<size_t> midpoint = position_to_coordinates(position);
-//  std::vector<size_t> coordinates(dim);
-//  std::vector<double> neighbor_position(dim);
-//  /** Calculate usual discretized Laplacian, but with modified distances:
-//   */
-//  // Initialize result
-//  // Calculate distances to the eight nearest neighbors
-//  std::vector<std::vector<double>> distances(3);
-//  std::vector<double> widths(3);
-//  double interpolation_rescaling = 1.;
-//  double laplacian_weight = 0.;
-//  double distance;
-//  for (size_t dir = 0; dir < 3; dir++) {
-//    distance = std::fmod(position.at(dir), bin_sizes.at(dir));
-//  //  std::cout << distance << std::endl;
-//    if (distance < bin_sizes.at(dir) * 1.e-4 || // workaround (TODO)
-//	bin_sizes.at(dir) - distance < bin_sizes.at(dir) * 1.e-4) {
-//      distances.at(dir) = {-bin_sizes.at(dir), bin_sizes.at(dir)};
-//    } else {
-//      distances.at(dir) = {-distance, bin_sizes.at(dir) - distance};
-//    }
-//    widths.at(dir) = distances.at(dir).at(1) - distances.at(dir).at(0);
-//    interpolation_rescaling /= widths.at(dir);
-//    laplacian_weight += -1. / (distances.at(dir).at(0) * distances.at(dir).at(1));
-//  }
-//  // Sum over all neighbors with appropriate weights
-//  double result = 0.;
-//  double neighbor_value;
-//  for (double dx : distances.at(0)) {
-//    neighbor_position.at(0) = position.at(0) + dx;
-//    for (double dy : distances.at(1)) {
-//      neighbor_position.at(1) = position.at(1) + dy;
-//      for (double dz: distances.at(2)) {
-//        neighbor_position.at(2) = position.at(2) + dz;
-//    	// Calculate neighboring grid point position
-//        coordinates = position_to_coordinates(neighbor_position);
-//	// Add neighbor contribution to result
-//        neighbor_value =
-//    		values.at(coordinates.at(0), coordinates.at(1), coordinates.at(2));
-//        result += (widths.at(0) - std::fabs(dx)) * (widths.at(1) - std::fabs(dy)) * (widths.at(2) - std::fabs(dz))
-//		* neighbor_value;
-//      }
-//    }
-//  }
-//  // Rescale interpolation weights
-//  result *= interpolation_rescaling;
-//  // Add midpoint contribution to result
-//  result -= 2. * mid_value;
-//  // Multiply all contributions with Laplacian weight
-//  result *= laplacian_weight;
-//  return result;
-//}
 // _____________________________________________________________________________
 template <size_t dim>
 void System<dim>::print_data(DataFrame<dim, double>& values, 

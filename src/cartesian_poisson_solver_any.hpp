@@ -1,4 +1,5 @@
-// SPDX-FileCopyrightText: 2022 Moritz Bültmann <moritz.bueltmann@gmx.de>
+// SPDX-FileCopyrightText: 2022 Moritz Bültmann <moritz.bueltmann@gmx.de>,
+// 			   2026 Fabienne Dressler <fab.dressler@web.de>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #ifndef SRC_CARTESIAN_POISSON_SOLVER_ANY_HPP_
 #define SRC_CARTESIAN_POISSON_SOLVER_ANY_HPP_
@@ -52,8 +53,17 @@ class CartesianPoissonSolverAny : public PoissonSolverCartesian,
    *  
    *  The GMRES solver of the SparseMatrix class is used to find an iterative
    *  solution.
+   *
+   *  \param rhs: right hand side of the Poisson equation: charge density
+   *  		profile, rescaled by -4*PI*bjerrum length
+   *  \param solution: pointer to return value. Initial state is used as initial
+   *  		guess.
    */
   void solve(std::vector<double>& rhs, std::vector<double>& solution) override;
+  /** \brief Solve the linear equation system
+   *  
+   *  Analogous to above version, but with DataFrames instead of vectors.
+   */
   void solve(DataFrame<3, double>& rhs, DataFrame<3, double>& solution);
 
  private:
@@ -78,7 +88,7 @@ class CartesianPoissonSolverAny : public PoissonSolverCartesian,
    *  become redundant and are hence removed; the corresponding columns also
    *  need to be removed because their potential value is already known.
    *  These positions coincide with the boundary positions.
-. This vector remembers their positions.
+   *  This vector remembers their positions.
    */
   std::vector<size_t> boundary_positions;
   /** \brief Holds the indices to remove and their associated boundary values
@@ -100,13 +110,13 @@ class CartesianPoissonSolverAny : public PoissonSolverCartesian,
   /** \brief Modify the Laplace matrix according to the periodic_boundaries
    */
   void set_boundary_conditions();
-  /** \brief From a coordinate index calculate the equation index
+  /** \brief From coordinate indices calculate the equation index
    *
    *  \return false if index out of bounds (even if there are PBC)
    */
   bool coordinates_to_index(size_t i, size_t j, size_t k, size_t* index);
   bool coordinates_to_index(std::vector<size_t> pos, size_t* index);
-  /** \brief From a coordinate index calculate the position
+  /** \brief From coordinate indices calculate the position
    */
   void coordinates_to_position(std::vector<size_t> pos, std::vector<double>* position);
   /** \brief Set the boundary position and values
@@ -117,16 +127,19 @@ class CartesianPoissonSolverAny : public PoissonSolverCartesian,
    * needed to set the boundary positions and values of one boundary object
    */
   void calc_boundary_values(BoundarySurface<3>* boundary_surface);
-  /** \brief Calculate the modification due to boundary values of the right
-   * hand side and the matrix
-   * elements associated with a specific grid point
+  /** \brief Calculate the modification induced by a given boundary point
+   *
+   * This calculates all modifications of the right hand side and matrix
+   * elements induced by the given boundary point.
    */
-  void modify_matrix_elements(BoundarySurface<3>* boundary_surface,
+  void modify_boundary_point(BoundarySurface<3>* boundary_surface,
 		std::vector<size_t>& index_position);	
-  /** \brief Calculate the modification of the right hand side and matrix
-   * elements induced by one boundary point.
+  /** \brief Calculate the modification affecting a given grid point
+   *
+   * This calculates the modifications of all right hand side and matrix
+   * elements associated with the given grid point.
    */
-  void modify_rhs(BoundarySurface<3>* boundary_surface,
+  void modify_grid_point(BoundarySurface<3>* boundary_surface,
 		std::vector<size_t>& index_position);	
   /** \brief Add the boundary values to a given right-hand side vector
    */

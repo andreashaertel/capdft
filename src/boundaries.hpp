@@ -5,7 +5,7 @@
 /** \file boundaries.hpp
  * \brief Header file for the Boundaries class.
  *
- *  The file contains the declarations of the CartesianPoissonSolverAny class.
+ *  The file contains the declarations of the Boundaries class.
  */
 // Includes
 #include <vector>
@@ -14,7 +14,7 @@
 #include "boundary_surface.hpp"
 #include "system.hpp"
 
-/** \brief This class is a container for multiple surfaces in one system.
+/** \brief This class is a container for multiple BoundarySurface in one system.
  *
  * This class is derived from an std::list, such that it can be handled like a
  * list for instance when accessing the elements. Note that the elements are
@@ -30,19 +30,6 @@ class Boundaries : public std::list<BoundarySurface<dim>*> {
     /** \brief Construct empty container
      */
     Boundaries();
-//    /** \brief Construct and initialize from System object
-//     *
-//     * \param system: must contain indexed properties for the different
-//     * 		BoundarySurface objects to be initialized here, as well as an
-//     * 		indexed std::string-property "type" specifying the corresponding
-//     * 		BoundarySurface-subclass
-//     * \param indices: which sets of boundary properties to choose
-//     */
-//    Boundaries(System<dim>& system,
-//		    std::vector<size_t>& indices); // implementation missing
-//    /** \brief Destructor
-//     */
-//    ~Boundaries();
     /** \brief Add a surface object to the container
      *
      * Note that, since the object is given as a pointer, it has to be defined
@@ -51,11 +38,6 @@ class Boundaries : public std::list<BoundarySurface<dim>*> {
      * remain intact in the main code as long as the Boundaries object is used.
      */
     void add_surface(BoundarySurface<dim>* surface);
-//    /** \brief Add a surface object to the container
-//     *
-//     * Parameters analogous to the constructor
-//     */
-//    void add_surface(System<dim>& system, size_t index);
     /** \brief Set uniform boundary value over all surfaces
      */
     void set_all_boundary_values(double value);

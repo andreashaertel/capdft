@@ -30,7 +30,7 @@ class BoundarySurfacePlanar : public BoundarySurface<dim> {
   public:
     /** \brief Construct structure from given System object.
      *
-     * Special parameters required for this surface object: For each system
+     * Special parameters required for this surface object: For each coordinate
      * axis, one parameter 'sides' encodes which of the two walls along that axis
      * are to be included in the surface object.
      */
