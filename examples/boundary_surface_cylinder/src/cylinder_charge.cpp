@@ -24,6 +24,17 @@
 // _____________________________________________________________________________
 // Main function
 int main(int argc, char** argv) {
+  if (argc < 2) {
+    std::cout << "Usage: " << argv[0] << " -f <parameter_file> ";
+    std::cout << "-p potential_profile=<filename1> ";
+    std::cout << "-p density_profiles=<filename2>\n";
+    std::cout << "	where <filename1,2> are the data files of the total "
+	 	 "electrostatic potential and the density profiles.\n";
+    std::cout << "	If not "
+	         "specified, the default filenames 'total_ES.dat' and "
+		 "'3d_profiles.dat' are used.\n";
+    exit(1);
+  }
 // _____________________________________________________________________________
   // Set the desired system properties
   /* The necessary geometric and physical properties are extracted from the
@@ -64,7 +75,8 @@ int main(int argc, char** argv) {
    */
 // _____________________________________________________________________________
   DataFrame<3,double> total_ES(grid_counts);
-  std::string potential_file = params.get_string("potential_profile", "total_ES.dat");
+  std::string potential_file =
+	  params.get_string("potential_profile", "total_ES.dat");
   size_t data_column = 3;
   system.load_data(potential_file, data_column, &total_ES);
 // _____________________________________________________________________________

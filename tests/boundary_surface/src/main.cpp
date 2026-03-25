@@ -28,7 +28,7 @@ int main(int argc, char** argv) {
 // _____________________________________________________________________________
   if (argc < 2) {
     std::cout << "Usage: " << argv[0] << " -f <parameter file>\n";
-    std::cout << "(or use flag -p <parameter>=<value>, cf. ParameterHandler)\n";
+    std::cout << "	(or use -p <parameter_name>=<value>)\n";
     exit(1);
   }
 // _____________________________________________________________________________

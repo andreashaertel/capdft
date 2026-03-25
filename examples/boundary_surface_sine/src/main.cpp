@@ -72,6 +72,12 @@ bool get_initial_guess(System<3>& system, std::string parameter_name,
 // _____________________________________________________________________________
 // Main function
 int main(int argc, char** args) {
+  if (argc < 2) {
+    std::cout << "Usage: " << args[0] << " -f <parameter_file>\n";
+    std::cout << "	or define parameters in command line via ";
+    std::cout << "-p <parameter_name>=<value>\n";
+    exit(1);
+  }
 // _____________________________________________________________________________
   // Set the desired system properties
   /* The necessary geometric and physical properties are extracted from the

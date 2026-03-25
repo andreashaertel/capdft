@@ -72,10 +72,10 @@ int main(int argc, char** argv) {
 	double x0,y0,z0;
 	double dist_squared;
 	double width;
-        system.get_property("ion_pos_x", &x0);
-        system.get_property("ion_pos_y", &y0);
-        system.get_property("ion_pos_z", &z0);
-        system.get_property("ion_width", &width);
+        x0 = params.get_double("0_ion_pos", lengths.at(0) / 2.);
+        y0 = params.get_double("1_ion_pos", lengths.at(1) / 2.);
+        z0 = params.get_double("2_ion_pos", lengths.at(2) / 2.);
+        width = params.get_double("ion_width", 1.);
         for (size_t i = 0; i < grid_counts.at(0); i++) {
 	  x = static_cast<double>(i) * bin_sizes.at(0);
   	  for (size_t j = 0; j < grid_counts.at(1); j++) {
@@ -110,49 +110,30 @@ int main(int argc, char** argv) {
   Boundaries<3> boundaries;
   std::vector<double> boundary_values = {potential, -potential};
   // for CartesianPoissonSolver:
-  std::vector<std::vector<double>> boundary_values2(3);
+  std::vector<std::vector<double>> boundary_values2 =
+  	{{0., 0.}, {0., 0.}, boundary_values};
   boundary_values2.at(2) = boundary_values;
-  //BoundarySurfaceSine boundaries_left(system, 0);
-  //BoundarySurfaceSine boundaries_right(system, 1);
-  BoundarySurfaceCylinder boundaries_left(system, 0);
-  BoundarySurfacePlanar boundaries_right(system, 1);
+  BoundarySurfaceSine boundaries_left(system, 0);
+  BoundarySurfaceSine boundaries_right(system, 1);
+  //BoundarySurfacePlanar boundaries_left(system, 0);
+  //BoundarySurfacePlanar boundaries_right(system, 1);
   boundaries_left.set_boundary_value(potential);
   boundaries_right.set_boundary_value(-potential);
   boundaries.add_surface(&boundaries_left);
   boundaries.add_surface(&boundaries_right);
-//  } else if (type_ES == "planar") {
-//    BoundarySurfacePlanar boundaries_left(properties, 0);
-//    BoundarySurfacePlanar boundaries_right(properties, 1);
-//    boundaries.add_surface(boundaries_left);
-//    boundaries.add_surface(boundaries_right);
-//  } else if (type_ES == "zigzag") {
-//    // waveform params
-//    properties.add_property<double>("amplitude", params.get_double("amplitude", lengths.at(2) / 4));
-//    properties.add_property<size_t>("maxima_count", params.get_int("maxima_count", 1));
-//    boundaries::zigzag(syst, properties, &boundary_positions);
-//  } else {
-//    std::cout << "invalid type '" << type_ES << "'\n";
-//    exit(1);
-//  }
   // Solve Poisson equation with CartesianPoissonSolverAny and - if boundaries
   // are planar - for comparison also with the simpler CartesianPoissonSolver.
   DataFrame<3, double> solution1(grid_counts);
   DataFrame<3, double> solution2(grid_counts);
-// -   std::cout << "main: boundary val " << boundaries.surfaces.front()->get_boundary_value() << std::endl;
-// -   std::cout << "main: boundary val " << boundaries.surfaces.front()->boundary_value << std::endl;
-// -   std::cout << "main: electrost. " << boundaries.surfaces.front()->electrostatics << std::endl;
-// -   std::cout << "main: Boundaries address " << &boundaries << std::endl;
-// -   std::cout << "main: Surface 1 address " << boundaries.surfaces.front() << std::endl;
-// -   std::cout << "main: boundary val address " << &(boundaries.surfaces.front()->boundary_value) << std::endl;
-// -   std::cout << "main: electrost. address " << &(boundaries.surfaces.front()->electrostatics) << std::endl;
   std::cout << "CartesianPoissonSolverAny:\n";
   CartesianPoissonSolverAny poisson1(system, &boundaries);
   poisson1.solve(rhs, solution1);
-//  if (type_ES == "planar") {
-//    std::cout << "CartesianPoissonSolver:\n";
-//    CartesianPoissonSolver poisson2(grid_counts, bin_sizes, system.periodic_boundaries);
-//    poisson2.solve(rhs, boundary_values2, solution2);
-//  }
+  bool planar = params.get_bool("planar", false);
+  if (planar) {
+    std::cout << "CartesianPoissonSolver:\n";
+    CartesianPoissonSolver poisson2(grid_counts, bin_sizes, system.periodic_boundaries);
+    poisson2.solve(rhs, boundary_values2, solution2);
+  }
   // Write results to files
   std::cout << "calculations done, write to file\n";
   std::fstream ES_dat;

@@ -1,4 +1,5 @@
 // SPDX-FileCopyrightText: 2021 Moritz Bültmann <moritz.bueltmann@gmx.de>
+// 			   2026 Fabienne Dressler <fab.dressler@web.de>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 /** \file examples/boundary_surface_planar/src/cartesian_3d.cpp
  *  \brief Main file of the example of the planar functionals in 3d.
@@ -25,6 +26,12 @@
 // _____________________________________________________________________________
 // Main function
 int main(int argc, char** args) {
+  if (argc < 2) {
+    std::cout << "Usage: " << args[0] << " -f <parameter_file>\n";
+    std::cout << "	or define parameters in command line via ";
+    std::cout << "-p <parameter_name>=<value>\n";
+    exit(1);
+  }
 // _____________________________________________________________________________
   // Set the desired system properties
   /* The necessary geometric and physical properties are extracted from the

@@ -24,6 +24,11 @@ double function(double scale, double x, double z) {
 // _____________________________________________________________________________
 // Main function
 int main(int argc, char** argv) {
+  if (argc < 2) {
+    std::cout << "Usage: " << argv[0] << " -f <parameter file>\n";
+    std::cout << "	(or use -p <parameter_name>=<value>)\n";
+    exit(1);
+  }
 // _____________________________________________________________________________
   // Get parameters from file/commandline input
   ParameterHandler params(argc, argv);

@@ -24,6 +24,17 @@
 // _____________________________________________________________________________
 // Main function
 int main(int argc, char** argv) {
+  if (argc < 2) {
+    std::cout << "Usage: " << argv[0] << " -f <parameter_file> ";
+    std::cout << "-p potential_profile=<filename1> ";
+    std::cout << "-p density_profiles=<filename2>\n";
+    std::cout << "	where <filename1,2> are the data files of the total "
+	 	 "electrostatic potential and the density profiles.\n";
+    std::cout << "	If not "
+	         "specified, the default filenames 'total_ES.dat' and "
+		 "'3d_profiles.dat' are used.\n";
+    exit(1);
+  }
 // _____________________________________________________________________________
   // Set the desired system properties
   /* The necessary geometric and physical properties are extracted from the
