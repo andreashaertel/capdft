@@ -177,7 +177,9 @@ void CartesianPoissonSolverAny::set_boundary_conditions() {
         SparseMatrix::set(col, row, 1. / bin_size_squared.at(0));
       }
     }
-  } else {  // if not periodic
+  } else {  // if not periodic: Do nothing. Effectively, this is as if points
+	    // at the boundary were linked to virtual points with zero boundary
+	    // value just outside the boundary (at distance of one bin size).
   }
   if (periodic_boundaries.at(1)) {
     for (size_t i = 0; i < bin_count.at(0); ++i) {

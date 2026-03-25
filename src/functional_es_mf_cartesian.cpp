@@ -83,15 +83,14 @@ void FunctionalESMFCartesian::calc_bulk_derivative(
 }
 // _____________________________________________________________________________
 double FunctionalESMFCartesian::calc_energy() {
-  DataFrame<1, double> energy_density(voxel_count);
+  DataFrame<3, double> energy_density(grid_counts);
   double integral{0.};
   calc_charge_densities();
   calc_potential();
   for (size_t i = 0; i < voxel_count; ++i) {
     energy_density.at(i) = .5 * potential.at(i) * charge_density_profile.at(i);
   }
-  // TODO(Moritz): 3D integration
-  //integral = integration_1d_closed(energy_density, dz);
+  integral = integration_3d_closed(energy_density, bin_sizes);
   return integral;
 }
 // _____________________________________________________________________________
