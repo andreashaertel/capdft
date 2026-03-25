@@ -19,7 +19,8 @@ Further details will be found on capdft.org soon.
 First, check that the required libraries are installed:
 1. GNU Scientific Library, e.g. `gsl-devel`
 2. FFTW3, e.g. `fftw3-devel`
-3. Parameter handler from https://github.com/andreashaertel/parameter_handler.git
+3. Doxygen
+4. Parameter handler from https://github.com/andreashaertel/parameter_handler.git
 (The latter should be located in the same folder as the capdft project.)
 
 To download and install the project, you need to clone the project from github and to run `make init` and `make`: 
