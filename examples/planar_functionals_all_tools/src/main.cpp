@@ -190,6 +190,7 @@ int main(int argc, char** args) {
   // Write density profile to file
   std::fstream out_stream;
   out_stream.open("planar_profile.dat", std::ios::out);
+  out_stream << "# [z] [density profiles]\n";
   for (size_t i = 0; i < grid_count; ++i) {
     z = dz * static_cast<double>(i);
     out_stream << z << " ";
