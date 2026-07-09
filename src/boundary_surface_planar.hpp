@@ -10,6 +10,7 @@
 // Includes
 #include "boundary_surface.hpp"
 #include "system.hpp"
+#include "discretization_handler.hpp"
 #include <vector>
 #include "data_frame.hpp"
 
@@ -25,8 +26,8 @@
  * ... plus the standard parameters listed in the documentation of the base
  * class BoundarySurface.
  */
-template <size_t dim>
-class BoundarySurfacePlanar : public BoundarySurface<dim> {
+template <Geometry geometry>
+class BoundarySurfacePlanar : public BoundarySurface<geometry> {
   public:
     /** \brief Construct structure from given System object.
      *
@@ -34,7 +35,7 @@ class BoundarySurfacePlanar : public BoundarySurface<dim> {
      * axis, one parameter 'sides' encodes which of the two walls along that axis
      * are to be included in the surface object.
      */
-    BoundarySurfacePlanar(System<dim>& system, size_t index);
+    BoundarySurfacePlanar(System<geometry>& system, size_t index);
     /** \brief Is this position within the boundaries?
      */
     bool is_within_boundary(std::vector<double>& position) const override;
@@ -59,7 +60,7 @@ class BoundarySurfacePlanar : public BoundarySurface<dim> {
      * \param upper_limit: upper limit on distance (see distance_minimal) - By
      * 		default, there is no limit except for the finite system size.
      */
-    void minimal_distances(DataFrame<dim, double>* result,
+    void minimal_distances(DataFrame<dimension(geometry), double>* result,
 		    double resolution, double upper_limit = -1.) override;
    /** \brief Return a set of points (and normal vectors) on the surface
     *
@@ -86,6 +87,6 @@ class BoundarySurfacePlanar : public BoundarySurface<dim> {
    std::vector<double> surface_normal(std::vector<double>& position) const;
    /** \brief Initialize the properties specific to this subclass
     */
-   void extract_special_properties(System<dim>& system, size_t index);
+   void extract_special_properties(System<geometry>& system, size_t index);
 };
 #endif // SRC_BOUNDARY_SURFACE_PLANAR_HPP_

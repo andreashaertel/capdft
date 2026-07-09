@@ -10,6 +10,7 @@
 #include "data_frame.hpp"  // NOLINT
 #include "integration.hpp"  // NOLINT
 #include "system.hpp"
+#include "discretization_handler.hpp"
 // _____________________________________________________________________________
 FunctionalFMTCartesian::FunctionalFMTCartesian() {
   //
@@ -17,7 +18,7 @@ FunctionalFMTCartesian::FunctionalFMTCartesian() {
 // _____________________________________________________________________________
 FunctionalFMTCartesian::FunctionalFMTCartesian(
     const std::vector<DataFrame<3, double>>* density_profiles,
-    System<3>& system) : density_profiles_pointer(density_profiles) {
+    System<Cartesian>& system) : density_profiles_pointer(density_profiles) {
   // Clear all std::vectors
   diameters.clear();
   bulk_densities.clear();
@@ -93,7 +94,7 @@ void FunctionalFMTCartesian::extract_system_properties(
   grid_counts_four.push_back(grid_counts.at(2) / 2 + 1);
 }
 // _____________________________________________________________________________
-void FunctionalFMTCartesian::extract_system_properties(System<3>& system) {
+void FunctionalFMTCartesian::extract_system_properties(System<Cartesian>& system) {
   // Extract properties
   lengths = system.system_lengths;
   grid_counts = system.grid_counts;
@@ -152,7 +153,7 @@ void FunctionalFMTCartesian::extract_species_properties(
   species_count = affected_species.size();
 }
 // _____________________________________________________________________________
-void FunctionalFMTCartesian::extract_species_properties(System<3>& system) {
+void FunctionalFMTCartesian::extract_species_properties(System<Cartesian>& system) {
   double diameter{0.};
   double bulk_density{0.};
   // Extract properties

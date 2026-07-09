@@ -11,10 +11,10 @@
 #include <cmath>
 #include "system.hpp"
 #include "stl_algorithms.hpp"
-
+#include "discretization_handler.hpp"
 // _____________________________________________________________________________
 template <>
-double charge_density(BoundarySurface<3>& boundary, System<3>& system,
+double charge_density(BoundarySurface<Cartesian>& boundary, System<Cartesian>& system,
 	DataFrame<3, double>& potential,
 	std::vector<double>& position_boundary, std::vector<double>& normal) {
   /** The local charge density at any surface point can be determined from the derivative of the
@@ -44,9 +44,9 @@ double charge_density(BoundarySurface<3>& boundary, System<3>& system,
   return prefactor * normal_derivative;
 }
 // _____________________________________________________________________________
-template <size_t dim>
-void charge_distribution(BoundarySurface<dim>& boundary, System<dim>& system,
-	DataFrame<dim, double>& potential,
+template <Geometry geometry>
+void charge_distribution(BoundarySurface<geometry>& boundary, System<geometry>& system,
+	DataFrame<dimension(geometry), double>& potential,
 	std::vector<std::pair<std::vector<double>, double>>* distribution,
    	double* total_charge, double resolution) {
   std::cerr << "charge_distribution: this is only implemented in 3d\n";
@@ -54,7 +54,7 @@ void charge_distribution(BoundarySurface<dim>& boundary, System<dim>& system,
 }
 // _____________________________________________________________________________
 template <>
-void charge_distribution(BoundarySurface<3>& boundary, System<3>& system,
+void charge_distribution(BoundarySurface<Cartesian>& boundary, System<Cartesian>& system,
 	DataFrame<3, double>& potential,
 	std::vector<std::pair<std::vector<double>, double>>* distribution,
    	double* total_charge, double resolution, double* total_area) {

@@ -9,13 +9,14 @@
 #include "poisson_solver_cartesian.hpp"  // NOLINT
 #include "cartesian_poisson_solver.hpp"  // NOLINT
 #include "system.hpp"
+#include "discretization_handler.hpp"
 // _____________________________________________________________________________
 FunctionalESMFCartesian::FunctionalESMFCartesian() {
 }
 // _____________________________________________________________________________
 FunctionalESMFCartesian::FunctionalESMFCartesian(
     std::vector<DataFrame<3, double>>* density_profiles,
-    System<3>& system, PoissonSolverCartesian* poisson_solver)
+    System<Cartesian>& system, PoissonSolverCartesian* poisson_solver)
   : density_profiles_pointer(density_profiles) {
   // Get system properties
   extract_system_properties(system);
@@ -94,7 +95,7 @@ double FunctionalESMFCartesian::calc_energy() {
   return integral;
 }
 // _____________________________________________________________________________
-void FunctionalESMFCartesian::get_potential(System<3>& system,
+void FunctionalESMFCartesian::get_potential(System<Cartesian>& system,
 		DataFrame<3, double>* data) const {
   size_t index;
   std::vector<size_t> coordinates(3);
@@ -139,7 +140,7 @@ void FunctionalESMFCartesian::extract_system_properties(
   extract_electrical_properties(system_properties);
 }
 // _____________________________________________________________________________
-void FunctionalESMFCartesian::extract_system_properties(System<3>& system) {
+void FunctionalESMFCartesian::extract_system_properties(System<Cartesian>& system) {
   // Extract properties
   lengths = system.system_lengths;
   grid_counts = system.grid_counts;
@@ -230,7 +231,7 @@ void FunctionalESMFCartesian::extract_species_properties(
   species_count = affected_species.size();
 }
 // _____________________________________________________________________________
-void FunctionalESMFCartesian::extract_species_properties(System<3>& system) {
+void FunctionalESMFCartesian::extract_species_properties(System<Cartesian>& system) {
   double valency;
   // Get valencies
   for (auto& species : affected_species) {

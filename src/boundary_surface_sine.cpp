@@ -7,19 +7,20 @@
  */
 #include "boundary_surface_sine.hpp"
 #include "system.hpp"
+#include "discretization_handler.hpp"
 #include <string>
 #include <stdexcept>
 #include <cmath>
 #include <iostream>
 
 // _____________________________________________________________________________
-BoundarySurfaceSine::BoundarySurfaceSine(System<3>& system, size_t index) :
-	BoundarySurface<3>(system, index) {
+BoundarySurfaceSine::BoundarySurfaceSine(System<Cartesian>& system, size_t index) :
+	BoundarySurface<Cartesian>(system, index) {
   extract_special_properties(system, index);
 }
 
 // _____________________________________________________________________________
-void BoundarySurfaceSine::extract_special_properties(System<3>& system, 
+void BoundarySurfaceSine::extract_special_properties(System<Cartesian>& system, 
 		size_t index) {
   // waveform parameters
   system.get_property("side_inversed", &side_inversed, index);

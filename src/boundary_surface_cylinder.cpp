@@ -7,19 +7,20 @@
  */
 #include "boundary_surface_cylinder.hpp"
 #include "system.hpp"
+#include "discretization_handler.hpp"
 #include <string>
 #include <stdexcept>
 #include <cmath>
 #include <iostream>
 
 // _____________________________________________________________________________
-BoundarySurfaceCylinder::BoundarySurfaceCylinder(System<3>& system, size_t index) :
-	BoundarySurface<3>(system, index) {
+BoundarySurfaceCylinder::BoundarySurfaceCylinder(System<Cartesian>& system, size_t index) :
+	BoundarySurface<Cartesian>(system, index) {
   extract_special_properties(system, index);
 }
 
 // _____________________________________________________________________________
-void BoundarySurfaceCylinder::extract_special_properties(System<3>& system, 
+void BoundarySurfaceCylinder::extract_special_properties(System<Cartesian>& system, 
 		size_t index) {
   system.get_property("height", &half_height, index);
   half_height *= 0.5;

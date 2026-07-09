@@ -8,23 +8,24 @@
  *  The file contains the declarations of the System class.
  */
 // Includes
-#include "properties.hpp"
 #include "../../parameter_handler/src/parameter_handler.hpp"
-#include <vector>
+#include "properties.hpp"
 #include "data_frame.hpp"
+#include "discretization_handler.hpp"
+#include <vector>
 #include <iostream>
 #include <fstream>
 
 /** \brief This class handles the system properties.
  * 
  * This class explicitly defines the system dimensions, electrical properties
- * and species properties. It also has methods to handle discretization
- * issues (e.g. conversion between DataFrame-index and corresponding position).
+ * and species properties. Derived from the DiscretizationHandler, it also has
+ * methods to handle discretization issues.
  * Finally, it can implicitly contain any number of other parameters which can
  * be read out using the get_property function.
  */
-template <size_t dim>
-class System : public Properties {
+template <Geometry geometry>
+class System : public DiscretizationHandler<geometry> {
 public:
   /** \brief Empty Constructor
    */
@@ -52,63 +53,6 @@ public:
   /** \brief Manual constructor with ParameterHandler
    */
   System(ParameterHandler* parameter_handler, std::vector<size_t>& species_indices);
-  /** \brief Conversion between different coordinate formats
-   *
-   * \param position (std::vector<double>): physical position, same unit as system_lengths
-   * \param coordinates (std::vector<size_t>): discretized coordinates (DataFrame indices)
-   * \param index (size_t): one-dimensional super-index (vector / flattened out DataFrame)
-   *
-   * (TODO?: These functions could take PBC into account if the given coordinate or
-   * position is out of system bounds (and throw an std::out_of_range-exception
-   * if it is out of bounds without PBC).)
-   */
-  std::vector<size_t> index_to_coordinates(size_t index) const;
-  std::vector<double> coordinates_to_position(std::vector<size_t>& coordinates) const;
-  std::vector<size_t> position_to_coordinates(std::vector<double>& position) const;
-  size_t coordinates_to_index(std::vector<size_t>& coordinates) const;
-  // ...
-  /** \brief In-/decrease coordinates, taking PBC into account
-   *
-   * \param index: DataFrame index in the given direction
-   * \param direction: along which axis (x=0, y=1, ...) to take the step
-   * \param step: stepsize (Negative step in increase means decrease by the absolute value.)
-   */
-  size_t increase(size_t index, size_t direction, size_t step) const;
-  size_t decrease(size_t index, size_t direction, size_t step) const;
-  size_t increase(size_t index, size_t direction, int step) const;
-  /** \brief Interpolate a field (DataFrame) of values at a given position
-   */
-  double interpolate(DataFrame<dim, double>& values,
-		  std::vector<double>& position);
-  /** \brief Print DataFrame to specified output
-   */
-  void print_data(DataFrame<dim, double>& values, std::ostream& out);
-  void print_data(std::vector<DataFrame<dim, double>>& values, std::ostream& out);
-  void print_data(DataFrame<dim, bool>& values, std::ostream& out);
-  void print_data(std::vector<DataFrame<dim, bool>>& values, std::ostream& out);
-  /** \brief Get DataFrame from data file (multiple columns)
-   *
-   * Return value says whether the process was successful.
-   *
-   * \param col_nums: indices of the relevant data columns 
-   * \param data: pointer to DataFrame where the extracted values shall be stored
-   */
-  bool load_data(std::string filename, std::vector<size_t>& col_nums,
-	std::vector<DataFrame<dim,double>>* data);
-  /** \brief Get DataFrame from data file (single column)
-   */
-  bool load_data(std::string filename,
-	size_t col_num, DataFrame<dim,double>* data);
-  /** \brief System dimensions
-   *
-   * Note that the grid could be defined in slightly different ways. Here we
-   * set, in each direction, the first grid point (index 0) at position 0 and
-   * the last one (index grid_counts - 1) at position system_lengths - bin_sizes.
-   */
-  std::vector<double> bin_sizes;
-  std::vector<size_t> grid_counts;
-  std::vector<double> system_lengths;
-  std::vector<bool> periodic_boundaries;
   /** \brief Electrical properties
    */
   double bjerrum;
@@ -123,10 +67,11 @@ public:
   /** \brief Electrically charged species
    */
   std::vector<size_t> affected_species_es;
+  // System dimensions and discretization tools are inherited from
+  // DiscretizationHandler. 
 private:
   /** \brief Explicitly initialize the system properties as member variables
    */
-  void extract_system_dimensions();
   void extract_electrical_properties();
   /** \brief Construct a vector of Properties objects for the different species
    * of particles in the system

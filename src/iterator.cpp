@@ -13,7 +13,7 @@
 #include "convergence_criterion_max_dev.hpp"  // NOLINT
 #include "convergence_criterion_steps.hpp"  // NOLINT
 #include "convergence_criterion_nan.hpp"  // NOLINT
-
+#include "discretization_handler.hpp"
 // _____________________________________________________________________________
 Iterator::~Iterator() {
   clear_convergence_criteria();
@@ -164,14 +164,8 @@ double Iterator::calculate_excess_free_energy() {
   return energy;
 }
 // _____________________________________________________________________________
-template <size_t dim>
-double Iterator::calculate_gc_energy(System<dim>& system) {
-  if (dim != 3) {
-    std::cerr << "Iterator::calculate_gc_energy: ";
-    std::cerr << "\"Error: Integration of energy densities is only implemented ";
-    std::cerr << "for 3d cartesian geometry.\"\n";
-    exit(1);
-  }
+template <Geometry geometry>
+double Iterator::calculate_gc_energy(System<geometry>& system) {
   // Initialize
   size_t species_count = density_profiles.size(); 
   size_t voxel_count = density_profiles.at(0).size(); 
@@ -184,7 +178,7 @@ double Iterator::calculate_gc_energy(System<dim>& system) {
   // is equivalent to an offset in the external potential, which we assume to be
   // already included in the given external potential profiles. What remains is
   // the external potential and a term -kT (here: - 1.) from the ideal gas.
-  DataFrame<dim,double> energy_density(system.grid_counts);
+  DataFrame<dimension(geometry), double> energy_density(system.grid_counts);
   energy_density.zero();
   double external_potential;
   for (size_t i = 0; i < species_count; ++i) {
@@ -202,12 +196,12 @@ double Iterator::calculate_gc_energy(System<dim>& system) {
 	      (external_potential - 1.);
     }
   }
-  // TODO: for other dimensions, integration depends on which geometry it is
-  // (1d planar or radial?)
-  energy += integration_3d_closed(energy_density, system.bin_sizes); 
+  energy += system.integrate(energy_density); 
   return energy;
 }
-template double Iterator::calculate_gc_energy(System<3>& system);
+template double Iterator::calculate_gc_energy(System<Cartesian>& system);
+template double Iterator::calculate_gc_energy(System<Planar>& system);
+template double Iterator::calculate_gc_energy(System<Spherical>& system);
 // _____________________________________________________________________________
 void Iterator::clear_convergence_criteria() {
   for (auto criterion : convergence_criteria) {

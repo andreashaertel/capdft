@@ -7,24 +7,25 @@
  */
 #include "boundary_surface_planar.hpp"
 #include "system.hpp"
+#include "discretization_handler.hpp"
 #include <string>
 #include <stdexcept>
 #include <cmath>
 #include <iostream>
 
 // Template class instantiation of 3d version
-template class BoundarySurfacePlanar<3>;
+template class BoundarySurfacePlanar<Cartesian>;
 
 // _____________________________________________________________________________
-template <size_t dim>
-BoundarySurfacePlanar<dim>::BoundarySurfacePlanar(System<dim>& system, size_t index) :
-	BoundarySurface<dim>(system, index) {
+template <Geometry geometry>
+BoundarySurfacePlanar<geometry>::BoundarySurfacePlanar(System<geometry>& system, size_t index) :
+	BoundarySurface<geometry>(system, index) {
   extract_special_properties(system, index);
 }
 
 // _____________________________________________________________________________
 template <> // could be template
-void BoundarySurfacePlanar<3>::extract_special_properties(System<3>& system, 
+void BoundarySurfacePlanar<Cartesian>::extract_special_properties(System<Cartesian>& system, 
 		size_t index) {
   size_t dim = 3;
   sides.clear();
@@ -53,7 +54,7 @@ void BoundarySurfacePlanar<3>::extract_special_properties(System<3>& system,
 
 // _____________________________________________________________________________
 template <> // could be template
-bool BoundarySurfacePlanar<3>::is_within_boundary(std::vector<double>& position)
+bool BoundarySurfacePlanar<Cartesian>::is_within_boundary(std::vector<double>& position)
 	const {
   size_t dim = 3;
   bool result = true;
@@ -71,7 +72,7 @@ bool BoundarySurfacePlanar<3>::is_within_boundary(std::vector<double>& position)
 
 // _____________________________________________________________________________
 template <> // could be template
-double BoundarySurfacePlanar<3>::distance_directed(std::vector<double>& position,
+double BoundarySurfacePlanar<Cartesian>::distance_directed(std::vector<double>& position,
 		    size_t direction, bool forward) const {
   if (direction >= 3) {
       throw(std::invalid_argument("BoundarySurfacePlanar::distance_directed: "
@@ -95,7 +96,7 @@ double BoundarySurfacePlanar<3>::distance_directed(std::vector<double>& position
 
 // _____________________________________________________________________________
 template <>
-void BoundarySurfacePlanar<3>::discretize_surface(std::vector<std::vector<double>>* 
+void BoundarySurfacePlanar<Cartesian>::discretize_surface(std::vector<std::vector<double>>* 
 		positions, double resolution) const {
   positions->clear();
   // discrete points distributed equidistantly in x and y direction
@@ -133,7 +134,7 @@ void BoundarySurfacePlanar<3>::discretize_surface(std::vector<std::vector<double
 
 // _____________________________________________________________________________
 template <>
-std::vector<double> BoundarySurfacePlanar<3>::surface_normal(
+std::vector<double> BoundarySurfacePlanar<Cartesian>::surface_normal(
 	std::vector<double>& position) const {
   // Take care with edge positions! Does recognize them as part of only one
   // surface, doesn't realize it lies in two surfaces at once.
@@ -155,7 +156,7 @@ std::vector<double> BoundarySurfacePlanar<3>::surface_normal(
 
 // _____________________________________________________________________________
 template <>
-void BoundarySurfacePlanar<3>::discretize_surface(
+void BoundarySurfacePlanar<Cartesian>::discretize_surface(
     std::vector<std::vector<std::vector<double>>>* distribution,
     double resolution) const {
   distribution->clear();
@@ -177,7 +178,7 @@ void BoundarySurfacePlanar<3>::discretize_surface(
 
 // _____________________________________________________________________________
 template <>
-double BoundarySurfacePlanar<3>::distance_minimal(std::vector<double>& position, 
+double BoundarySurfacePlanar<Cartesian>::distance_minimal(std::vector<double>& position, 
 		double upper_limit) const {
   if (!is_within_boundary(position)) {
     return 0.;
@@ -202,7 +203,7 @@ double BoundarySurfacePlanar<3>::distance_minimal(std::vector<double>& position,
 }
 // _____________________________________________________________________________
 template <>
-void BoundarySurfacePlanar<3>::minimal_distances(DataFrame<3, double>* result,
+void BoundarySurfacePlanar<Cartesian>::minimal_distances(DataFrame<3, double>* result,
 		double resolution, double upper_limit) {
   // Initialize
   std::vector<size_t> grid_counts = result->size_dim();

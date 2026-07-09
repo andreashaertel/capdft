@@ -9,35 +9,36 @@
 #include "boundaries.hpp"
 #include "boundary_surface.hpp"
 #include "system.hpp"
+#include "discretization_handler.hpp"
 
 // Template class instantiation
-template class Boundaries<3>;
+template class Boundaries<Cartesian>;
 
 // _____________________________________________________________________________
-template <size_t dim>
-Boundaries<dim>::Boundaries() {
+template <Geometry geometry>
+Boundaries<geometry>::Boundaries() {
 }
 // _____________________________________________________________________________
-template <size_t dim>
-void Boundaries<dim>::add_surface(BoundarySurface<dim>* surface) {
+template <Geometry geometry>
+void Boundaries<geometry>::add_surface(BoundarySurface<geometry>* surface) {
   this->push_back(surface);
 }  
 // _____________________________________________________________________________
-template <size_t dim>
-void Boundaries<dim>::set_all_boundary_values(double value) {
+template <Geometry geometry>
+void Boundaries<geometry>::set_all_boundary_values(double value) {
   for (auto i = this->begin(); i != this->end(); i++) {
     (*i)->set_boundary_value(value);
   }
 }
 // _____________________________________________________________________________
-template <size_t dim>
-void Boundaries<dim>::exp_external_potential_hs(System<dim>& system,
-		std::vector<DataFrame<dim, double>>* result,
+template <Geometry geometry>
+void Boundaries<geometry>::exp_external_potential_hs(System<geometry>& system,
+		std::vector<DataFrame<dimension(geometry), double>>* result,
 		double resolution) {
   std::vector<size_t> grid_counts = result->at(0).size_dim();
   // if there are no boundary objects, set all to 1.
   if (this->size() == 0) {
-    DataFrame<dim, double> dummy(grid_counts);
+    DataFrame<dimension(geometry), double> dummy(grid_counts);
     dummy.set_all_elements_to(1.);
     for (size_t i = 0; i < result->size(); i++) {
       result->at(i) = dummy;
@@ -52,8 +53,8 @@ void Boundaries<dim>::exp_external_potential_hs(System<dim>& system,
       (*it)->exp_external_potential_hs(system, result);
     }
     // multiply with all remaining boundaries' potentials
-    std::vector<DataFrame<dim, double>> dummy(result->size(), 
-		    DataFrame<dim, double>(grid_counts));
+    std::vector<DataFrame<dimension(geometry), double>> dummy(result->size(), 
+		    DataFrame<dimension(geometry), double>(grid_counts));
     it++;
     std::cout << "HS of first surface\n";
     while (it != this->end()) {

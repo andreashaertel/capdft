@@ -12,6 +12,7 @@
 #include "functional.hpp"  // NOLINT
 #include <vector>
 #include "data_frame.hpp"  // NOLINT
+#include "discretization_handler.hpp" // NOLINT
 #include "properties.hpp"  // NOLINT
 #include "poisson_solver_cartesian.hpp"  // NOLINT
 #include "system.hpp"
@@ -37,7 +38,7 @@ class FunctionalESMFCartesian : public Functional {
    */
   FunctionalESMFCartesian(
       std::vector<DataFrame<3, double>>* density_profiles,
-      System<3>& system, PoissonSolverCartesian* poisson_solver);
+      System<Cartesian>& system, PoissonSolverCartesian* poisson_solver);
   /** \brief Constructor (without System, for planar boundaries)
    *
    * Deprecated version, used in some examples
@@ -82,7 +83,7 @@ class FunctionalESMFCartesian : public Functional {
   virtual double calc_energy();
   /** \brief Return the electrostatic potential profile as DataFrame
    */
-  void get_potential(System<3>& system, DataFrame<3, double>* data) const;
+  void get_potential(System<Cartesian>& system, DataFrame<3, double>* data) const;
  private:
   /** \brief Vector that remembers the species, that are affected by this
    *  functional
@@ -151,7 +152,7 @@ class FunctionalESMFCartesian : public Functional {
    * (first version is deprecated, needed for the deprecated constructors)
    */
   void extract_system_properties(const Properties& system_properties);
-  void extract_system_properties(System<3>& system);
+  void extract_system_properties(System<Cartesian>& system);
   /** \brief From two of the three electrical properties, the third on can be
    *         calculated.
    */
@@ -163,7 +164,7 @@ class FunctionalESMFCartesian : public Functional {
    */
   void extract_species_properties(
       const std::vector<Properties>& species_properties);
-  void extract_species_properties(System<3>& system);
+  void extract_species_properties(System<Cartesian>& system);
   /** \brief Allocate memory for all DataFrame objects */
   void initialize_all_data_frames();
   /** \brief Initialize the PlanarPoissonSolver object if no other PoissonSolver

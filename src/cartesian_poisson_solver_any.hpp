@@ -16,6 +16,7 @@
 #include "poisson_solver_cartesian.hpp"
 #include "boundaries.hpp"
 #include "system.hpp"
+#include "discretization_handler.hpp"
 /** \brief This class contains tools to solve the cartesian (3D)
  *         poisson equation with structured boundaries
  * 
@@ -35,8 +36,8 @@ class CartesianPoissonSolverAny : public PoissonSolverCartesian,
    *  \param system defines the spatial dimensions and periodic boundary cond.
    *  \param boundary_surface specifies the boundary values and positions
    */
-  CartesianPoissonSolverAny(System<3>& system,
-      BoundarySurface<3>* boundary_surface);
+  CartesianPoissonSolverAny(System<Cartesian>& system,
+      BoundarySurface<Cartesian>* boundary_surface);
   /** \brief Constructor with multiple BoundarySurface objects
    *
    *  \param system defines the spatial dimensions and periodic boundary cond.
@@ -45,7 +46,7 @@ class CartesianPoissonSolverAny : public PoissonSolverCartesian,
    *  Warning: Errors might occur if the BoundarySurface objects in boundaries
    *  have overlaps. For correct usage, make sure they are spatially separated.
    */
-  CartesianPoissonSolverAny(System<3>& system, Boundaries<3>* boundaries);
+  CartesianPoissonSolverAny(System<Cartesian>& system, Boundaries<Cartesian>* boundaries);
   /** \brief Destructor
    */
   ~CartesianPoissonSolverAny();
@@ -69,7 +70,7 @@ class CartesianPoissonSolverAny : public PoissonSolverCartesian,
  private:
   /** \brief System object, specifying e.g. the dimensions and PBCs.
    */
-  System<3> system;
+  System<Cartesian> system;
   /** \brief Number of bins in every dimension
    */
   std::vector<size_t> bin_count;
@@ -121,25 +122,25 @@ class CartesianPoissonSolverAny : public PoissonSolverCartesian,
   void coordinates_to_position(std::vector<size_t> pos, std::vector<double>* position);
   /** \brief Set the boundary position and values
    */
-  void set_boundary_values(BoundarySurface<3>* boundary_surface);
-  void set_boundary_values(Boundaries<3>* boundaries);
+  void set_boundary_values(BoundarySurface<Cartesian>* boundary_surface);
+  void set_boundary_values(Boundaries<Cartesian>* boundaries);
   /** \brief Calculate the modifications of right hand side and matrix elements
    * needed to set the boundary positions and values of one boundary object
    */
-  void calc_boundary_values(BoundarySurface<3>* boundary_surface);
+  void calc_boundary_values(BoundarySurface<Cartesian>* boundary_surface);
   /** \brief Calculate the modification induced by a given boundary point
    *
    * This calculates all modifications of the right hand side and matrix
    * elements induced by the given boundary point.
    */
-  void modify_boundary_point(BoundarySurface<3>* boundary_surface,
+  void modify_boundary_point(BoundarySurface<Cartesian>* boundary_surface,
 		std::vector<size_t>& index_position);	
   /** \brief Calculate the modification affecting a given grid point
    *
    * This calculates the modifications of all right hand side and matrix
    * elements associated with the given grid point.
    */
-  void modify_grid_point(BoundarySurface<3>* boundary_surface,
+  void modify_grid_point(BoundarySurface<Cartesian>* boundary_surface,
 		std::vector<size_t>& index_position);	
   /** \brief Add the boundary values to a given right-hand side vector
    */

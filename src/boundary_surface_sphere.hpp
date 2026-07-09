@@ -12,6 +12,7 @@
 #include "system.hpp"
 #include <vector>
 #include "data_frame.hpp"
+#include "discretization_handler.hpp"
 #include "../../parameter_handler/src/parameter_handler.hpp"
 
 /** \brief Class for a spherical boundary surface.
@@ -27,11 +28,11 @@
  * ... plus the standard parameters listed in the documentation of the base
  * class BoundarySurface.
  */
-class BoundarySurfaceSphere : public BoundarySurface<3> {
+class BoundarySurfaceSphere : public BoundarySurface<Cartesian> {
   public:
     /** \brief Constructor
      */
-    BoundarySurfaceSphere(System<3>& system, size_t index);
+    BoundarySurfaceSphere(System<Cartesian>& system, size_t index);
     /** \brief Is this position within the boundaries?
      */
     bool is_within_boundary(std::vector<double>& position) const override;
@@ -93,6 +94,6 @@ class BoundarySurfaceSphere : public BoundarySurface<3> {
     std::vector<double> surface_normal(std::vector<double>& position) const;
     /** \brief Initialize the properties specific to this subclass
      */
-    void extract_special_properties(System<3>& system, size_t index);
+    void extract_special_properties(System<Cartesian>& system, size_t index);
 };
 #endif // SRC_BOUNDARY_SURFACE_SPHERE_HPP_

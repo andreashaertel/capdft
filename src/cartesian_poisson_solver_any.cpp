@@ -10,6 +10,7 @@
 #include "boundary_surface.hpp"
 #include "boundaries.hpp"
 #include "system.hpp"
+#include "discretization_handler.hpp"
 #include <cmath>
 #include <iostream>
 #include <limits>
@@ -20,8 +21,8 @@
 CartesianPoissonSolverAny::CartesianPoissonSolverAny() {
 }
 // _____________________________________________________________________________
-CartesianPoissonSolverAny::CartesianPoissonSolverAny(System<3>& system,
-    BoundarySurface<3>* boundary_surface) : SparseMatrix(
+CartesianPoissonSolverAny::CartesianPoissonSolverAny(System<Cartesian>& system,
+    BoundarySurface<Cartesian>* boundary_surface) : SparseMatrix(
     system.grid_counts.at(0) * system.grid_counts.at(1) * system.grid_counts.at(2)) {
   this->system = system;
   this->bin_count = system.grid_counts;
@@ -36,8 +37,8 @@ CartesianPoissonSolverAny::CartesianPoissonSolverAny(System<3>& system,
   set_boundary_values(boundary_surface);
 }
 // _____________________________________________________________________________
-CartesianPoissonSolverAny::CartesianPoissonSolverAny(System<3>& system,
-    Boundaries<3>* boundaries)
+CartesianPoissonSolverAny::CartesianPoissonSolverAny(System<Cartesian>& system,
+    Boundaries<Cartesian>* boundaries)
   : SparseMatrix(
     system.grid_counts.at(0) * system.grid_counts.at(1) * system.grid_counts.at(2)) {
   this->system = system;
@@ -230,7 +231,7 @@ void CartesianPoissonSolverAny::coordinates_to_position(
 }
 // _____________________________________________________________________________
 void CartesianPoissonSolverAny::set_boundary_values(
-		Boundaries<3>* boundaries) {
+		Boundaries<Cartesian>* boundaries) {
   // Reset global variables
   boundary_points.clear();
   boundary_positions.clear();
@@ -270,7 +271,7 @@ void CartesianPoissonSolverAny::set_boundary_values(
 }
 // _____________________________________________________________________________
 void CartesianPoissonSolverAny::set_boundary_values(
-		BoundarySurface<3>* boundary_surface) {
+		BoundarySurface<Cartesian>* boundary_surface) {
   // Reset global variables
   boundary_points.clear();
   boundary_positions.clear();
@@ -296,7 +297,7 @@ void CartesianPoissonSolverAny::set_boundary_values(
 // hollow cylinder) can't be resolved with this method.
 // _____________________________________________________________________________
 void CartesianPoissonSolverAny::calc_boundary_values(
-		BoundarySurface<3>* boundary_surface) {
+		BoundarySurface<Cartesian>* boundary_surface) {
   // Iterate over all grid points outside the boundaries
   std::vector<double> position = {0., 0., 0.};
   std::vector<size_t> coordinates = {0, 0, 0};
@@ -327,7 +328,7 @@ void CartesianPoissonSolverAny::calc_boundary_values(
 }
 // _____________________________________________________________________________
 void CartesianPoissonSolverAny::modify_boundary_point(
-		BoundarySurface<3>* boundary_surface,
+		BoundarySurface<Cartesian>* boundary_surface,
 		std::vector<size_t>& coordinates1) {
   // index & boundary value at given point (must be a point outside boundaries!)
   size_t index1;
@@ -407,7 +408,7 @@ void CartesianPoissonSolverAny::modify_boundary_point(
 // and thus gets the default boundary value zero.)
 // _____________________________________________________________________________
 //void CartesianPoissonSolverAny::calc_boundary_values(
-//		BoundarySurface<3>* boundary_surface) {
+//		BoundarySurface<Cartesian>* boundary_surface) {
 //  // Iterate over all grid points outside the boundaries
 //  std::vector<double> position = {0., 0., 0.};
 //  std::vector<size_t> coordinates = {0, 0, 0};
@@ -439,7 +440,7 @@ void CartesianPoissonSolverAny::modify_boundary_point(
 //}
 //// _____________________________________________________________________________
 //void CartesianPoissonSolverAny::modify_grid_point(
-//		BoundarySurface<3>* boundary_surface,
+//		BoundarySurface<Cartesian>* boundary_surface,
 //		std::vector<size_t>& coordinates) {
 //  double value = boundary_surface->get_boundary_value();
 //  std::vector<double> position = system.coordinates_to_position(coordinates);

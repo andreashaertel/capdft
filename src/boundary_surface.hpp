@@ -10,6 +10,7 @@
 // Includes
 #include <vector>
 #include "data_frame.hpp"
+#include "discretization_handler.hpp"
 #include "system.hpp"
 #include <string>
 
@@ -39,7 +40,7 @@
  * particular independent from the ordering of these objects within a Boundaries
  * container.
  */
-template <size_t dim>
+template <Geometry geometry>
 class BoundarySurface {
   public:
     /** \brief General constructor
@@ -56,7 +57,7 @@ class BoundarySurface {
      * \param index: specifies which set of boundary parameters in the system
      * 		object should be used
      */
-    BoundarySurface(System<dim>& system, size_t index);
+    BoundarySurface(System<geometry>& system, size_t index);
     /** \brief Different types of boundary values
      *
      * PotentialES: electrostatic potential on the surface (Dirichlet)  
@@ -89,7 +90,7 @@ class BoundarySurface {
      * \param grid: pointer to return value; needs to be initialized with the
      * 		desired grid dimensions
      */
-    void discretize_volume(DataFrame<dim, bool>* grid);
+    void discretize_volume(DataFrame<dimension(geometry), bool>* grid);
     /** \brief Discretize the surface into a list of points
      *
      * This function returns an (unordered) list of points on the surface.
@@ -123,8 +124,8 @@ class BoundarySurface {
      * \return -1 if there is no boundary in the given direction, 0 if the given
      * position itself is outside the boundaries.
      *
-     * \param direction: index of axis (0,1,...,dim-1) along which the distance
-     * 		should be calculated
+     * \param direction: index of axis (0,1,...,dimension-1) along which the
+     * 		distance should be calculated
      * \param forward: if true, the search goes in positive direction along the
      * 		specified axis, else in opposite direction
      */
@@ -168,7 +169,7 @@ class BoundarySurface {
      * 		default, there is no limit except for the finite system size or
      * 		periodic boundary conditions.
      */
-    virtual void minimal_distances(DataFrame<dim, double>* result,
+    virtual void minimal_distances(DataFrame<dimension(geometry), double>* result,
 		    double resolution, double upper_limit = -1.);
     /** \brief Calculate the (exponentiated) external potential for hard spheres
      *
@@ -182,11 +183,12 @@ class BoundarySurface {
      * \param resolution: spatial resolution of surface discretization, in units
      * 		of the smallest ion diameter
      */
-    void exp_external_potential_hs(System<dim>& system,
-    	std::vector<DataFrame<dim, double>>* potential, double resolution = 0.25);
+    void exp_external_potential_hs(System<geometry>& system,
+    	std::vector<DataFrame<dimension(geometry), double>>* potential, double resolution = 0.25);
   protected:
     /** \brief System dimensions
      */
+    size_t dim;
     std::vector<double> system_lengths;
     /** \brief Type of the boundary value
      * 
@@ -220,7 +222,7 @@ class BoundarySurface {
      * \param index: specifies which boundary value should be chosen, if several
      * 		different surfaces exist in the system
      */
-    void extract_standard_properties(System<dim>& system, size_t index);
+    void extract_standard_properties(System<geometry>& system, size_t index);
     /** \brief Calculate bin sizes for a certain discretization
      */
     std::vector<double> bins(std::vector<size_t>& grid_counts) const;

@@ -13,6 +13,7 @@
 #include "properties.hpp"
 #include "boundary_surface.hpp"
 #include "system.hpp"
+#include "discretization_handler.hpp"
 
 /** \brief This class is a container for multiple BoundarySurface in one system.
  *
@@ -24,8 +25,8 @@
  * (e.g. having the same system lengths and periodic boundary conditions) lies
  * in the responsibility of the user.
  */
-template <size_t dim>
-class Boundaries : public std::list<BoundarySurface<dim>*> {
+template <Geometry geometry>
+class Boundaries : public std::list<BoundarySurface<geometry>*> {
   public:
     /** \brief Construct empty container
      */
@@ -37,7 +38,7 @@ class Boundaries : public std::list<BoundarySurface<dim>*> {
      * object via add_surface and then forget about it. The surface object must 
      * remain intact in the main code as long as the Boundaries object is used.
      */
-    void add_surface(BoundarySurface<dim>* surface);
+    void add_surface(BoundarySurface<geometry>* surface);
     /** \brief Set uniform boundary value over all surfaces
      */
     void set_all_boundary_values(double value);
@@ -48,8 +49,8 @@ class Boundaries : public std::list<BoundarySurface<dim>*> {
      * 		defined in BoundarySurface::exp_external_potential. Else, the
      * 		default resolution settings are used.
      */
-    void exp_external_potential_hs(System<dim>& system,
-		    std::vector<DataFrame<dim, double>>* result,
+    void exp_external_potential_hs(System<geometry>& system,
+		    std::vector<DataFrame<dimension(geometry), double>>* result,
 		    double resolution = 0.);
 };
 #endif // SRC_BOUNDARIES_HPP_

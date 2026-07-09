@@ -9,6 +9,7 @@
 #include <cmath>
 #include <algorithm>
 #include "boundary_surface.hpp"
+#include "discretization_handler.hpp"
 #include "system.hpp"
 #include "properties.hpp"
 #include "data_frame.hpp"
@@ -16,17 +17,17 @@
 #include <string>
 
 // Template class instantiation
-template class BoundarySurface<3>;
+template class BoundarySurface<Cartesian>;
 
 // _____________________________________________________________________________
-template <size_t dim>
-BoundarySurface<dim>::BoundarySurface(System<dim>& system, size_t index) {
+template <Geometry geometry>
+BoundarySurface<geometry>::BoundarySurface(System<geometry>& system, size_t index) {
   extract_standard_properties(system, index);
 }
 
 // _____________________________________________________________________________
-template <size_t dim>
-void BoundarySurface<dim>::set_boundary_value(double value, Type boundary_type,
+template <Geometry geometry>
+void BoundarySurface<geometry>::set_boundary_value(double value, Type boundary_type,
 		std::string unit) {
   // unit conversions
   if (boundary_type == PotentialES && unit == "V") {
@@ -38,8 +39,8 @@ void BoundarySurface<dim>::set_boundary_value(double value, Type boundary_type,
 }
 
 // _____________________________________________________________________________
-template <size_t dim>
-double BoundarySurface<dim>::get_boundary_value() const {
+template <Geometry geometry>
+double BoundarySurface<geometry>::get_boundary_value() const {
   if (type == None) {
     std::cerr << "BoundarySurface::get_boundary_value: no boundary values\n";
     exit(1);
@@ -48,8 +49,8 @@ double BoundarySurface<dim>::get_boundary_value() const {
 }
 
 // _____________________________________________________________________________
-template <size_t dim>
-double BoundarySurface<dim>::distance_minimal(std::vector<double>& position, 
+template <Geometry geometry>
+double BoundarySurface<geometry>::distance_minimal(std::vector<double>& position, 
 		double resolution, double upper_limit) const {
   if (!is_within_boundary(position)) {
     return 0.;
@@ -69,8 +70,8 @@ double BoundarySurface<dim>::distance_minimal(std::vector<double>& position,
   return sqrt(minimum_squared);
 }
 // _____________________________________________________________________________
-template <size_t dim>
-double BoundarySurface<dim>::distance_minimal(std::vector<double>& position, 
+template <Geometry geometry>
+double BoundarySurface<geometry>::distance_minimal(std::vector<double>& position, 
 	std::vector<std::vector<double>>& surface_points, double upper_limit) const {
   if (!is_within_boundary(position)) {
     return 0.;
@@ -88,9 +89,10 @@ double BoundarySurface<dim>::distance_minimal(std::vector<double>& position,
   return sqrt(minimum_squared);
 }
 // _____________________________________________________________________________
-template <size_t dim>
-void BoundarySurface<dim>::extract_standard_properties(System<dim>& system,
+template <Geometry geometry>
+void BoundarySurface<geometry>::extract_standard_properties(System<geometry>& system,
 		size_t index) {
+  dim = system.dim;
   system_lengths = system.system_lengths;
   system_temperature = system.temperature;
   try { // optional parameter: boundary value
@@ -109,7 +111,7 @@ void BoundarySurface<dim>::extract_standard_properties(System<dim>& system,
  
 // _____________________________________________________________________________
 template <>
-void BoundarySurface<3>::discretize_volume(DataFrame<3, bool>* grid) {
+void BoundarySurface<Cartesian>::discretize_volume(DataFrame<3, bool>* grid) {
   std::vector<size_t> grid_counts = grid->size_dim();
   std::vector<double> bin_sizes = bins(grid_counts);
   std::vector<double> position(3);
@@ -126,7 +128,7 @@ void BoundarySurface<3>::discretize_volume(DataFrame<3, bool>* grid) {
 }
 // _____________________________________________________________________________
 template <>
-void BoundarySurface<3>::minimal_distances(DataFrame<3, double>* result,
+void BoundarySurface<Cartesian>::minimal_distances(DataFrame<3, double>* result,
 		double resolution, double upper_limit) {
   // Initialize
   std::vector<size_t> grid_counts = result->size_dim();
@@ -164,7 +166,7 @@ void BoundarySurface<3>::minimal_distances(DataFrame<3, double>* result,
 }
 // _____________________________________________________________________________
 template <>
-void BoundarySurface<3>::exp_external_potential_hs(System<3>& system,
+void BoundarySurface<Cartesian>::exp_external_potential_hs(System<Cartesian>& system,
 	std::vector<DataFrame<3, double>>* potential, double resolution) {
   // Initialize
   std::vector<size_t> grid_counts = potential->at(0).size_dim();
@@ -211,8 +213,8 @@ void BoundarySurface<3>::exp_external_potential_hs(System<3>& system,
 }
 
 // _____________________________________________________________________________
-template <size_t dim>
-bool BoundarySurface<dim>::is_electrostatic() const {
+template <Geometry geometry>
+bool BoundarySurface<geometry>::is_electrostatic() const {
   switch (type) {
   case PotentialES: return true;
   case None: return false;
@@ -223,8 +225,8 @@ bool BoundarySurface<dim>::is_electrostatic() const {
 }
 
 // _____________________________________________________________________________
-template <size_t dim>
-std::vector<double> BoundarySurface<dim>::bins(std::vector<size_t>&
+template <Geometry geometry>
+std::vector<double> BoundarySurface<geometry>::bins(std::vector<size_t>&
 		grid_counts) const {
   std::vector<double> result(dim);
   for (size_t i = 0; i < dim; i++) { 

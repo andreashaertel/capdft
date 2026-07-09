@@ -18,6 +18,7 @@
 #include "functional.hpp"  // NOLINT
 #include "properties.hpp"  // NOLINT
 #include "system.hpp"
+#include "discretization_handler.hpp"
 // Class forward declarations
 // _____________________________________________________________________________
 /** \brief FunctionalFMTCartesian calculates the FMT functional in the 3D
@@ -39,7 +40,7 @@ class FunctionalFMTCartesian : public Functional {
    */
   FunctionalFMTCartesian(
       const std::vector<DataFrame<3, double>>* density_profiles,
-      System<3>& system);
+      System<Cartesian>& system);
   /** \brief Manual Constructor (without System object)
    *
    * This constructor chooses the particle species that are supplied from the
@@ -94,7 +95,7 @@ class FunctionalFMTCartesian : public Functional {
   virtual double calc_energy();
 
  private:
-  /** \brief System length (radius of the sperical geometry)
+  /** \brief System lengths
    *
    */
   std::vector<double> lengths;
@@ -215,12 +216,12 @@ class FunctionalFMTCartesian : public Functional {
   /** \brief From the system object extract the system properties
    */
   void extract_system_properties(const Properties& system_properties);
-  void extract_system_properties(System<3>& system);
+  void extract_system_properties(System<Cartesian>& system);
   /** \brief From the system object extract the species properties
    */
   void extract_species_properties(
       const std::vector<Properties>& species_properties);
-  void extract_species_properties(System<3>& system);
+  void extract_species_properties(System<Cartesian>& system);
   /** \brief Initialize all data frame vectors
    */
   void initialize_all_data_frames();

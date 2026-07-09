@@ -10,6 +10,7 @@
 #include "boundary_surface.hpp"
 #include "data_frame.hpp"
 #include "system.hpp"
+#include "discretization_handler.hpp"
 #include <vector>
 // _____________________________________________________________________________
 /** \brief Calculate the surface charge density at a given position from a
@@ -27,9 +28,9 @@
  * \param position_boundary: position where the charge density is to be calculated
  * \param normal: surface normal vector at the given position (norm 1)
  */
-template <size_t dim>
-double charge_density(BoundarySurface<dim>& boundary, System<dim>& system,
-	DataFrame<dim, double>& potential,
+template <Geometry geometry>
+double charge_density(BoundarySurface<geometry>& boundary, System<geometry>& system,
+	DataFrame<dimension(geometry), double>& potential,
 	std::vector<double>& position_boundary, std::vector<double>& normal);
 /** \brief Calculate the surface charge distribution from a potential profile
  *
@@ -46,9 +47,9 @@ double charge_density(BoundarySurface<dim>& boundary, System<dim>& system,
  * 		BoundarySurface::discretize_surface)
  * \param total_area: pointer to return value for the total surface area
  */
-template <size_t dim>
-void charge_distribution(BoundarySurface<dim>& boundary, System<dim>& system,
-   DataFrame<dim, double>& potential,
+template <Geometry geometry>
+void charge_distribution(BoundarySurface<geometry>& boundary, System<geometry>& system,
+   DataFrame<dimension(geometry), double>& potential,
    std::vector<std::pair<std::vector<double>, double>>* distribution,
    double* total_charge, double resolution, double* total_area = nullptr);
 

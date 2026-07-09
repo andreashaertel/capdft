@@ -15,6 +15,7 @@
 #include <gsl/gsl_multiroots.h>
 #include <map>
 #include <vector>
+#include "discretization_handler.hpp"
 #include "convergence_criterion.hpp"  // NOLINT
 #include "data_frame.hpp"  // NOLINT
 #include "functional.hpp" // NOLINT
@@ -117,8 +118,8 @@ class Iterator {
    *  	integration over the energy density
    *  \return The grand canonical energy in kT per system volume.
    */
-  template<size_t dim>
-  double calculate_gc_energy(System<dim>& system);
+  template <Geometry geometry>
+  double calculate_gc_energy(System<geometry>& system);
   /** \brief Add a convergence criterion
    *
    *  The standard criterion (ConvergenceCriterionMaxDev) is added when a new
