@@ -7,10 +7,13 @@
 #include <cmath>
 #include <limits>
 #include "data_frame.hpp"  // NOLINT
+#include "integration.hpp"  // NOLINT
+#include "system.hpp"  // NOLINT
 #include "convergence_criterion.hpp"  // NOLINT
 #include "convergence_criterion_max_dev.hpp"  // NOLINT
 #include "convergence_criterion_steps.hpp"  // NOLINT
 #include "convergence_criterion_nan.hpp"  // NOLINT
+
 // _____________________________________________________________________________
 Iterator::~Iterator() {
   clear_convergence_criteria();
@@ -161,16 +164,50 @@ double Iterator::calculate_excess_free_energy() {
   return energy;
 }
 // _____________________________________________________________________________
-double Iterator::calculate_gc_energy() {
+template <size_t dim>
+double Iterator::calculate_gc_energy(System<dim>& system) {
+  if (dim != 3) {
+    std::cerr << "Iterator::calculate_gc_energy: ";
+    std::cerr << "\"Error: Integration of energy densities is only implemented ";
+    std::cerr << "for 3d cartesian geometry.\"\n";
+    exit(1);
+  }
+  // Initialize
+  size_t species_count = density_profiles.size(); 
+  size_t voxel_count = density_profiles.at(0).size(); 
   double energy{0.};
   // Calculate excess free energy
   energy += calculate_excess_free_energy();
-  // Calculate ideal free energy
-  // TODO(Moritz):
-  // Calculate external and chemical potential term
-  // TODO(Moritz):
+  // Calculate ideal free energy, external and chemical potential term:
+  // The ideal gas contribution to the chemical potential cancels out when all
+  // these terms are added up. The excess contribution to the chemical potential
+  // is equivalent to an offset in the external potential, which we assume to be
+  // already included in the given external potential profiles. What remains is
+  // the external potential and a term -kT (here: - 1.) from the ideal gas.
+  DataFrame<dim,double> energy_density(system.grid_counts);
+  energy_density.zero();
+  double external_potential;
+  for (size_t i = 0; i < species_count; ++i) {
+    for (size_t j = 0; j < voxel_count; ++j) {
+      // Calculate external potential. To avoid divergences, set it to one where
+      // exp_external_potentials is zero. (The energy_density is anyway zero at
+      // these points.)
+      if (exp_external_potentials.at(i).at(j) == 0.) {
+       	external_potential = 1.;
+      } else {
+	external_potential = - log(exp_external_potentials.at(i).at(j));
+      }
+      // Calculate energy density of ideal + external + chemical potential terms
+      energy_density.at(j) += density_profiles.at(i).at(j) * 
+	      (external_potential - 1.);
+    }
+  }
+  // TODO: for other dimensions, integration depends on which geometry it is
+  // (1d planar or radial?)
+  energy += integration_3d_closed(energy_density, system.bin_sizes); 
   return energy;
 }
+template double Iterator::calculate_gc_energy(System<3>& system);
 // _____________________________________________________________________________
 void Iterator::clear_convergence_criteria() {
   for (auto criterion : convergence_criteria) {

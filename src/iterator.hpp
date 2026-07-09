@@ -19,6 +19,7 @@
 #include "data_frame.hpp"  // NOLINT
 #include "functional.hpp" // NOLINT
 #include "properties.hpp"  // NOLINT
+#include "system.hpp"  // NOLINT
 /** \brief Class that holds the system and all functionals and provides DFT 
  *         methods
  *
@@ -101,20 +102,23 @@ class Iterator {
   void run_anderson(double mixing, size_t memory);
   /** \brief Calculate the excess free energy.
    *
-   *  The grand canonical energy of the system is calculated for its current
+   *  The energy of the system is calculated for its current
    *  state without further iteration. 
    *
-   *  \return The grand canonical energy in kT per system volume.
+   *  \return The excess free energy in kT per system volume.
    */
   double calculate_excess_free_energy();
   /** \brief Calculate the grand canonical energy of the system. 
    *
-   *  The grand canonical energy of the system is calculated for its current
-   *  state without further iteration. 
+   *  The energy of the system is calculated for its current
+   *  state without further iteration.
    *
+   *  \param system: specifies grid dimensions and spacing, required for the
+   *  	integration over the energy density
    *  \return The grand canonical energy in kT per system volume.
    */
-  double calculate_gc_energy();
+  template<size_t dim>
+  double calculate_gc_energy(System<dim>& system);
   /** \brief Add a convergence criterion
    *
    *  The standard criterion (ConvergenceCriterionMaxDev) is added when a new
