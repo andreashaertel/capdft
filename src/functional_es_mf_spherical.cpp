@@ -5,11 +5,7 @@
 #include <algorithm>
 #include "data_frame.hpp"  // NOLINT
 #include "integration.hpp"  // NOLINT
-// Define some natural constants
-#define ELECTRON_CHARGE 1.602176634  // *1e-19
-#define BOLTZMANN 1.38064852  // *1e-23
-#define VACUUM_PERMITIVITY 8.8541878128  // *1e-12
-#define AVOGADRO 6.02214076  // *1e23
+#include "constants.hpp"    // NOLINT
 // _____________________________________________________________________________
 FunctionalESMFSpherical::FunctionalESMFSpherical() {
 }
