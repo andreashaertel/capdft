@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2025 Fabienne Dressler <fab.dressler@web.de>
+// SPDX-FileCopyrightText: 2026 Fabienne Dressler <fab.dressler@web.de>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 #ifndef SRC_BOUNDARY_SURFACE_CYLINDER_HPP_
 #define SRC_BOUNDARY_SURFACE_CYLINDER_HPP_
@@ -8,9 +8,10 @@
  *  The file contains the declarations of the BoundarySurfaceCylinder class.
  */
 // Includes
+#include <vector>
+#include <string>
 #include "boundary_surface.hpp"
 #include "system.hpp"
-#include <vector>
 #include "data_frame.hpp"
 #include "../../parameter_handler/src/parameter_handler.hpp"
 
@@ -25,6 +26,7 @@
  * \param height
  * Optional parameters (given to constructor via System object):
  * \param x_mid, y_mid, z_mid
+ * \param caps = 'flat' or 'spherical'
  * ... plus the standard parameters listed in the documentation of the base
  * class BoundarySurface.
  */
@@ -62,6 +64,26 @@ class BoundarySurfaceCylinder : public BoundarySurface<3> {
      */
     void cylinder_coordinates(std::vector<double>& cartesian,
 		    std::vector<double>* cylinder) const;
+     /** \brief Return a set of points on the surface
+     *
+     * The points that lie on the cylinder caps are distributed on a square grid
+     * in the x-y-plane. Those that lie on the cylinder mantle are distributed
+     * on a square grid wrapped around the mantle.
+     *
+     * \param distribution: pointer to return value
+     * \param resolution: bin size of the discretization
+     */
+    void discretize_surface(
+		std::vector<std::vector<double>>* points, double resolution)
+	   	const override;
+   /** \brief Return a set of points and normal vectors on the surface
+     *
+     * Analogous to the above version, but also includes surface normal
+     * vectors (cf. documentation of base class BoundarySurface).
+     */
+    void discretize_surface(
+ 	    std::vector<std::vector<std::vector<double>>>* distribution,
+ 	    double resolution) const override;
   private:
     /** \brief Half of the cylinder height
      */
@@ -72,36 +94,28 @@ class BoundarySurfaceCylinder : public BoundarySurface<3> {
     /** \brief Position of cylinder centre
      */
     double x_mid, y_mid, z_mid;
-   /** \brief Return a set of points on the surface
-    *
-    * The points that lie on the cylinder caps are distributed on a square grid
-    * in the x-y-plane. Those that lie on the cylinder mantle are distributed
-    * on a square grid wrapped around the mantle.
-    *
-    * \param distribution: pointer to return value
-    * \param resolution: bin size of the discretization
-    */
-   void discretize_surface(
-		std::vector<std::vector<double>>* points, double resolution)
-	   	const override;
-   /** \brief Return a set of points and normal vectors on the surface
-    *
-    * Analogous to the above version, but also includes surface normal
-    * vectors (cf. documentation of base class BoundarySurface).
-    */
-   void discretize_surface(
-	    std::vector<std::vector<std::vector<double>>>* distribution,
-	    double resolution) const override;
-   /** \brief Return surface normal vector at given x and y
-    *
-    * The returned vector is orthogonal to the surface, points away from the
-    * wall into the bulk. Its norm is the ratio between actual surface area
-    * and the projected area bin_size.at(0)*bin_size.at(1) associated with
-    * the grid point (x,y).
-    */
-   std::vector<double> surface_normal(std::vector<double>& position) const;
-   /** \brief Initialize the properties specific to this subclass
-    */
-   void extract_special_properties(System<3>& system, size_t index);
+    /** \brief Shape of cylinder caps (flat or spherical)
+     */
+    std::string caps;
+    /** \brief Calculate the distance of a given position to the spherical cap
+     *
+     * This function does not check whether the caps are actually spherical.
+     * Of the two caps, the one is chosen which is closer to the given position.
+     *
+     * \param cylinder_coordinates: position vector {r, phi, z}
+     */
+    double distance_to_spherical_cap(
+		    std::vector<double>& cylinder_coordinates) const;
+    /** \brief Return surface normal vector at given x and y
+     *
+     * The returned vector is orthogonal to the surface, points away from the
+     * wall into the bulk. Its norm is the ratio between actual surface area
+     * and the projected area bin_size.at(0)*bin_size.at(1) associated with
+     * the grid point (x,y).
+     */
+    std::vector<double> surface_normal(std::vector<double>& position) const;
+    /** \brief Initialize the properties specific to this subclass
+     */
+    void extract_special_properties(System<3>& system, size_t index);
 };
 #endif // SRC_BOUNDARY_SURFACE_CYLINDER_HPP_
