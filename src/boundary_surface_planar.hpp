@@ -61,18 +61,6 @@ class BoundarySurfacePlanar : public BoundarySurface<dim> {
      */
     void minimal_distances(DataFrame<dim, double>* result,
 		    double resolution, double upper_limit = -1.) override;
-  private:
-   /** \brief Specifies which of the six system walls are part of the surface
-    */
-   std::vector<std::vector<size_t>> sides;
-   /** \brief Effective height of the system between opposite surfaces
-    *
-    * This differs from the system_lengths by one bin size.
-    */
-   std::vector<double> system_heights;
-   /** \brief Calculate surface normal vector at any point on the surface
-    */
-   std::vector<double> surface_normal(std::vector<double>& position) const;
    /** \brief Return a set of points (and normal vectors) on the surface
     *
     * The points are distributed equidistantly on a square grid.
@@ -84,6 +72,18 @@ class BoundarySurfacePlanar : public BoundarySurface<dim> {
    void discretize_surface(
 		std::vector<std::vector<double>>* points, double resolution)
 	   	const override;
+ private:
+   /** \brief Specifies which of the six system walls are part of the surface
+    */
+   std::vector<std::vector<size_t>> sides;
+   /** \brief Effective height of the system between opposite surfaces
+    *
+    * This differs from the system_lengths by one bin size.
+    */
+   std::vector<double> system_heights;
+   /** \brief Calculate surface normal vector at any point on the surface
+    */
+   std::vector<double> surface_normal(std::vector<double>& position) const;
    /** \brief Initialize the properties specific to this subclass
     */
    void extract_special_properties(System<dim>& system, size_t index);

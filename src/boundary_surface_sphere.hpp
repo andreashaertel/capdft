@@ -58,41 +58,41 @@ class BoundarySurfaceSphere : public BoundarySurface<3> {
      */
     void shifted_coordinates(std::vector<double>& cartesian,
 		    std::vector<double>* shifted) const;
-  private:
+    /** \brief Return a set of points on the surface
+     *
+     * The points are distributed equidistantly along each line of latitude with
+     * an approximate distance of <resolution>. The separation between two
+     * latitudinal lines is also equal to <resolution>.
+     * 
+     * \param points: pointer to return value
+     * \param resolution: bin size of the discretization
+     */
+     void discretize_surface(
+ 		std::vector<std::vector<double>>* points, double resolution)
+ 	   	const override;
+     /** \brief Return a set of points and normal vectors on the surface
+      *
+      * Analogous to above version, but also includes surface normal vectors
+      * (cf. documentation of base class BoundarySurface).
+      */
+     void discretize_surface(
+ 	    std::vector<std::vector<std::vector<double>>>* distribution,
+ 	    double resolution) const override;
+ private:
     /** \brief Sphere radius
      */
     double radius;
     /** \brief Position of sphere centre
      */
     double x_mid, y_mid, z_mid;
-    /** \brief Return a set of points on the surface
-     *
-     * The points are distributed equidistantly along each line of latitude with
-     * an approximate distance of <resolution>. The separation between two
-     * latitudinal lines is also equal to <resolution>.
-    * 
-    * \param points: pointer to return value
-    * \param resolution: bin size of the discretization
-    */
-    void discretize_surface(
-		std::vector<std::vector<double>>* points, double resolution)
-	   	const override;
-    /** \brief Return a set of points and normal vectors on the surface
-     *
-     * Analogous to above version, but also includes surface normal vectors
-     * (cf. documentation of base class BoundarySurface).
-     */
-    void discretize_surface(
-	    std::vector<std::vector<std::vector<double>>>* distribution,
-	    double resolution) const override;
     /** \brief Return surface normal vector at given x and y
     *
     * The returned vector is orthogonal to the surface, points away from the
     * wall into the bulk.
     */
-   std::vector<double> surface_normal(std::vector<double>& position) const;
-   /** \brief Initialize the properties specific to this subclass
-    */
-   void extract_special_properties(System<3>& system, size_t index);
+    std::vector<double> surface_normal(std::vector<double>& position) const;
+    /** \brief Initialize the properties specific to this subclass
+     */
+    void extract_special_properties(System<3>& system, size_t index);
 };
 #endif // SRC_BOUNDARY_SURFACE_SPHERE_HPP_

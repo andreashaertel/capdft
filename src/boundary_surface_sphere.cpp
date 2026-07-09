@@ -107,7 +107,7 @@ void BoundarySurfaceSphere::discretize_surface(std::vector<std::vector<double>>*
   // (parametrized by phi). The angular spacing dphi depends on the longitude
   // theta such that the distances R*sin(theta)*dphi=resolution=R*dtheta both
   // equal (approximately) the desired resolution. We slightly adapt the spacing
-  // to obtain a symmetric distribution over the full range [0,PI] / [0,2 PI).
+  // to obtain a symmetric distribution over the full range [0,PI] / [0,2PI).
   std::vector<double> position(3); 
   // For longitudinal distribution: Add +/-1 to include theta=PI.
   size_t grid_count_theta = static_cast<size_t>(M_PI * radius / resolution) + 1;
@@ -117,7 +117,6 @@ void BoundarySurfaceSphere::discretize_surface(std::vector<std::vector<double>>*
   size_t grid_count_phi;
   double rho, dphi, phi;
   for (size_t i = 0; i < grid_count_theta; i++) {
-//    std::cout << "discretize_surface: theta = " << theta; // show state of calculations
     position.at(2) = z_mid + radius * cos(theta);
     // For latitudinal distribution:
     rho = radius * sin(theta);
@@ -125,17 +124,13 @@ void BoundarySurfaceSphere::discretize_surface(std::vector<std::vector<double>>*
     grid_count_phi = static_cast<size_t>(phi / resolution);
     if (grid_count_phi == 0) grid_count_phi += 1;
     dphi = 2. * M_PI / static_cast<double>(grid_count_phi);
-//    std::cout << ", grid_count_phi = " << grid_count_phi << std::endl;
-//    std::cout << "phi = ";
     phi = 0.; // minimum, starting point for iteration
     for (size_t j = 0; j < grid_count_phi; j++) {
-//      std::cout << phi << " ";
       position.at(0) = x_mid + rho * cos(phi);
       position.at(1) = y_mid + rho * sin(phi);
       positions->push_back(position);
       phi += dphi;
     }
-//    std::cout << std::endl;
     theta += dtheta;
   }
 }

@@ -64,8 +64,13 @@ class BoundarySurface {
      */
     enum Type {PotentialES, None};
     /** \brief Set boundary value (uniform over whole surface)
+     *
+     * Standard unit for potential value is kT/e in reduced units, optionally
+     * it can be given in Volt (specify unit="V"), then the unit conversion is
+     * done internally.
      */
-    void set_boundary_value(double value, Type boundary_type = PotentialES);
+    void set_boundary_value(double value, Type boundary_type = PotentialES,
+		    std::string unit = "kT/e");
     /** \brief Get boundary value
      */
     double get_boundary_value() const;
@@ -200,10 +205,17 @@ class BoundarySurface {
     /** \brief Boundary value on the surface (electrostatic potential)
      */
     double boundary_value;
+    /** \brief System temperature (needed for unit conversions)
+     */
+    double system_temperature;
     /** \brief Initialize properties from System object
      *
      * This only extracts the standard properties (system dimensions, boundary
      * value...), not the subclass-specific properties.
+     *
+     * Note: Per default, this function assumes that the given boundary value
+     * is the potential value in Volt. If this is not the case, use
+     * set_boundary_value to correct it.
      *
      * \param index: specifies which boundary value should be chosen, if several
      * 		different surfaces exist in the system

@@ -41,23 +41,6 @@ class BoundarySurfaceSine : public BoundarySurface<3> {
      */
     double distance_directed(std::vector<double>& position,
 		    size_t direction, bool forward) const override;
-  private:
-    /** \brief amplitude of the surface structure (maximal minus minimal height)
-     */
-    double amplitude;
-    /** \brief wave number of the surface structure
-     * 	(2 Pi / distance between nearest minima)
-     */
-    double wave_vector;
-    /** \brief effective height of the system in z direction
-     *
-     * This differs from the system_lengths by one bin size.
-     */
-    double system_height;
-    /** \brief false if surface is at z = 0 (default); true if it is opposite to
-     * that (i.e. at z = system_height)
-     */
-    bool side_inversed;
    /** \brief Return a set of points on the surface
     *
     * The points are distributed equidistantly in x and y direction.
@@ -75,25 +58,42 @@ class BoundarySurfaceSine : public BoundarySurface<3> {
    void discretize_surface(
 	    std::vector<std::vector<std::vector<double>>>* distribution,
 	    double resolution) const override;
-   /** \brief Return boundaries' z position at given x and y
-    *
-    * \param position: specifies x and y position (may also contain a z
-    * 		coordinate, but then that is ignored)
-    */
-   double surface_height(std::vector<double>& position) const;
-   /** \brief Return surface normal vector at given x and y
-    *
-    * The returned vector is orthogonal to the surface, points away from the
-    * wall into the bulk. Its norm is the ratio between actual surface area
-    * and the projected area bin_size.at(0)*bin_size.at(1) associated with
-    * the grid point (x,y).
-    *
-    * \param position: specifies x and y position (may also contain a z
-    * 		coordinate, but then that is ignored)
-    */
-   std::vector<double> surface_normal(std::vector<double>& position) const;
-   /** \brief Initialize the properties specific to this subclass
-    */
-   void extract_special_properties(System<3>& system, size_t index);
+ private:
+    /** \brief amplitude of the surface structure (maximal minus minimal height)
+     */
+    double amplitude;
+    /** \brief wave number of the surface structure
+     * 	(2 Pi / distance between nearest minima)
+     */
+    double wave_vector;
+    /** \brief effective height of the system in z direction
+     *
+     * This differs from the system_lengths by one bin size.
+     */
+    double system_height;
+    /** \brief false if surface is at z = 0 (default); true if it is opposite to
+     * that (i.e. at z = system_height)
+     */
+    bool side_inversed;
+    /** \brief Return boundaries' z position at given x and y
+     *
+     * \param position: specifies x and y position (may also contain a z
+     * 		coordinate, but then that is ignored)
+     */
+    double surface_height(std::vector<double>& position) const;
+    /** \brief Return surface normal vector at given x and y
+     *
+     * The returned vector is orthogonal to the surface, points away from the
+     * wall into the bulk. Its norm is the ratio between actual surface area
+     * and the projected area bin_size.at(0)*bin_size.at(1) associated with
+     * the grid point (x,y).
+     *
+     * \param position: specifies x and y position (may also contain a z
+     * 		coordinate, but then that is ignored)
+     */
+    std::vector<double> surface_normal(std::vector<double>& position) const;
+    /** \brief Initialize the properties specific to this subclass
+     */
+    void extract_special_properties(System<3>& system, size_t index);
 };
 #endif // SRC_BOUNDARY_SURFACE_SINE_HPP_

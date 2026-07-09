@@ -12,6 +12,7 @@
 #include "system.hpp"
 #include "properties.hpp"
 #include "data_frame.hpp"
+#include "constants.hpp"
 #include <string>
 
 // Template class instantiation
@@ -25,7 +26,13 @@ BoundarySurface<dim>::BoundarySurface(System<dim>& system, size_t index) {
 
 // _____________________________________________________________________________
 template <size_t dim>
-void BoundarySurface<dim>::set_boundary_value(double value, Type boundary_type) {
+void BoundarySurface<dim>::set_boundary_value(double value, Type boundary_type,
+		std::string unit) {
+  // unit conversions
+  if (boundary_type == PotentialES && unit == "V") {
+    value *= 1e4 * ELECTRON_CHARGE / (BOLTZMANN * system_temperature);
+  }
+  // store value and type as member variables
   boundary_value = value;
   type = boundary_type;
 }
@@ -85,9 +92,11 @@ template <size_t dim>
 void BoundarySurface<dim>::extract_standard_properties(System<dim>& system,
 		size_t index) {
   system_lengths = system.system_lengths;
+  system_temperature = system.temperature;
   try { // optional parameter: boundary value
     system.get_property("boundary_value", &boundary_value, index);
     type = PotentialES;
+    set_boundary_value(boundary_value, type, "V"); // convert from V to kT/e
   } catch (const Properties::MissingPropertyException*) {
     type = None;
   }
