@@ -8,7 +8,7 @@
  *  and adapted to demonstrate how those sinusoidal surfaces can be handled via
  *  the BoundarySurface class. More tools related to the BoundarySurface class
  *  (e.g. calculation of the charge distribution on the electrode) are shown
- *  in ../../boundary_surface_sine or  ../../boundary_surface_cylinder.
+ *  in ../../boundary_surface_sine.
  */
 // _____________________________________________________________________________
 // Includes
@@ -94,7 +94,7 @@ int main(int argc, char** args) {
     system_properties.add_property<bool>("side_inversed", (side == 1), side);
   }
   // Initialize System object
-  System<3> system(system_properties);
+  System<Cartesian> system(system_properties);
   // Get some properties from System
   std::vector<size_t> affected_species_fmt = system.affected_species_fmt;
   std::vector<size_t> affected_species_es = system.affected_species_es;
@@ -110,7 +110,7 @@ int main(int argc, char** args) {
 // _____________________________________________________________________________
   // Initialize boundaries
   std::cout << "Define system boundaries\n";
-  Boundaries<3> surfaces;
+  Boundaries<Cartesian> surfaces;
   BoundarySurfaceSine surface_left(system, 0);
   BoundarySurfaceSine surface_right(system, 1);
   surface_left.set_boundary_value(potential);

@@ -1,0 +1,149 @@
+// SPDX-FileCopyrightText: 2026 Fabienne Dressler <fab.dressler@web.de>
+// SPDX-License-Identifier: LGPL-3.0-or-later
+/** \file tests/poisson_solver_cartesian/src/test2.cpp
+  * \brief Calculate electric potential between two structured electrodes.
+  * 
+  */
+// _____________________________________________________________________________
+// Includes
+#include "../../../../parameter_handler/src/parameter_handler.hpp"
+#include "../../../src/data_frame.hpp"
+#include "../../../src/properties.hpp"
+#include "../../../src/constants.hpp"
+#include "../../../src/boundaries.hpp"
+#include "../../../src/boundary_surface.hpp"
+#include "../../../src/boundary_surface_sine.hpp"
+#include "../../../src/boundary_surface_planar.hpp"
+#include "../../../src/boundary_surface_cylinder.hpp"
+#include "../../../src/cartesian_poisson_solver_any.hpp"
+#include "../../../src/cartesian_poisson_solver.hpp"
+#include "../../../src/system.hpp"
+#include "../../../src/discretization_handler.hpp"
+#include <vector>
+#include <string> // for parameter labels
+#include <cmath> // std::exp
+#include <math.h> // M_PI
+#include <iostream>
+#include <fstream> // write results to file
+// _____________________________________________________________________________
+void distribution(DataFrame<3,double>* density, System<Cartesian>&system) {
+  double bulk_dens;
+  double valency;
+  for (size_t s : system.affected_species_es) {
+    system.species_properties.at(s).get_property("bulk density", &bulk_dens);
+  }
+ // TODO
+}
+// _____________________________________________________________________________
+// Main function
+int main(int argc, char** argv) {
+// _____________________________________________________________________________
+  if (argc < 2) {
+    std::cout << "Usage: " << argv[0] << " -f <parameter file>\n";
+    std::cout << "(or use flag -p <parameter>=<value>, cf. ParameterHandler)\n";
+    exit(1);
+  }
+// _____________________________________________________________________________
+  /* Define System  
+   * The required parameters are extracted from the input via ParameterHandler.
+   */
+// _____________________________________________________________________________
+  // Get parameters from file/commandline input
+  ParameterHandler params(argc, argv);
+  params.process_parameters();
+  // Define System
+  System<Cartesian> system(&params);
+  std::vector<size_t> grid_counts = system.grid_counts;
+  std::vector<double> lengths = system.system_lengths;
+  std::vector<double> bin_sizes = system.bin_sizes;
+  double potential = params.get_double("potential");
+// _____________________________________________________________________________
+  /* Define the right hand side of the Poisson equation     
+   * Here, we can choose an arbitrary density distribution for the ions.
+   */
+// _____________________________________________________________________________
+  // Define ion distribution
+  DataFrame<3, double> rhs(grid_counts);
+  distribution(&rhs, system);
+  rhs *= - 4. * M_PI * system.bjerrum;
+// _____________________________________________________________________________
+  /* Define boundary conditions  
+   * We can set boundary positions and boundary values via one (or more)
+   * BoundarySurface objects. If we choose planar surfaces, we can also compare
+   * the results with the CartesianPoissonSolver or the PlanarPoissonSolver.   
+   */
+// _____________________________________________________________________________
+  // Define Boundaries
+  // Set boundary positions
+  std::vector<size_t> xy_counts{grid_counts.at(0), grid_counts.at(1)};
+  std::vector<DataFrame<2,double>>
+	  boundary_positions(2, DataFrame<2,double>(xy_counts));
+  // for CartesianPoissonSolverAny:
+  Boundaries<Cartesian> boundaries;
+  std::vector<double> boundary_values = {potential, -potential};
+  // for CartesianPoissonSolver:
+  std::vector<std::vector<double>> boundary_values2 =
+  	{{0., 0.}, {0., 0.}, boundary_values};
+  boundary_values2.at(2) = boundary_values;
+  BoundarySurfaceSine boundaries_left(system, 0);
+  BoundarySurfaceSine boundaries_right(system, 1);
+  //BoundarySurfacePlanar boundaries_left(system, 0);
+  //BoundarySurfacePlanar boundaries_right(system, 1);
+  boundaries_left.set_boundary_value(potential);
+  boundaries_right.set_boundary_value(-potential);
+  boundaries.add_surface(&boundaries_left);
+  boundaries.add_surface(&boundaries_right);
+// _____________________________________________________________________________
+  /* Solve Poisson equation with CartesianPoissonSolverAny and - if boundaries
+   * are planar - for comparison also with the simpler CartesianPoissonSolver.
+   */
+// _____________________________________________________________________________
+  DataFrame<3, double> solution1(grid_counts);
+  DataFrame<3, double> solution2(grid_counts);
+  std::cout << "CartesianPoissonSolverAny:\n";
+  CartesianPoissonSolverAny poisson1(system, &boundaries);
+  poisson1.solve(rhs, solution1);
+  bool planar = params.get_bool("planar", false);
+  if (planar) {
+    std::cout << "CartesianPoissonSolver:\n";
+    CartesianPoissonSolver poisson2(grid_counts, bin_sizes, system.periodic_boundaries);
+    poisson2.solve(rhs, boundary_values2, solution2);
+  }
+// _____________________________________________________________________________
+  /* Produce output  
+   * We write the calculated potential profiles into data files. Furthermore,
+   * we compare the results with the analytical expectation or with results from
+   * different versions of the Poisson solvers.
+   */
+// _____________________________________________________________________________
+  // Write results to files
+  std::cout << "calculations done, write to file\n";
+  std::fstream ES_dat;
+  std::string filename{"total_ES.dat"};
+  ES_dat.open(filename, std::ios::out);
+  ES_dat << "# [x] [y] [z] [electrostatic potential]" << std::endl;
+  // write grid dimensions to header
+  ES_dat << "# grid_counts=";
+  for (size_t g : grid_counts) {
+    ES_dat << g << ",";
+  }
+  ES_dat << std::endl;
+  // write data
+  double x, y, z;
+  for (size_t i = 0; i < grid_counts.at(0); ++i) {
+    x = bin_sizes.at(0) * static_cast<double>(i);
+    for (size_t j = 0; j < grid_counts.at(1); ++j) {
+      y = bin_sizes.at(1) * static_cast<double>(j);
+      for (size_t k = 0; k < grid_counts.at(2); ++k) {
+        z = bin_sizes.at(2) * static_cast<double>(k);
+//	size_t index = k + j * grid_counts.at(2) + i * grid_counts.at(2) * grid_counts.at(1);
+        ES_dat << x << " " << y << " " << z << " ";
+	// write both solutions, second is zero if only first Solver was used
+        ES_dat << solution1.at(i, j, k) << " " << solution2.at(i, j, k) << std::endl;
+      }
+    }
+  }
+  ES_dat.close();
+  // all done
+  std::cout << "see results in " << filename << std::endl;
+}

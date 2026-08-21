@@ -16,6 +16,7 @@ SDIR = src/
 REPOSDIR = ../../src/
 REPOFILE =
 REPOFILE += system
+REPOFILE += discretization_handler
 REPOFILE += boundary_surface
 REPOFILE += boundary_surface_sine
 REPOFILE += boundaries

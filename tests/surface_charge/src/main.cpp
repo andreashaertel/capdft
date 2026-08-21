@@ -16,6 +16,7 @@
 #include "../../../src/boundary_surface_planar.hpp"
 #include "../../../src/surface_charge_distribution.hpp"
 #include "../../../src/system.hpp"
+#include "../../../src/discretization_handler.hpp"
 #include <vector>
 #include <string> // for parameter labels
 #include <cmath> // std::exp
@@ -37,7 +38,7 @@ int main(int argc, char** argv) {
   // Get parameters from file/commandline input
   ParameterHandler params(argc, argv);
   params.process_parameters();
-  System<3> system(&params);
+  System<Cartesian> system(&params);
   // System properties:
   std::vector<size_t> grid_counts = system.grid_counts;
   std::vector<double> bin_sizes = system.bin_sizes;
@@ -52,7 +53,7 @@ int main(int argc, char** argv) {
   potential *= ELECTRON_CHARGE / (BOLTZMANN * temperature) * 1e4;
   std::cout << "= " << potential << " kT/e\n"; // in reduced units
   // Define boundary surface (planar wall at z=0)
-  BoundarySurfacePlanar<3> surface(system, 0);
+  BoundarySurfacePlanar<Cartesian> surface(system, 0);
   surface.set_boundary_value(potential);
 // _____________________________________________________________________________
   /* Define the electrostatic potential profile

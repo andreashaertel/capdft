@@ -56,7 +56,7 @@ int main(int argc, char** args) {
 // _____________________________________________________________________________
   ParameterHandler params(argc, args);
   params.process_parameters();
-  System<3> system(&params);
+  System<Cartesian> system(&params);
   // Get some properties from System
   std::vector<size_t> affected_species_fmt = system.affected_species_fmt;
   std::vector<size_t> affected_species_es = system.affected_species_es;
@@ -79,10 +79,10 @@ int main(int argc, char** args) {
 // _____________________________________________________________________________
   // Initialize boundaries
   std::cout << "Define system boundaries\n";
-  Boundaries<3> surfaces;
+  Boundaries<Cartesian> surfaces;
   BoundarySurfaceSphere sphere1(system, 0);
   BoundarySurfaceSphere sphere2(system, 1);
-  BoundarySurfacePlanar<3> box(system, 2);
+  BoundarySurfacePlanar<Cartesian> box(system, 2);
   sphere1.set_boundary_value(potential);
   sphere2.set_boundary_value(potential);
   box.set_boundary_value(0.);
@@ -254,20 +254,19 @@ int main(int argc, char** args) {
   out << "# [x] [y] [z] [electrostatic potential]\n";
   system.print_data(total_ES, out);
   out.close();
-  // set boundary value of sphere surface
-  sphere1.set_boundary_value(potential);
-  sphere2.set_boundary_value(potential);
   // initialize
   std::vector<double> position(3);
   std::vector<double> normal(3);
   std::vector<std::pair<std::vector<double>, double>> charge_distr;
   double total_charge;
   double resolution = system.bin_sizes.at(2);
-for (size_t surface : {1,2}) {
+  for (size_t surface : {1,2}) {
     if (surface == 1) {
+      sphere1.set_boundary_value(potential);
       charge_distribution(sphere1, system, total_ES,
     		      &charge_distr, &total_charge, resolution);
-    } else {
+    } else if (surface == 2) {
+      sphere2.set_boundary_value(potential);
       charge_distribution(sphere2, system, total_ES,
     		      &charge_distr, &total_charge, resolution);
     }
@@ -282,6 +281,12 @@ for (size_t surface : {1,2}) {
     }
     out.close();
   }
+  out.open("energy.txt", std::ios::out);
+  double excess_free_energy = my_iterator.calculate_excess_free_energy();
+  double gc_energy = my_iterator.calculate_gc_energy(system);
+  out << "excess free energy: " << excess_free_energy  << " # kT\n";
+  out << "grand canonical potential: " << gc_energy << " # kT\n";
+  out.close();
 // _____________________________________________________________________________
   /* All done!
    * Now we produce some output and view it e.g. via gnuplot or python. We also

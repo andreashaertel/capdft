@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 # Binary name ##################################################################
 BNAMES = check_interpolation
-BNAMES += interpolate_data
+#BNAMES += interpolate_data
 # Compiler #####################################################################
 CXX=g++
 # Libraries to be linked #######################################################
@@ -19,6 +19,8 @@ REPOSDIR = ../../
 #REPOSDIR = ../../src/
 REPOFILE =
 REPOFILE += system
+REPOFILE += discretization_handler
+REPOFILE += integration 
 REPOFILE += data_frame
 REPOFILE += properties
 # Additional file from parameter_handler #######################################

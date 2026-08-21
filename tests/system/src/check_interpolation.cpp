@@ -40,15 +40,16 @@ int main(int argc, char** argv) {
    */
 // _____________________________________________________________________________
   // Original grid:
-  System<3> system(&params);
+  System<Cartesian> system(&params);
   std::vector<size_t> grid_counts = system.grid_counts;
   std::vector<double> bin_sizes = system.bin_sizes;
   // New grid:
   std::vector<size_t> new_grid_counts(3);
   std::vector<double> new_bin_sizes(3);
+  double scale = params.get_int("scale", 2);
   for (size_t i = 0; i < 3; i++) {
-    new_grid_counts.at(i) = 2 * grid_counts.at(i);
-    new_bin_sizes.at(i) = 0.5 * bin_sizes.at(i);
+    new_grid_counts.at(i) = scale * grid_counts.at(i);
+    new_bin_sizes.at(i) = bin_sizes.at(i) / static_cast<double>(scale);
   }
 // _____________________________________________________________________________
   /* Define the values on the original grid based on the previously defined test

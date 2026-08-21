@@ -15,6 +15,8 @@
 #include "../../../src/convergence_criterion_steps.hpp"
 #include "../../../src/convergence_criterion_nan.hpp"
 #include "../../../src/data_frame.hpp"
+#include "../../../src/system.hpp"
+#include "../../../src/discretization_handler.hpp"
 #include "../../../src/functional.hpp"
 #include "../../../src/functional_fmt_planar.hpp"
 #include "../../../src/functional_es_mf_planar.hpp"
@@ -45,7 +47,7 @@ int main(int argc, char** args) {
 // _____________________________________________________________________________
   ParameterHandler params(argc, args);
   params.process_parameters();
-  System<1> system(&params);
+  System<Cartesian> system(&params);
   // Get some properties from System
   std::vector<size_t> affected_species_fmt = system.affected_species_fmt;
   std::vector<size_t> affected_species_es = system.affected_species_es;

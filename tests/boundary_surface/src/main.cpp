@@ -16,6 +16,7 @@
 #include "../../../src/boundary_surface_cylinder.hpp"
 #include "../../../src/boundary_surface_sphere.hpp"
 #include "../../../src/system.hpp"
+#include "../../../src/discretization_handler.hpp"
 #include <vector>
 #include <string> // for parameter labels
 #include <cmath> // std::exp
@@ -48,7 +49,7 @@ int main(int argc, char** argv) {
   // Get parameters from file/commandline input
   ParameterHandler params(argc, argv);
   params.process_parameters();
-  System<3> system(&params);
+  System<Cartesian> system(&params);
   // Get some properties from System
   std::vector<size_t> grid_counts = system.grid_counts;
   std::vector<double> lengths = system.system_lengths;
@@ -66,8 +67,8 @@ int main(int argc, char** argv) {
    * check the cylinder coordinates that this class is using.
    */
 // _____________________________________________________________________________
-  // BoundarySurfaceCylinder boundary(system, 0);
-  BoundarySurfaceSphere boundary(system, 0);
+  BoundarySurfaceCylinder boundary(system, 0);
+  // BoundarySurfaceSphere boundary(system, 0);
   // BoundarySurfaceSine boundary(system, 0);
   double resolution;
   // Write data to files
@@ -120,46 +121,47 @@ int main(int argc, char** argv) {
   file_out << "# [x] [y] [z] [distances to boundary in different directions]" << std::endl;
   system.print_data(data, file_out);
   file_out.close();
-////  // cylinder coordinates
+//  // cylinder coordinates
 //  std::cout << "> cylinder_coordinates...\n";
-////  data.resize(3);
-////  std::vector<double> cylinder_coordinates(3);
-////  for (size_t i = 0; i < grid_counts.at(0); i++) {
-////    position.at(0) = bin_sizes.at(0) * static_cast<double>(i);
-////    for (size_t j = 0; j < grid_counts.at(1); j++) {
-////      position.at(1) = bin_sizes.at(1) * static_cast<double>(j);
-////      for (size_t k = 0; k < grid_counts.at(2); k++) {
-////        position.at(2) = bin_sizes.at(2) * static_cast<double>(k);
-////	boundary.cylinder_coordinates(position, &cylinder_coordinates);
-////	for (size_t dir = 0; dir < 3; dir++) {
-////          data.at(dir).at(i,j,k) = cylinder_coordinates.at(dir);
-////	}
-////      }
-////    }
-////  }
-////  file_out.open("cylinder_coordinates.dat", std::ios::out);
-////  file_out << "# [x] [y] [z] [r] [phi] [z']" << std::endl;
-////  system.print_data(data, file_out);
-////  file_out.close();
-//  // surface discretization - can't be tested when
-//  // BoundarySurface::discretize is a private member function!
-//  // Make it public before executing the following code.
-//  std::cout << "> discretize_surface...\n";
-//  std::vector<std::vector<std::vector<double>>> surface;
-//  resolution = params.get_double("resolution", bin_sizes.at(0));
-//  boundary.discretize_surface(&surface, resolution);
-//  file_out.open("discretize_surface.dat", std::ios::out);
-//  file_out << "# [x] [y] [z] [surface normal vector]" << std::endl;
-//  for (std::vector<std::vector<double>>& point : surface) {
-//    for (double pos : point.at(0)) { // positions
-//      file_out << pos << " ";
+//  data.resize(3);
+//  std::vector<double> cylinder_coordinates(3);
+//  for (size_t i = 0; i < grid_counts.at(0); i++) {
+//    position.at(0) = bin_sizes.at(0) * static_cast<double>(i);
+//    for (size_t j = 0; j < grid_counts.at(1); j++) {
+//      position.at(1) = bin_sizes.at(1) * static_cast<double>(j);
+//      for (size_t k = 0; k < grid_counts.at(2); k++) {
+//        position.at(2) = bin_sizes.at(2) * static_cast<double>(k);
+//	boundary.cylinder_coordinates(position, &cylinder_coordinates);
+//	for (size_t dir = 0; dir < 3; dir++) {
+//          data.at(dir).at(i,j,k) = cylinder_coordinates.at(dir);
+//	}
+//      }
 //    }
-//    for (double dir : point.at(1)) { // normal vector
-//      file_out << dir << " "; 
-//    }
-//    file_out << std::endl;
 //  }
+//  file_out.open("cylinder_coordinates.dat", std::ios::out);
+//  file_out << "# [x] [y] [z] [r] [phi] [z']" << std::endl;
+//  system.print_data(data, file_out);
 //  file_out.close();
+  // surface discretization
+  std::cout << "> discretize_surface...\n";
+  std::vector<std::vector<std::vector<double>>> surface;
+  resolution = params.get_double("resolution", bin_sizes.at(0));
+  boundary.discretize_surface(&surface, resolution);
+  file_out.open("discretize_surface.dat", std::ios::out);
+  file_out << "# [x] [y] [z] [surface normal vector] [area per point]" << std::endl;
+  for (std::vector<std::vector<double>>& point : surface) {
+    for (double pos : point.at(0)) { // positions
+      file_out << pos << " ";
+    }
+    double norm = 0.;
+    for (double dir : point.at(1)) { // normal vector
+      file_out << dir << " "; 
+      norm += dir * dir;
+    }
+    file_out << sqrt(norm); // associated area
+    file_out << std::endl;
+  }
+  file_out.close();
   // all done
   return 0.;
 }

@@ -36,6 +36,10 @@ int main(int argc, char** argv) {
     exit(1);
   }
 // _____________________________________________________________________________
+  /* Define System  
+   * The required parameters are extracted from the input via ParameterHandler.
+   */
+// _____________________________________________________________________________
   // Get parameters from file/commandline input
   ParameterHandler params(argc, argv);
   params.process_parameters();
@@ -52,7 +56,12 @@ int main(int argc, char** argv) {
   // Species properties:
   std::string type_densities = params.get_string("type_densities");
   std::vector<DataFrame<3,double>> densities(0);
-  // Define ion distribution (Poisson rhs)
+// _____________________________________________________________________________
+  /* Define the right hand side of the Poisson equation     
+   * Here, we can choose an arbitrary density distribution for the ions.
+   */
+// _____________________________________________________________________________
+  // Define ion distribution
   DataFrame<3, double> rhs(grid_counts);
   rhs.set_all_elements_to(0.);
   if (type_densities == "none") {} // leave all species empty
@@ -83,7 +92,7 @@ int main(int argc, char** argv) {
             for (size_t k = 0; k < grid_counts.at(2); k++) {
 	      z = static_cast<double>(k) * bin_sizes.at(2);
   	      // - just some completely arbitrary, unphysical distribution
-  	      //spec_density.at(i,j,k) = bulk_dens * (1.e-2 * static_cast<double>(s * k) +
+  	      // spec_density.at(i,j,k) = bulk_dens * (1.e-2 * static_cast<double>(s * k) +
   	      //    (static_cast<double>(s)-1.) * 1.e-4 * static_cast<double>(i*i));
 	      // put a blob of ions at position (x0,y0,z0)
               dist_squared = pow(x-x0, 2) + pow(y-y0, 2) + pow(z-z0, 2);    
@@ -101,6 +110,13 @@ int main(int argc, char** argv) {
     }
   }
   rhs *= - 4. * M_PI * system.bjerrum;
+// _____________________________________________________________________________
+  /* Define boundary conditions  
+   * We can set boundary positions and boundary values via one (or more)
+   * BoundarySurface objects. If we choose planar surfaces, we can also compare
+   * the results with the CartesianPoissonSolver or the PlanarPoissonSolver.   
+   */
+// _____________________________________________________________________________
   // Define Boundaries
   // Set boundary positions
   std::vector<size_t> xy_counts{grid_counts.at(0), grid_counts.at(1)};
@@ -121,8 +137,11 @@ int main(int argc, char** argv) {
   boundaries_right.set_boundary_value(-potential);
   boundaries.add_surface(&boundaries_left);
   boundaries.add_surface(&boundaries_right);
-  // Solve Poisson equation with CartesianPoissonSolverAny and - if boundaries
-  // are planar - for comparison also with the simpler CartesianPoissonSolver.
+// _____________________________________________________________________________
+  /* Solve Poisson equation with CartesianPoissonSolverAny and - if boundaries
+   * are planar - for comparison also with the simpler CartesianPoissonSolver.
+   */
+// _____________________________________________________________________________
   DataFrame<3, double> solution1(grid_counts);
   DataFrame<3, double> solution2(grid_counts);
   std::cout << "CartesianPoissonSolverAny:\n";
@@ -134,6 +153,13 @@ int main(int argc, char** argv) {
     CartesianPoissonSolver poisson2(grid_counts, bin_sizes, system.periodic_boundaries);
     poisson2.solve(rhs, boundary_values2, solution2);
   }
+// _____________________________________________________________________________
+  /* Produce output  
+   * We write the calculated potential profiles into data files. Furthermore,
+   * we compare the results with the analytical expectation or with results from
+   * different versions of the Poisson solvers.
+   */
+// _____________________________________________________________________________
   // Write results to files
   std::cout << "calculations done, write to file\n";
   std::fstream ES_dat;

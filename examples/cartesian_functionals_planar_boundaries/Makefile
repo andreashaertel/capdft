@@ -30,6 +30,7 @@ REPOFILE += iterator
 REPOFILE += properties
 REPOFILE += sparse_matrix
 REPOFILE += system
+REPOFILE += discretization_handler
 # ParameterHandler files #######################################################
 REPOSDIR2 = ../../../parameter_handler/src/
 REPOFILE2 = parameter_handler

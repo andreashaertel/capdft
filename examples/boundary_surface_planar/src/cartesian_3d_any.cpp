@@ -25,6 +25,7 @@
 #include "../../../src/iterator.hpp"
 #include "../../../src/properties.hpp"
 #include "../../../src/system.hpp"
+#include "../../../src/discretization_handler.hpp"
 #include "../../../src/stl_algorithms.hpp"
 // _____________________________________________________________________________
 // Main function
@@ -50,7 +51,7 @@ int main(int argc, char** args) {
 // _____________________________________________________________________________
   ParameterHandler params(argc, args);
   params.process_parameters();
-  System<3> system(&params);
+  System<Cartesian> system(&params);
   // Get some properties from System
   std::vector<size_t> affected_species_fmt = system.affected_species_fmt;
   std::vector<size_t> affected_species_es = system.affected_species_es;
@@ -71,7 +72,7 @@ int main(int argc, char** args) {
 // _____________________________________________________________________________
   // Initialize boundaries
   std::cout << "Define system boundaries\n";
-  Boundaries<3> surfaces;
+  Boundaries<Cartesian> surfaces;
   BoundarySurfacePlanar surface_left(system, 0);
   BoundarySurfacePlanar surface_right(system, 1);
   surface_left.set_boundary_value(potential);

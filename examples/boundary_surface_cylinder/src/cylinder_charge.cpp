@@ -15,6 +15,8 @@
 #include "../../../src/surface_charge_distribution.hpp"
 #include "../../../src/system.hpp"
 #include "../../../src/integration.hpp"
+#include "../../../src/stl_algorithms.hpp"
+#include "../../../src/discretization_handler.hpp"
 #include <vector>
 #include <string> // for parameter labels
 #include <cmath> // std::exp
@@ -50,7 +52,7 @@ int main(int argc, char** argv) {
 // _____________________________________________________________________________
   ParameterHandler params(argc, argv);
   params.process_parameters();
-  System<3> system(&params);
+  System<Cartesian> system(&params);
   // System properties:
   std::vector<size_t> grid_counts = system.grid_counts;
   std::vector<double> bin_sizes = system.bin_sizes;
@@ -69,6 +71,10 @@ int main(int argc, char** argv) {
 // _____________________________________________________________________________
   BoundarySurfaceCylinder cylinder(system, 0);
   cylinder.set_boundary_value(potential);
+  // extract cylinder radius and height for later usage:
+  double half_height = params.get_double("0_height") * 0.5;
+  double z_mid = params.get_double("0_z_mid",
+		  		   system.system_lengths.at(2) * 0.5);
 // _____________________________________________________________________________
   /* Extract the electrostatic potential profile from a data file
    * The filename is specified in the command line parameters.
@@ -91,108 +97,163 @@ int main(int argc, char** argv) {
    * not lie on the surface, where we set the value to zero.
    */
 // _____________________________________________________________________________
-  // initialize
-  std::vector<double> position(3);
-  std::vector<double> normal(3);
-  double radius = params.get_double("0_radius");
-  double radius_squared = radius * radius;
-  double half_height = params.get_double("0_height") * 0.5;
-  double charge;
-  double x_mid = system.system_lengths.at(0) * 0.5;
-  double y_mid = system.system_lengths.at(1) * 0.5;
-  // mantle
-  normal.at(2) = 0.;
-  double phi;
-  double dphi = system.bin_sizes.at(0) / radius;
-  double z;
   std::fstream out;
-  out.open("surface_charge_mantle.dat", std::ios::out);
-  out << "# [phi] [z] [surface charge density]\n";
-  z = system.system_lengths.at(2) * 0.5 - half_height;
-  while (z <= system.system_lengths.at(2) * 0.5 + half_height) {
-    position.at(2) = z;
-    phi = 0.;
-    while (phi < 2. * M_PI) {
-      normal.at(0) = cos(phi);
-      normal.at(1) = sin(phi);
-      position.at(0) = x_mid + normal.at(0) * radius;
-      position.at(1) = y_mid + normal.at(1) * radius;
-      charge = charge_density(cylinder, system, total_ES, position, normal);
-      out << phi << " " << z << " " << charge << std::endl;
-      phi += dphi;
-    }
-    z += system.bin_sizes.at(2);
-  }
-  out.close();
-  // upper cylinder cap
-  normal.at(0) = 0.;
-  normal.at(1) = 0.;
-  normal.at(2) = 1.;
-  double x, y;
-  position.at(2) = system.system_lengths.at(2) / 2. + half_height;
-  out.open("surface_charge_top.dat", std::ios::out);
-  out << "# [x] [y] [surface charge density]\n";
-  x = 0.;
-  while (x < system.system_lengths.at(0)) {
-    position.at(0) = x;
-    y = 0.;
-    while (y < system.system_lengths.at(1)) {
-      position.at(1) = y;
-      if (pow(x - x_mid, 2) + pow(y - y_mid, 2) > radius_squared) {
-	charge = 0.;
-      } else {
-        charge = charge_density(cylinder, system, total_ES, position, normal);
-      }
-      out << x << " " << y << " " << charge << std::endl;
-      y += system.bin_sizes.at(1);
-    }
-    x += system.bin_sizes.at(0);
-  }
-  out.close();
-  // lower cylinder cap
-  normal.at(0) = 0.;
-  normal.at(1) = 0.;
-  normal.at(2) = -1.;
-  position.at(2) = system.system_lengths.at(2) / 2. - half_height;
-  out.open("surface_charge_bottom.dat", std::ios::out);
-  out << "# [x] [y] [surface charge density]\n";
-  double x_diff, y_diff;
-  x = 0.;
-  while (x < system.system_lengths.at(0)) {
-    position.at(0) = x;
-    y = 0.;
-    while (y < system.system_lengths.at(1)) {
-      position.at(1) = y;
-      x_diff = x - x_mid;
-      y_diff = y - y_mid;
-      if (x_diff * x_diff + y_diff * y_diff > radius_squared) {
-	charge = 0.;
-      } else {
-        charge = charge_density(cylinder, system, total_ES, position, normal);
-      }
-      out << x << " " << y << " " << charge << std::endl;
-      y += system.bin_sizes.at(1);
-    }
-    x += system.bin_sizes.at(0);
-  }
-  out.close();
-  // Could also use the function charge_distribution, but then you might have to
-  // sort the values by positions before you can plot the results:
-  std::vector<std::pair<std::vector<double>, double>> charge_distr;
-  double total_charge;
-  charge_distribution(cylinder, system, total_ES,
-		      &charge_distr, &total_charge, resolution);
-  out.open("surface_charge_total.dat", std::ios::out);
+  // Calculation via charge_density: Need to define surface points manually.
+  // initialize surface points
+  std::vector<std::vector<std::vector<double>>> surface_points;
+  cylinder.discretize_surface(&surface_points, resolution);
+  // initialize local variables
+  double z;
+  std::vector<double> normal(3);
+  double sigma; // charge density
+  double area;
+  double charge;
+  // initialize total charge
+  double area_total = 0.;
+  double area_top = 0.;
+  double area_mantle = 0.;
+  double area_bottom = 0.;
+  double charge_total = 0.;
+  double charge_top = 0.;
+  double charge_mantle = 0.;
+  double charge_bottom = 0.;
+  // calculate charge densities
+  out.open("surface_charge_full.dat", std::ios::out);
   out << "# [x] [y] [z] [surface charge density]\n";
-  out << "# total charge: " << total_charge << std::endl;
-  for (std::pair<std::vector<double>, double>& surface_point : charge_distr) {
+  for (std::vector<std::vector<double>>& point : surface_points) {
+    // determine area associated with this point
+    area = stl_algorithm::vector_norm(point.at(1));
     for (size_t dir = 0; dir < 3; dir++) {
-      out << surface_point.first.at(dir) << " ";
+      // print position to file
+      out << point.at(0).at(dir) << " ";
+      // calculate normal vector
+      normal.at(dir) = point.at(1).at(dir) / area;
     }
-    out << surface_point.second << std::endl;
-  }
+    // calculate charge density at this point
+    sigma = charge_density(cylinder, system, total_ES, point.at(0), normal);
+    out << sigma << std::endl;
+    // integrate charge
+    charge = sigma * area;
+    charge_total += charge;
+    area_total += area;
+    // check whether the point is on mantle / top / bottom cap
+    z = point.at(0).at(2) - z_mid;
+    if (z >= half_height) {
+      charge_top += charge;
+      area_top += area;
+    } else if (z <= - half_height) {
+      charge_bottom += charge;
+      area_bottom += area;
+    } else {
+      charge_mantle += charge;
+      area_mantle += area;
+    }
+   }
+  out << "# total surface area: " << charge_total << "e per " << area_total << "nm² = " << charge_total / area_total << "e/nm²\n";
+  out << "# on cylinder mantle: " << charge_mantle << "e per " << area_mantle << "nm² = " << charge_mantle / area_mantle << "e/nm²\n";
+  out << "# on upper cap: " << charge_top << "e per " << area_top << "nm² = " << charge_top / area_top << "e/nm²\n";
+  out << "# on lower cap: " << charge_bottom << "e per " << area_bottom << "nm² = " << charge_bottom / area_bottom << "e/nm²\n";
   out.close();
-  std::cout << "total charge: " << total_charge << std::endl;
+//  // Without BoundarySurface::discretize_surface, instead defining all points
+//  // manually:
+//  // initialize
+//  std::vector<double> position(3);
+//  std::vector<double> normal(3);
+//  double charge;
+//  double x_mid = system.system_lengths.at(0) * 0.5;
+//  double y_mid = system.system_lengths.at(1) * 0.5;
+//  // mantle
+//  normal.at(2) = 0.;
+//  double phi;
+//  double dphi = system.bin_sizes.at(0) / radius;
+//  double z;
+//  out.open("surface_charge_mantle.dat", std::ios::out);
+//  out << "# [phi] [z] [surface charge density]\n";
+//  z = system.system_lengths.at(2) * 0.5 - half_height;
+//  while (z <= system.system_lengths.at(2) * 0.5 + half_height) {
+//    position.at(2) = z;
+//    phi = 0.;
+//    while (phi < 2. * M_PI) {
+//      normal.at(0) = cos(phi);
+//      normal.at(1) = sin(phi);
+//      position.at(0) = x_mid + normal.at(0) * radius;
+//      position.at(1) = y_mid + normal.at(1) * radius;
+//      charge = charge_density(cylinder, system, total_ES, position, normal);
+//      out << phi << " " << z << " " << charge << std::endl;
+//      phi += dphi;
+//    }
+//    z += system.bin_sizes.at(2);
+//  }
+//  out.close();
+//  // upper cylinder cap
+//  normal.at(0) = 0.;
+//  normal.at(1) = 0.;
+//  normal.at(2) = 1.;
+//  double x, y;
+//  position.at(2) = system.system_lengths.at(2) / 2. + half_height;
+//  out.open("surface_charge_top.dat", std::ios::out);
+//  out << "# [x] [y] [surface charge density]\n";
+//  x = 0.;
+//  while (x < system.system_lengths.at(0)) {
+//    position.at(0) = x;
+//    y = 0.;
+//    while (y < system.system_lengths.at(1)) {
+//      position.at(1) = y;
+//      if (pow(x - x_mid, 2) + pow(y - y_mid, 2) > radius_squared) {
+//	charge = 0.;
+//      } else {
+//        charge = charge_density(cylinder, system, total_ES, position, normal);
+//      }
+//      out << x << " " << y << " " << charge << std::endl;
+//      y += system.bin_sizes.at(1);
+//    }
+//    x += system.bin_sizes.at(0);
+//  }
+//  out.close();
+//  // lower cylinder cap
+//  normal.at(0) = 0.;
+//  normal.at(1) = 0.;
+//  normal.at(2) = -1.;
+//  position.at(2) = system.system_lengths.at(2) / 2. - half_height;
+//  out.open("surface_charge_bottom.dat", std::ios::out);
+//  out << "# [x] [y] [surface charge density]\n";
+//  double x_diff, y_diff;
+//  x = 0.;
+//  while (x < system.system_lengths.at(0)) {
+//    position.at(0) = x;
+//    y = 0.;
+//    while (y < system.system_lengths.at(1)) {
+//      position.at(1) = y;
+//      x_diff = x - x_mid;
+//      y_diff = y - y_mid;
+//      if (x_diff * x_diff + y_diff * y_diff > radius_squared) {
+//	charge = 0.;
+//      } else {
+//        charge = charge_density(cylinder, system, total_ES, position, normal);
+//      }
+//      out << x << " " << y << " " << charge << std::endl;
+//      y += system.bin_sizes.at(1);
+//    }
+//    x += system.bin_sizes.at(0);
+//  }
+//  out.close();
+//  // Could also use the function charge_distribution, but then you might have to
+//  // sort the values by positions before you can plot the results:
+//  std::vector<std::pair<std::vector<double>, double>> charge_distr;
+//  double charge_total;
+//  charge_distribution(cylinder, system, total_ES,
+//		      &charge_distr, &charge_total, resolution);
+//  out.open("surface_charge_total.dat", std::ios::out);
+//  out << "# [x] [y] [z] [surface charge density]\n";
+//  out << "# total charge: " << charge_total << std::endl;
+//  for (std::pair<std::vector<double>, double>& surface_point : charge_distr) {
+//    for (size_t dir = 0; dir < 3; dir++) {
+//      out << surface_point.first.at(dir) << " ";
+//    }
+//    out << surface_point.second << std::endl;
+//  }
+//  out.close();
+  std::cout << "total charge: " << charge_total << std::endl;
 // _____________________________________________________________________________
   /* Alternative method to calculate total surface charge:
    * Use total charge neutrality of the system and integrate over all ion
@@ -225,7 +286,65 @@ int main(int argc, char** argv) {
    */
 // _____________________________________________________________________________
   std::cout << "total charge in system: ";
-  std::cout << total_ion_charge + total_charge;
+  std::cout << total_ion_charge + charge_total;
   std::cout << std::endl;
+// _____________________________________________________________________________
+  /* Calculate the charge distribution that would occur without ions
+   *
+   * For this, we repeat the same procedure as before, just using the external
+   * potential profile instead of the total electrostatic potential.
+   */
+// _____________________________________________________________________________
+  DataFrame<3,double> external_ES(grid_counts);
+  potential_file =
+	  params.get_string("external_potential_profile", "extpot_es.dat");
+  data_column = 3;
+  system.load_data(potential_file, data_column, &external_ES);
+  // initialize total charge
+  area_total = 0.;
+  area_top = 0.;
+  area_mantle = 0.;
+  area_bottom = 0.;
+  charge_total = 0.;
+  charge_top = 0.;
+  charge_mantle = 0.;
+  charge_bottom = 0.;
+  // calculate charge densities
+  out.open("surface_charge_vacuum.dat", std::ios::out);
+  out << "# [x] [y] [z] [surface charge density]\n";
+  for (std::vector<std::vector<double>>& point : surface_points) {
+    // determine area associated with this point
+    area = stl_algorithm::vector_norm(point.at(1));
+    for (size_t dir = 0; dir < 3; dir++) {
+      // print position to file
+      out << point.at(0).at(dir) << " ";
+      // calculate normal vector
+      normal.at(dir) = point.at(1).at(dir) / area;
+    }
+    // calculate charge density at this point
+    sigma = charge_density(cylinder, system, external_ES, point.at(0), normal);
+    out << sigma << std::endl;
+    // integrate charge
+    charge = sigma * area;
+    charge_total += charge;
+    area_total += area;
+    // check whether the point is on mantle / top / bottom cap
+    z = point.at(0).at(2) - z_mid;
+    if (z >= half_height) {
+      charge_top += charge;
+      area_top += area;
+    } else if (z <= - half_height) {
+      charge_bottom += charge;
+      area_bottom += area;
+    } else {
+      charge_mantle += charge;
+      area_mantle += area;
+    }
+   }
+  out << "# total surface area: " << charge_total << "e per " << area_total << "nm² = " << charge_total / area_total << "e/nm²\n";
+  out << "# on cylinder mantle: " << charge_mantle << "e per " << area_mantle << "nm² = " << charge_mantle / area_mantle << "e/nm²\n";
+  out << "# on upper cap: " << charge_top << "e per " << area_top << "nm² = " << charge_top / area_top << "e/nm²\n";
+  out << "# on lower cap: " << charge_bottom << "e per " << area_bottom << "nm² = " << charge_bottom / area_bottom << "e/nm²\n";
+  out.close();
   return 0;
 }

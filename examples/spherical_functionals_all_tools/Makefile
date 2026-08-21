@@ -26,6 +26,7 @@ REPOFILE += functional_es_mf_spherical
 REPOFILE += functional_es_delta_spherical
 REPOFILE += integration
 REPOFILE += iterator
+REPOFILE += discretization_handler
 REPOFILE += properties
 REPOFILE += radial_poisson_solver
 # ParameterHandler files #######################################################

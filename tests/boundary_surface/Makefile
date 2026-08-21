@@ -16,6 +16,8 @@ SDIR = src/
 REPOSDIR = ../../src/
 REPOFILE =
 REPOFILE += system
+REPOFILE += discretization_handler
+REPOFILE += integration
 REPOFILE += boundary_surface
 REPOFILE += boundary_surface_sine
 REPOFILE += boundary_surface_planar
@@ -59,7 +61,7 @@ BOFF = $(BDIR)$(HOST).
 OOFF = $(ODIR)$(HOST).
 # TARGETS ######################################################################
 
-.PHONY: default all init todo checkstyle clean compile
+.PHONY: default all init todo checkstyle clean compile test
 
 default: init compile
 
@@ -103,3 +105,20 @@ $(REPOOBJECTS): $(REPOSOURCE) $(HEADER)
 $(REPOOBJECTS2): $(REPOSOURCE2) $(HEADER2)
 	$(CXX) $(CXXFLAGS) -c -o $@ $(REPOSDIR2)$(subst .,,$(suffix $(basename $@))).cpp
 
+# run tests
+PLOT = ~/Documents/capdft/examples/plots/src/
+DIRECTORY = ~/Documents/capdft/tests/boundary_surface/
+BINARY = $(DIRECTORY)$(BOFF)main
+
+test:
+ifndef version
+	@echo "Choose boundary surface version:"
+	@cd out; echo "	" *
+	@echo "Run via make test version=<version>."
+else
+	@cd $(DIRECTORY)out/$(version); \
+	echo "Running calculations for out/$(version)/params.txt"; \
+	$(BINARY) -f params.txt > /dev/null; \
+	echo "Plot results"; \
+	python3 $(PLOT)heatmap.py discretize_volume.dat X=1 cabel="inside boundary?" save=discretize_volume.pdf > /dev/null
+endif

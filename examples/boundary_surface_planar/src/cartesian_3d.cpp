@@ -16,6 +16,8 @@
 #include "../../../src/convergence_criterion_steps.hpp"
 #include "../../../src/convergence_criterion_nan.hpp"
 #include "../../../src/data_frame.hpp"
+#include "../../../src/system.hpp"
+#include "../../../src/discretization_handler.hpp"
 #include "../../../src/functional.hpp"
 #include "../../../src/functional_fmt_cartesian.hpp"
 #include "../../../src/functional_es_mf_cartesian.hpp"
@@ -47,7 +49,7 @@ int main(int argc, char** args) {
 // _____________________________________________________________________________
   ParameterHandler params(argc, args);
   params.process_parameters();
-  System<3> system(&params);
+  System<Cartesian> system(&params);
   // Get some properties from System
   std::vector<size_t> affected_species_fmt = system.affected_species_fmt;
   std::vector<size_t> affected_species_es = system.affected_species_es;
@@ -178,9 +180,6 @@ int main(int argc, char** args) {
    */
 // _____________________________________________________________________________
   // Write density profiles to file
-  double x{0.}, y{0.};
-  double dx = system.bin_sizes.at(0);
-  double dy = system.bin_sizes.at(1);
   std::fstream out_stream;
   out_stream.open("3d_profiles.dat", std::ios::out);
   out_stream << "# [x] [y] [z] [density profiles]" << std::endl;

@@ -11,6 +11,7 @@
 #include "../../../src/data_frame.hpp"
 #include "../../../src/properties.hpp"
 #include "../../../src/system.hpp"
+#include "../../../src/discretization_handler.hpp"
 #include <vector>
 #include <string> // for parameter labels
 #include <cmath> // std::exp
@@ -36,7 +37,7 @@ int main(int argc, char** argv) {
    */
 // _____________________________________________________________________________
   // Original grid:
-  System<3> system(&params);
+  System<Cartesian> system(&params);
   std::vector<size_t> grid_counts = system.grid_counts;
   std::vector<double> bin_sizes = system.bin_sizes;
   // New grid:

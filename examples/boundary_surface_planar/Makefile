@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
 # Binary name ##################################################################
 BNAMES = planar_1d
-BNAMES += cartesian
-BNAMES += cartesian_any
+BNAMES += cartesian_3d
+BNAMES += cartesian_3d_any
 # Compiler #####################################################################
 CXX=g++
 # Libraries to be linked #######################################################
@@ -17,7 +17,9 @@ SDIR = src/
 # All files from the normal repository that are used in this example ###########
 REPOSDIR = ../../src/
 REPOFILE =
+REPOFILE += surface_charge_distribution
 REPOFILE += system
+REPOFILE += discretization_handler
 REPOFILE += banded_matrix
 REPOFILE += sparse_matrix
 REPOFILE += convergence_criterion

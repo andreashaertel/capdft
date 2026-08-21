@@ -31,6 +31,7 @@
 #include "../../../src/system.hpp"
 #include "../../../src/stl_algorithms.hpp"
 #include "../../../src/surface_charge_distribution.hpp"
+#include "../../../src/discretization_handler.hpp"
 // _____________________________________________________________________________
 // Main function
 int main(int argc, char** args) {
@@ -55,7 +56,7 @@ int main(int argc, char** args) {
 // _____________________________________________________________________________
   ParameterHandler params(argc, args);
   params.process_parameters();
-  System<3> system(&params);
+  System<Cartesian> system(&params);
   // Get some properties from System
   std::vector<size_t> affected_species_fmt = system.affected_species_fmt;
   std::vector<size_t> affected_species_es = system.affected_species_es;
@@ -78,9 +79,9 @@ int main(int argc, char** args) {
 // _____________________________________________________________________________
   // Initialize boundaries
   std::cout << "Define system boundaries\n";
-  Boundaries<3> surfaces;
+  Boundaries<Cartesian> surfaces;
   BoundarySurfaceCylinder cylinder(system, 0);
-  BoundarySurfacePlanar<3> box(system, 1);
+  BoundarySurfacePlanar<Cartesian> box(system, 1);
   cylinder.set_boundary_value(potential);
   box.set_boundary_value(0.);
   surfaces.add_surface(&cylinder);
@@ -194,9 +195,9 @@ int main(int argc, char** args) {
   out << "# [x] [y] [z] [density profiles]\n";
   system.print_data(density_profiles, out);
   out.close();
-  out.open("extpot.dat", std::ios::out);
-  out << "# [x] [y] [z] [exp. extpot profiles]\n";
-  system.print_data(exp_ext_potential_hs, out);
+  out.open("extpot_es.dat", std::ios::out);
+  out << "# [x] [y] [z] [external electrostatic potential]\n";
+  system.print_data(ext_potential_es, out);
   out.close();
   out.open("extpot_total.dat", std::ios::out);
   out << "# [x] [y] [z] [exp. extpot profiles]\n";

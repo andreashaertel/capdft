@@ -50,7 +50,7 @@ int main(int argc, char** argv) {
 // _____________________________________________________________________________
   ParameterHandler params(argc, argv);
   params.process_parameters();
-  System<3> system(&params);
+  System<Cartesian> system(&params);
   // System properties:
   std::vector<size_t> grid_counts = system.grid_counts;
   std::vector<double> bin_sizes = system.bin_sizes;

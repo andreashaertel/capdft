@@ -64,7 +64,8 @@ int main(int argc, char** args) {
       }
     }
   }
-  std::cout << "3D DataFrame size: " << my_data_frame5.size() << std::endl;
+  std::cout << "3D DataFrame size: " << gc_x << "x" << gc_y << "x" << gc_z;
+  std::cout << "=" << my_data_frame5.size() << std::endl;
   // my_data_frame1.at(2001);  // error: out of bounds (2001>1001)
 // _____________________________________________________________________________
   /* To show the values in these containers, a print() function is available.

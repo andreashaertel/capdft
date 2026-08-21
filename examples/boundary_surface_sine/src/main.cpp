@@ -32,7 +32,7 @@
 #include "../../../src/stl_algorithms.hpp"
 // _____________________________________________________________________________
 // Extract initial guess from data files
-bool get_initial_guess(System<3>& system, std::string parameter_name,
+bool get_initial_guess(System<Cartesian>& system, std::string parameter_name,
 		       std::vector<DataFrame<3, double>>* data) {
   try {
     std::string filename;
@@ -52,7 +52,7 @@ bool get_initial_guess(System<3>& system, std::string parameter_name,
     return false;
   }
 }  
-bool get_initial_guess(System<3>& system, std::string parameter_name,
+bool get_initial_guess(System<Cartesian>& system, std::string parameter_name,
 		       DataFrame<3, double>* data) {
   try {
     std::string filename;
@@ -93,7 +93,7 @@ int main(int argc, char** args) {
 // _____________________________________________________________________________
   ParameterHandler params(argc, args);
   params.process_parameters();
-  System<3> system(&params);
+  System<Cartesian> system(&params);
   // Get some properties from System
   std::vector<size_t> affected_species_fmt = system.affected_species_fmt;
   std::vector<size_t> affected_species_es = system.affected_species_es;
@@ -114,7 +114,7 @@ int main(int argc, char** args) {
 // _____________________________________________________________________________
   // Initialize boundaries
   std::cout << "Define system boundaries\n";
-  Boundaries<3> surfaces;
+  Boundaries<Cartesian> surfaces;
   BoundarySurfaceSine surface_left(system, 0);
   BoundarySurfaceSine surface_right(system, 1);
   surface_left.set_boundary_value(potential);

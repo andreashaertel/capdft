@@ -30,6 +30,7 @@ REPOFILE += iterator
 REPOFILE += properties
 REPOFILE += planar_poisson_solver
 REPOFILE += planar_poisson_solver_any
+REPOFILE += discretization_handler 
 # ParameterHandler files #######################################################
 REPOSDIR2 = ../../../parameter_handler/src/
 REPOFILE2 = parameter_handler
