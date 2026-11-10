@@ -1,0 +1,23 @@
+# Parameter file
+# System properties:
+
+0_grid_count 32
+1_grid_count 32
+2_grid_count 32
+0_length 2
+1_length 2
+2_length 2
+0_PBC true
+1_PBC true
+2_PBC false
+temperature 300
+bjerrum_length 1
+# (or dielectric constant)
+
+# External potential parameters:
+# Planar wall at z=0
+
+potential 0.1
+0_0_sides 0
+0_1_sides 0
+0_2_sides 1
