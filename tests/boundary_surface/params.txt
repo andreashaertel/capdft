@@ -1,0 +1,31 @@
+# Parameter file for a cylinder surface
+# System properties:
+
+0_grid_count 128 # number of grid points in x-direction
+1_grid_count 128 # ... in y-direction
+2_grid_count 256 # ... in z-direction
+0_length 13 # [nm], system length in x-direction
+1_length 13 # ... in y-direction
+2_length 26 # ... in z-direction
+0_PBC false # no periodic boundary conditions in x-direction
+1_PBC false # ... in y-direction
+2_PBC false # ... in z-direction
+temperature 300 # [K]
+bjerrum_length 1 # [nm]
+
+# Cylinder properties:
+
+potential 0.1 # [V], potential boundary value
+0_hard_walls true # hard sphere ions are repelled from the wall
+0_height 12. # [nm], height of the cylinder
+0_radius 0.6 # [nm], cylinder radius
+0_z_mid 15. # [nm], the cylinder is positioned at z=15nm
+	    # (and w.r.t. x and y at the system center, per default)
+
+# Species properties:
+
+affected_FMT 0,1 # ion species 0 and 1 are both hard spheres, described by FMT
+0_bulk_density 3. # [nm^(-3)], bulk density of ion species 0
+1_bulk_density 3. # ... of ion species 1
+0_diameter 0.1 # [nm] hard sphere diameter of ion species 0
+1_diameter 0.4 # ... of ion species 1

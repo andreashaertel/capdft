@@ -1,0 +1,34 @@
+# Parameter file
+# System properties:
+
+0_grid_count 64
+1_grid_count 64
+2_grid_count 64
+0_length 2
+1_length 2
+2_length 2
+0_PBC true
+1_PBC true
+2_PBC false
+temperature 300
+bjerrum_length 1
+# (or dielectric constant)
+
+# External potential parameters:
+
+0_boundary_value 1
+0_0_sides 0
+0_1_sides 0
+0_2_sides 1
+
+1_boundary_value -1
+1_0_sides 0
+1_1_sides 0
+1_2_sides 2
+
+# Species properties:
+
+affected_ES 0
+0_bulk_density 3.
+0_valency 1.
+

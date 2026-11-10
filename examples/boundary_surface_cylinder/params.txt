@@ -1,9 +1,9 @@
 # system params
 bjerrum_length 1.
 temperature 300.
-0_grid_count 32
-1_grid_count 32
-2_grid_count 64
+0_grid_count 16
+1_grid_count 16
+2_grid_count 32
 0_length 13
 1_length 13
 2_length 26
