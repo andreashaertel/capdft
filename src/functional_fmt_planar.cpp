@@ -260,9 +260,6 @@ void FunctionalFMTPlanar::calc_derivative(
   }
   // Calculate the weighted densities
   calc_weighted_densities();
-  // From the weighted densities calculate the partial derivatives of the
-  // excess free energy
-  calc_partial_derivatives();
   // Calculate the weighted partial derivatives
   calc_weighted_partial_derivatives(functional_derivative);
 }
@@ -282,9 +279,6 @@ void FunctionalFMTPlanar::calc_derivative_warnings(
   calc_weighted_densities();
   // Check whether there are unphysical values in the  weighted densities
   check_weighted_densities();
-  // From the weighted densities calculate the partial derivatives of the
-  // excess free energy
-  calc_partial_derivatives();
   // Calculate the weighted partial derivatives
   calc_weighted_partial_derivatives(functional_derivative);
 }
@@ -625,6 +619,8 @@ void FunctionalFMTPlanar::calc_weighted_partial_derivatives(
             functional_derivative->at(*it).array(),
             flags_destroy));
   }
+  // Creating plans overwrites the input arrays hence we need to update them
+  calc_partial_derivatives();
   // Transform the partial derivatives into Fourier space.
   for (auto& plan : forward_plans) {
     fftw_execute(plan);
